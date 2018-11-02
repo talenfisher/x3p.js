@@ -1,6 +1,6 @@
 {
   "name": "x3p.js",
-  "version": "0.2.0",
+  "version": "0.0.0",
   "description": "JavaScript library for working with X3P files",
   "main": "bin/x3p.js",
   "directories": {
