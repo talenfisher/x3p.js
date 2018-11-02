@@ -11,7 +11,7 @@ export default class X3P extends EventEmitter {
         super();
 
         this._file = new JSZip();
-        this.name = name;
+        this._name = name;
 
         if(file !== null) {
             this._file.loadAsync(file);
@@ -24,6 +24,7 @@ export default class X3P extends EventEmitter {
         this._file.file("md5checksum.hex", "");
 
         this.checkOutputSupport();
+        this.checkRoot();
     }
 
     /**
@@ -39,10 +40,51 @@ export default class X3P extends EventEmitter {
     }
 
     /**
+     * Check if container files are wrapped in a folder
+     */
+    checkRoot() {
+        this._root = "";
+
+        let result = this._file.file(/main\.xml$/g);
+        if(result.length > 0 && result[0].name !== "main.xml") {
+            this._root = result[0].name.replace("main.xml", "");
+        }
+    }
+
+    /**
      * Getter for file
      * @return {JSZip} the X3P file as a JSZip Object
      */
     get container() {
         return this._file;
+    }
+
+    /**
+     * Getter for filename
+     * @return {string} the name of the X3P file
+     */
+    get name() {
+        return this._name;
+    }
+
+    /**
+     * Setter for filename
+     */
+    set name(name) {
+        this._name = name;
+    }
+
+     /**
+     * Converts the X3P file into a 
+     * @return {Promise} a promise that resolves to a blob or node buffer
+     */
+    toBlob() {
+        return this._file.generateAsync({
+            type: this._outputType,
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 9 
+            }
+        });
     }
 }
