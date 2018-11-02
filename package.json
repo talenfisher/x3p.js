@@ -9,7 +9,7 @@
   "scripts": {
     "test": "mocha tests",
     "lint": "eslint src",
-    "watch": "watch 'npm run build' src",
+    "watch": "watch 'npm run build; npm run test' src",
     "build": "rollup -c"
   },
   "keywords": [

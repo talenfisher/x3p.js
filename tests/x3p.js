@@ -9,5 +9,10 @@ describe("X3P", () => {
             assert.equal("bindata/data.bin" in x3p.container.files, true);
             assert.equal("md5checksum.hex" in x3p.container.files, true);
         });
+
+        it("should detect support for nodebuffer in test environment", () => {
+            let x3p = new X3P();
+            assert.equal(x3p._outputType, "nodebuffer");
+        });
     });
 });

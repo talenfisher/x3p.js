@@ -1,12 +1,15 @@
+import { EventEmitter } from "events";
 import JSZip from "jszip";
 
-export default class X3P {
+export default class X3P extends EventEmitter {
     /**
      * 
      * @param {File|null} file optional file to load
      * @param {*} name 
      */
     constructor(file = null, name = null) {
+        super();
+
         this._file = new JSZip();
         this.name = name;
 
@@ -19,6 +22,20 @@ export default class X3P {
         this._file.file("main.xml", "");
         this._file.file("bindata/data.bin", "");
         this._file.file("md5checksum.hex", "");
+
+        this.checkOutputSupport();
+    }
+
+    /**
+     * Check for output type support (blob or node buffer)
+     */
+    checkOutputSupport() {
+        this._outputType = JSZip.support.blob ? "blob" : null;
+        this._outputType = JSZip.support.nodebuffer ? "nodebuffer" : null;
+
+        if(this._outputType === null) {
+            throw new Exception("No supported output type (blob, nodebuffer) detected");
+        }
     }
 
     /**
