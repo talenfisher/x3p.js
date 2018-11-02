@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import DEFAULTS from "./defaults";
 import JSZip from "jszip";
 
-export default class X3P extends EventEmitter {
+export class X3P extends EventEmitter {
     /**
      * 
      * @param {File|null} file optional file to load
@@ -36,7 +36,7 @@ export default class X3P extends EventEmitter {
         this._outputType = JSZip.support.nodebuffer ? "nodebuffer" : null;
 
         if(this._outputType === null) {
-            throw new Exception("No supported output type (blob, nodebuffer) detected");
+            throw new Error("No supported output type (blob, nodebuffer) detected");
         }
     }
 
@@ -93,7 +93,7 @@ export default class X3P extends EventEmitter {
         this._name = name;
     }
 
-     /**
+    /**
      * Converts the X3P file into a 
      * @return {Promise} a promise that resolves to a blob or node buffer
      */
@@ -107,3 +107,5 @@ export default class X3P extends EventEmitter {
         });
     }
 }
+export default X3P;
+export { default as DEFAULTS } from "./defaults";

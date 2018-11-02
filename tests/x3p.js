@@ -1,5 +1,7 @@
+/* global it, describe */
 const assert = require("assert");
-const X3P = require("../bin/x3p");
+const X3PJs = require("../bin/x3p");
+const X3P = X3PJs.default;
 
 describe("X3P", () => {
     describe("constructor", () => {
@@ -36,6 +38,13 @@ describe("X3P", () => {
             ]);
         });
     });
+    
+    describe("readFile", () => {
+        it("should return default value for main.xml after blank X3P creation", async () => {
+            let x3p = new X3P();
+            assert.equal(await x3p.readFile("main.xml"), X3PJs.DEFAULTS["main.xml"]);
+        });
+    });
 
     describe("toBlob", () => {
         it("should return a promise that resolves to a node buffer", async () => {
@@ -43,5 +52,5 @@ describe("X3P", () => {
             let blob = await x3p.toBlob();
             assert.equal(blob.constructor.name, "Buffer");
         });
-    })
+    });
 });
