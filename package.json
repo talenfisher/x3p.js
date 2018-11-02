@@ -1,0 +1,29 @@
+{
+  "name": "x3p.js",
+  "version": "0.2.0",
+  "description": "JavaScript library for working with X3P files",
+  "main": "bin/x3p.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha tests",
+    "lint": "eslint src",
+    "build": "rollup -c"
+  },
+  "keywords": [
+    "x3p",
+    "forensics"
+  ],
+  "author": "Talen Fisher",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^5.8.0",
+    "mocha": "^5.2.0",
+    "rollup": "^0.66.6",
+    "rollup-plugin-terser": "^3.0.0"
+  },
+  "dependencies": {
+    "jszip": "^3.1.5"
+  }
+}

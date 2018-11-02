@@ -1,0 +1,19 @@
+language: node_js
+
+node_js:
+  - '10'
+
+before_script:
+  - npm install
+
+script:
+  - npm run lint
+  - npm run build
+  - npm run test
+
+before_deploy: npm version from-git
+
+deploy:
+  provider: npm
+  email: tqfisher@iastate.edu
+  api_key: $NPM_TOKEN
