@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import DEFAULTS from "./defaults";
 import JSZip from "jszip";
 
 export default class X3P extends EventEmitter {
@@ -19,18 +20,18 @@ export default class X3P extends EventEmitter {
         }
 
         // TODO: add defaults for each file
-        this._file.file("main.xml", "");
-        this._file.file("bindata/data.bin", "");
-        this._file.file("md5checksum.hex", "");
+        this._file.file("main.xml", DEFAULTS["main.xml"]);
+        this._file.file("bindata/data.bin", DEFAULTS["bindata/data.bin"]);
+        this._file.file("md5checksum.hex", DEFAULTS["md5checksum.hex"]);
 
-        this.checkOutputSupport();
-        this.checkRoot();
+        this._checkOutputSupport();
+        this._checkRoot();
     }
 
     /**
      * Check for output type support (blob or node buffer)
      */
-    checkOutputSupport() {
+    _checkOutputSupport() {
         this._outputType = JSZip.support.blob ? "blob" : null;
         this._outputType = JSZip.support.nodebuffer ? "nodebuffer" : null;
 
@@ -42,13 +43,31 @@ export default class X3P extends EventEmitter {
     /**
      * Check if container files are wrapped in a folder
      */
-    checkRoot() {
+    _checkRoot() {
         this._root = "";
 
         let result = this._file.file(/main\.xml$/g);
         if(result.length > 0 && result[0].name !== "main.xml") {
             this._root = result[0].name.replace("main.xml", "");
         }
+    }
+
+    /**
+     * Reads the contents of a file in the X3P container
+     * @param {String} filename the name of the file in the container to read
+     * @param {String} type  the type of output to retrieve
+     * @return {Promise} a promise that resolves to file contents of the specified type or null if the file doesn't exist
+     */
+    readFile(filename, type = "text") {
+        let file = this.container.file(filename);
+        return file === null ? null : file.async(type);
+    }
+
+    /**
+     * Get a list of filenames within the container
+     */
+    get fileNames() {
+        return Object.keys(this.container.files);
     }
 
     /**
@@ -79,7 +98,7 @@ export default class X3P extends EventEmitter {
      * @return {Promise} a promise that resolves to a blob or node buffer
      */
     toBlob() {
-        return this._file.generateAsync({
+        return this.container.generateAsync({
             type: this._outputType,
             compression: "DEFLATE",
             compressionOptions: {

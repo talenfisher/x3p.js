@@ -11,17 +11,29 @@ describe("X3P", () => {
         });
     });
 
-    describe("checkOutputSupport", () => {
+    describe("_checkOutputSupport", () => {
         it("should detect support for nodebuffer in test environment", () => {
             let x3p = new X3P();
             assert.equal(x3p._outputType, "nodebuffer");
         });
     });
 
-    describe("checkRoot", () => {
+    describe("_checkRoot", () => {
         it("should detect no root folder when creating blank X3Ps", () => {
             let x3p = new X3P();
             assert.equal(x3p._root, "");
+        });
+    });
+
+    describe("get fileNames", () => {
+        it("blank X3Ps should have main.xml, bindata/, bindata/data.bin, and md5checksum.hex", () => {
+            let x3p = new X3P();
+            assert.deepStrictEqual(x3p.fileNames, [
+                "main.xml",
+                "bindata/",
+                "bindata/data.bin",
+                "md5checksum.hex"
+            ]);
         });
     });
 
