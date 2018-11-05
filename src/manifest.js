@@ -34,11 +34,33 @@ export default class Manifest {
      * Find an element in the manifest using CSS-like selectors.
      * 
      * @param {string} selector the query selector
-     * @return {Element} the resulting element
+     * @return {string} the text value of the resulting element
      */
     get(selector) {
         let el = this.data.find(selector);
         return el !== null ? el.text : null;
+    }
+
+    /**
+     * Find an element in the manifest and cast it to an integer
+     * 
+     * @param {string} selector the query selector
+     * @return {int} the integer value of the resulting element
+     */
+    getInt(selector) {
+        let val = this.get(selector);
+        return val !== null ? parseInt(val) : null;
+    }
+
+    /**
+     * Find an element in the manifest and cast it to a float
+     * 
+     * @param {string} selector the query selector
+     * @return {float} the float value of the resulting element
+     */
+    getFloat(selector) {
+        let val = this.get(selector);
+        return val !== null ? parseFloat(val) : null;
     }
 
     /**
