@@ -14,13 +14,17 @@ describe("Manifest", () => {
     });
 
     describe("getInt", () => {
-        let manifest = new Manifest(NUM_TEST);
-        assert.strictEqual(manifest.getInt("./x"), 1);
+        it("should correctly return the integer value in a node", () => {
+            let manifest = new Manifest(NUM_TEST);
+            assert.strictEqual(manifest.getInt("./x"), 1);
+        });
     });
 
     describe("getFloat", () => {
-        let manifest = new Manifest(NUM_TEST);
-        assert.strictEqual(manifest.getFloat("./x"), 1.1);
+        it("should correctly return the floating point value in a node", () => {
+            let manifest = new Manifest(NUM_TEST);
+            assert.strictEqual(manifest.getFloat("./x"), 1.1);
+        });
     });
 
     describe("set", () => {
