@@ -6,6 +6,7 @@ import DEFAULTS from "./defaults";
 const MANIFEST_FILENAME = "main.xml";
 
 export default class X3P extends EventEmitter {
+    
     /**
      * Constructs a new X3P object
      * 
