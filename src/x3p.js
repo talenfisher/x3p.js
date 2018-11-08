@@ -1,6 +1,9 @@
 import { EventEmitter } from "events";
 import JSZip from "jszip";
+import Manifest from "./manifest";
 import DEFAULTS from "./defaults";
+
+const MANIFEST_FILENAME = "main.xml";
 
 export default class X3P extends EventEmitter {
     /**
@@ -35,9 +38,10 @@ export default class X3P extends EventEmitter {
      * Performs checks on the loaded X3P container and sets up 
      * additional properties if needed
      */
-    _bootstrap() {
+    async _bootstrap() {
         this._checkOutputSupport();
         this._checkRoot();
+        await this._checkManifest();
         this.emit("load"); 
     }
 
@@ -65,6 +69,17 @@ export default class X3P extends EventEmitter {
     }
 
     /**
+     * X3P files should always contain a main.xml
+     */
+    async _checkManifest() {
+        if(!this.fileNames.includes(MANIFEST_FILENAME)) {
+            throw new Error("X3P format requires a main.xml file");
+        }
+
+        this._manifest = new Manifest(await this.readFile(MANIFEST_FILENAME));
+    }
+
+    /**
      * Reads the contents of a file in the X3P container
      * 
      * @param {String} filename the name of the file in the container to read
@@ -80,7 +95,18 @@ export default class X3P extends EventEmitter {
      * Get a list of filenames within the container
      */
     get fileNames() {
-        return Object.keys(this.container.files);
+        let result = [];
+        
+        for(let filename of Object.keys(this.container.files)) {
+            let exp = new RegExp(`^${this._root}`, "gi");
+            filename = filename.replace(exp, "");
+
+            if(filename !== "") {
+                result.push(filename);
+            }
+        }
+
+        return result;
     }
 
     /**

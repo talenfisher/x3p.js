@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "mocha tests",
+    "test": "mocha tests --no-timeouts",
     "lint": "eslint src",
     "watch": "watch 'npm run build; npm run test' src tests",
     "build": "parcel build src/index.js -d bin -o x3p.js"
@@ -20,6 +20,9 @@
   "repository": "https://github.com/talenfisher/x3p.js",
   "license": "MIT",
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
     "chai": "^4.2.0",
     "eslint": "^5.8.0",
     "mocha": "^5.2.0",
@@ -28,6 +31,10 @@
   },
   "dependencies": {
     "elementtree": "^0.1.7",
-    "jszip": "^3.1.5"
-  }
+    "jszip": "^3.1.5",
+    "manifest": "^0.1.4"
+  },
+  "browserslist": [
+    "chrome>=60"
+  ]
 }

@@ -9,6 +9,7 @@ const ElementTree = require("elementtree");
 const CSAFE_LOGO_PATH = path.resolve(__dirname, "artifacts/csafe-logo.x3p");
 
 describe("X3P", () => {
+
     describe("constructor", () => {
         it("should create new X3P file when file parameter is not specified", () => {
             let x3p = new X3P();
@@ -41,12 +42,33 @@ describe("X3P", () => {
     describe("get fileNames", () => {
         it("blank X3Ps should have main.xml, bindata/, bindata/data.bin, and md5checksum.hex", () => {
             let x3p = new X3P();
+
             assert.deepStrictEqual(x3p.fileNames, [
                 "main.xml",
                 "bindata/",
                 "bindata/data.bin",
                 "md5checksum.hex"
             ]);
+        });
+
+        it("should strip the root directory name from the results",  done => {
+            let file = fs.readFileSync(CSAFE_LOGO_PATH);
+            let x3p = new X3P(file);
+            
+            x3p.on("load", () => {
+                try {
+                    assert.deepStrictEqual(x3p.fileNames, [
+                        "bindata/",
+                        "main.xml",
+                        "md5checksum.hex",
+                        "bindata/data.bin"
+                    ]);
+
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
         });
     });
     
