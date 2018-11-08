@@ -32,10 +32,18 @@ describe("X3P", () => {
             assert.strictEqual(x3p._root, "");
         });
 
-        it("should detect a root folder when there is one", () => {
+        it("should detect a root folder when there is one", done => {
             let file = fs.readFileSync(path.resolve(__dirname, "artifacts/csafe-logo.x3p"));
             let x3p = new X3P(file);
-            x3p.on("load", () => assert.strictEqual(x3p._root, "csafe-logo/"));
+
+            x3p.on("load", () => {
+                try {
+                    assert.strictEqual(x3p._root, "csafe-logo/");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
         });
     });
 
@@ -63,7 +71,6 @@ describe("X3P", () => {
                         "md5checksum.hex",
                         "bindata/data.bin"
                     ]);
-
                     done();
                 } catch(err) {
                     done(err);
@@ -88,14 +95,21 @@ describe("X3P", () => {
             assert.strictEqual(await x3p.readFile("bindata/data.bin"), X3PJs.DEFAULTS["bindata/data.bin"]);
         });
 
-        it("[csafe-logo.x3p @ main.xml] should return an xml string which contains Record1 ", () => {
+        it("[csafe-logo.x3p @ main.xml] should return an xml string which contains Record1 ", done => {
             let file = fs.readFileSync(CSAFE_LOGO_PATH);
             let x3p = new X3P(file);
 
             x3p.on("load", async () => {
-                let manifest = await x3p.readFile("main.xml");
-                let document = ElementTree.parse(manifest);
-                assert.isOk(document.find("./Record1") !== null);
+                try {
+                    let manifest = await x3p.readFile("main.xml");
+                    let document = ElementTree.parse(manifest);
+                    assert.isOk(document.find("./Record1") !== null);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+
+                
             });
         });
     });
