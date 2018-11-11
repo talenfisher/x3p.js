@@ -1,4 +1,5 @@
 import ElementTree from "elementtree";
+import lint from "./lint";
 
 export default class Manifest {
 
@@ -10,6 +11,7 @@ export default class Manifest {
     constructor(source) {
         this._source = source;
         this._data = ElementTree.parse(this._source);
+        this._lint = lint(this._source);
     }
 
     /**
