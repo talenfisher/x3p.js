@@ -11,7 +11,9 @@ script:
   - npm run build
   - npm run test
 
-before_deploy: npm version from-git
+before_deploy: 
+  - git add . && git commit -m "."
+  - npm version $TRAVIS_TAG
 
 deploy:
   provider: npm
