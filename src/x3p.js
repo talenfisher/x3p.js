@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import JSZip from "jszip";
 import Manifest from "./manifest";
+import PositionsBuilder from "./positionsbuilder";
 import DEFAULTS from "./defaults";
 
 const MANIFEST_FILENAME = "main.xml";
@@ -43,6 +44,9 @@ export default class X3P extends EventEmitter {
         this._checkOutputSupport();
         this._checkRoot();
         await this._checkManifest();
+        await this._checkDataFile();
+        
+        this._positions = new PositionsBuilder({ manifest: this._manifest, data: this._data });
         this.emit("load"); 
     }
 
@@ -78,6 +82,20 @@ export default class X3P extends EventEmitter {
         }
 
         this._manifest = new Manifest(await this.readFile(MANIFEST_FILENAME));
+    }
+
+    /**
+     * X3P files should have a point data file
+     */
+    async _checkDataFile() {
+        let xpath = "./Record3/DataLink/PointDataLink";
+        this._dataFile = this._manifest.get(xpath);
+
+        if(!this.fileNames.includes(this._dataFile)) {
+            throw new Error(`[${xpath}] missing from main.xml`);
+        }
+
+        this._data = await this.readFile(this._dataFile);
     }
 
     /**

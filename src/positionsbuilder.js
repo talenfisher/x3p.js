@@ -4,7 +4,11 @@ const EPSILON = 0.0001;
 const MULTIPLY = 5;
 const AXES = ["x", "y", "z"];
 
-export default class Matrix {
+/**
+ * Generates vertex positions from the manifest (main.xml) and
+ * binary matrix (bindata/data.bin)
+ */
+export default class PositionsBuilder {
 
     /**
      * Constructs a new matrix object
@@ -16,7 +20,9 @@ export default class Matrix {
         this._sizes = {};
         this._types = {};
         this._increments = {};
-        this._maxes = {};
+        this._maxes = { x: NaN, y: NaN, z: NaN };
+
+        this._bootstrap();
     }
 
     /**
@@ -24,7 +30,7 @@ export default class Matrix {
      */
     _bootstrap() {
         this._checkAxes();
-        this._setupMaxes();
+        this._buildPositions();
     }
 
     /**
@@ -47,7 +53,7 @@ export default class Matrix {
             value = this._manifest.getInt(xpath);
 
         if(value === null) {
-            throw new Error(`'${xpath}' required in main.xml for positions matrix creation`);
+            throw new Error(`'${xpath}' required in main.xml for generating vertex positions`);
         }
 
         this._sizes[axis] = value;
@@ -62,7 +68,7 @@ export default class Matrix {
             value = this._manifest.get(xpath);
         
         if(value === null) {
-            throw new Error(`'${xpath}' required in main.xml for positions matrix creation`);
+            throw new Error(`'${xpath}' required in main.xml for generating vertex positions`);
         }
 
         value = value.toUpperCase();
@@ -82,20 +88,10 @@ export default class Matrix {
             value = this._manifest.getInt(xpath);
 
         if(value === null) {
-            throw new Error(`${xpath} required in main.xml for positions matrix creation`);
+            throw new Error(`${xpath} required in main.xml for generating vertex positions`);
         }
 
         this._increments[axis] = value / EPSILON;
-    }
-
-    /**
-     * Sets up axes maximums with the exception of Z, which will
-     * be setup later.
-     */
-    _setupMaxes() {
-        this._maxes.x = this._increments.x * this._sizes.x;
-        this._maxes.y = this._increments.y * this._sizes.y;
-        this._maxes.z = NaN;
     }
 
     /**
@@ -113,7 +109,10 @@ export default class Matrix {
             let z = (points[i] / EPSILON) * MULTIPLY;
 
             if(!isNaN(z)) {
+                if(isNaN(this._maxes.x) || this._maxes.x < x) this._maxes.x = x;
+                if(isNaN(this._maxes.y) || this._maxes.y < y) this._maxes.y = y;
                 if(isNaN(this._maxes.z) || this._maxes.z < z) this._maxes.z = z;
+                
                 positions.push(x, y, z);
             }
         }
@@ -124,7 +123,7 @@ export default class Matrix {
     /**
      * Getter for positions
      */
-    get positions() {
+    get result() {
         return this._positions;
     }
 }
