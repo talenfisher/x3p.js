@@ -17,6 +17,12 @@ describe("X3P", () => {
             assert.isOk("bindata/data.bin" in x3p.container.files);
             assert.isOk("md5checksum.hex" in x3p.container.files);
         });
+
+        it("should emit error when file parameter is a plain string", done => {
+            let x3p = new X3P("test");
+            x3p.on("load", () => assert.fail());
+            x3p.on("error", () => done());
+        });
     });
 
     describe("_checkOutputSupport", () => {

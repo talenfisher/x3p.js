@@ -28,7 +28,8 @@ export default class X3P extends EventEmitter {
         if(file !== null) {
             this.container
                 .loadAsync(file)
-                .then(() => this.emit("read")); 
+                .then(() => this.emit("read"))
+                .catch(() => this.emit("error", "The 'file' parameter was invalid.  Please specify a valid X3P container file."));
 
         } else {
             this._file.file("main.xml", DEFAULTS["main.xml"]);
