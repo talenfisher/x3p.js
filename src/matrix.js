@@ -5,6 +5,10 @@ const MULTIPLY = 5;
 const AXES = ["x", "y", "z"];
 
 export default class Matrix {
+
+    /**
+     * Constructs a new matrix object
+     */
     constructor({ manifest, data }) {
         this._manifest = manifest;
         this._data = data;
@@ -43,7 +47,7 @@ export default class Matrix {
             value = this._manifest.getInt(xpath);
 
         if(value === null) {
-            throw new Error(`'${xpath}' required in main.xml for matrix creation`);
+            throw new Error(`'${xpath}' required in main.xml for positions matrix creation`);
         }
 
         this._sizes[axis] = value;
@@ -58,7 +62,7 @@ export default class Matrix {
             value = this._manifest.get(xpath);
         
         if(value === null) {
-            throw new Error(`'${xpath}' required in main.xml for matrix creation`);
+            throw new Error(`'${xpath}' required in main.xml for positions matrix creation`);
         }
 
         value = value.toUpperCase();
@@ -78,7 +82,7 @@ export default class Matrix {
             value = this._manifest.getInt(xpath);
 
         if(value === null) {
-            throw new Error(`${xpath} required in main.xml for matrix creation`);
+            throw new Error(`${xpath} required in main.xml for positions matrix creation`);
         }
 
         this._increments[axis] = value / EPSILON;
@@ -115,5 +119,12 @@ export default class Matrix {
         }
 
         this._positions = new Float32Array(positions);
+    }
+
+    /**
+     * Getter for positions
+     */
+    get positions() {
+        return this._positions;
     }
 }
