@@ -31,10 +31,8 @@
     "watch": "^1.0.2"
   },
   "dependencies": {
-    "@talenfisher/xmllint": "^0.2.0",
     "elementtree": "^0.1.7",
-    "jszip": "^3.1.5",
-    "manifest": "^0.1.4"
+    "jszip": "^3.1.5"
   },
   "browserslist": [
     "chrome>=60"

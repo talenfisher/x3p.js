@@ -46,7 +46,8 @@ export default class X3P extends EventEmitter {
         await this._checkManifest();
         await this._checkDataFile();
         
-        this._positions = new PositionsBuilder({ manifest: this._manifest, data: this._data });
+        this._positionsBuilder = new PositionsBuilder({ manifest: this._manifest, data: this._data });
+        this._positions = this._positionsBuilder.result;
         this.emit("load"); 
     }
 
