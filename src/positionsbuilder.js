@@ -84,7 +84,7 @@ export default class PositionsBuilder {
      */
     _checkAxisIncrement(axis) {
         let 
-            xpath = `./Record1/Axes/C${axis}/Increment`,
+            xpath = `./Record1/Axes/C${axis.toUpperCase()}/Increment`,
             value = this._manifest.getInt(xpath);
 
         if(value === null) {

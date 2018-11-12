@@ -20,6 +20,8 @@ export default class X3P extends EventEmitter {
         this._file = new JSZip();
         this._name = name;
         this._root = "";
+        this._positions = [];
+
 
         this.on("read", this._bootstrap.bind(this));
 
@@ -46,8 +48,15 @@ export default class X3P extends EventEmitter {
         await this._checkManifest();
         await this._checkDataFile();
         
-        this._positionsBuilder = new PositionsBuilder({ manifest: this._manifest, data: this._data });
-        this._positions = this._positionsBuilder.result;
+        try {
+            if(this._data !== null) {
+                this._positionsBuilder = new PositionsBuilder({ manifest: this._manifest, data: this._data });
+                this._positions = this._positionsBuilder.result;
+            }
+        } catch(err) { 
+            // do nothing 
+        }
+
         this.emit("load"); 
     }
 
@@ -91,12 +100,7 @@ export default class X3P extends EventEmitter {
     async _checkDataFile() {
         let xpath = "./Record3/DataLink/PointDataLink";
         this._dataFile = this._manifest.get(xpath);
-
-        if(!this.fileNames.includes(this._dataFile)) {
-            throw new Error(`[${xpath}] missing from main.xml`);
-        }
-
-        this._data = await this.readFile(this._dataFile);
+        this._data = (this.fileNames.includes(this._dataFile)) ? await this.readFile(this._dataFile) : null;
     }
 
     /**
