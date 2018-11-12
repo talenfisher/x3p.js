@@ -20,7 +20,6 @@ export default class X3P extends EventEmitter {
         this._file = new JSZip();
         this._name = name;
         this._root = "";
-        this._positions = [];
 
 
         this.on("read", this._bootstrap.bind(this));
