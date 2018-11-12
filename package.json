@@ -10,7 +10,7 @@
     "test": "mocha tests --no-timeouts",
     "lint": "eslint src",
     "watch": "watch 'npm run build; npm run test' src tests",
-    "build": "parcel build src/index.js -d bin -o x3p.js"
+    "build": "parcel build src/index.js -d bin -o x3p.js --no-source-maps"
   },
   "keywords": [
     "x3p",
