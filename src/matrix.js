@@ -36,7 +36,7 @@ export default class Matrix {
             value = this._manifest.getInt(xpath);
 
         if(value === null) {
-            throw new Error(`'${xpath}' Missing from Manifest`);
+            throw new Error(`'${xpath}' required in main.xml for building matrix`);
         }
 
         this._sizes[axis] = value;
@@ -51,7 +51,7 @@ export default class Matrix {
             value = this._manifest.get(xpath);
         
         if(value === null) {
-            throw new Error(`'${xpath}' Missing from Manifest`);
+            throw new Error(`'${xpath}' required in main.xml for building matrix`);
         }
 
         value = value.toUpperCase();
