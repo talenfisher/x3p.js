@@ -105,11 +105,27 @@ describe("X3P", () => {
                     let document = ElementTree.parse(manifest);
                     assert.isOk(document.find("./Record1") !== null);
                     done();
+
                 } catch(err) {
                     done(err);
                 }
+            });
+        });
+    });
 
-                
+    describe("get vertexPositions", () => {
+        it("should return undefined when there is no point data file", () => {
+            let x3p = new X3P();
+            assert.strictEqual(x3p.vertexPositions, undefined);
+        });
+
+        it("should return a float32array when there is a valid point data file", done => {
+            let file = fs.readFileSync(CSAFE_LOGO_PATH);
+            let x3p = new X3P(file);
+            
+            x3p.on("load", () => {
+                assert.strictEqual(x3p.vertexPositions.constructor.name, "Float32Array");
+                done();
             });
         });
     });
