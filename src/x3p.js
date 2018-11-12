@@ -51,7 +51,6 @@ export default class X3P extends EventEmitter {
         try {
             if(this._data !== null) {
                 this._positionsBuilder = new PositionsBuilder({ manifest: this._manifest, data: this._data });
-                this._positions = this._positionsBuilder.result;
             }
         } catch(err) { 
             // do nothing 
@@ -156,6 +155,13 @@ export default class X3P extends EventEmitter {
      */
     set name(name) {
         this._name = name;
+    }
+
+    /**
+     * Getter for vertex positions
+     */
+    get vertexPositions() {
+        return typeof this._positionsBuilder !== "undefined" ? this._positionsBuilder.result : undefined;
     }
 
     /**
