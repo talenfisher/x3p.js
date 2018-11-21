@@ -1,3 +1,4 @@
+import Shader from "./shader";
 export default class Renderer {
     constructor({ canvas, x3p }) {
         this._checkEnvironment();
@@ -6,13 +7,20 @@ export default class Renderer {
         this._x3p = x3p;
 
         if(this._gl === null) throw new Error("WebGL not supported");
-        this.clear();
+        this._bootstrap();
     }
 
     _checkEnvironment() {
         if(typeof global !== "undefined") {
             throw new Error("Rendering not supported in Node.js yet.");
         }
+    }
+
+    _bootstrap() {
+        this.clear();
+        
+        let shader = new Shader({ gl: this._gl });
+        this._shader = shader.program;
     }
 
     clear() {
