@@ -20,6 +20,7 @@ export default class Renderer {
         this._modelViewMatrix = mat4.create();
         this._shader = (new Shader({ gl: this._gl })).program;
 
+        this._bootstrap();
         this.clear();
     }
 
@@ -34,6 +35,11 @@ export default class Renderer {
         if(this._gl === null) {
             throw new Error("WebGL not supported");
         }
+    }
+
+    _bootstrap() {
+        // setup persepective
+        mat4.perspective(this._projectionMatrix, this._fieldOfView, this._aspectRatio, this.zNear, this.zFar);
     }
 
     clear() {
