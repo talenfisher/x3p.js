@@ -39,15 +39,17 @@ export default class Renderer {
     }
 
     _bootstrap() {
-        // setup persepective
-        mat4.perspective(this._projectionMatrix, this._fieldOfView, this._aspectRatio, this.zNear, this.zFar);
+        // setup persepective, uniforms
+        mat4.perspective(this._projectionMatrix, this._fieldOfView, this._aspectRatio, this._zNear, this._zFar);
+        this._gl.uniformMatrix4fv(this._shader.uniforms.projectionMatrix, this._projectionMatrix);
+        this._gl.uniformMatrix4fv(this._shader.uniforms.modelViewMatrix, this._modelViewMatrix);
 
-        // create position buffer
+        // create position buffer, enable position attribute
         this._buffers.position = this._gl.createBuffer();
         this._gl.bindBuffer(this._gl, this._buffers.position);
         this._gl.bufferData(this._gl.ARRAY_BUFFER, this._x3p.vertexPositions, this._gl.STATIC_DRAW);
         this._gl.vertexAttribPointer(this._shader.attributes.position, 3, this._gl.FLOAT, false, 0, 0);
-        this._gl.enableVertexAttribArray(this._shader.attributes.position);
+        this._gl.enableVertexAttribArray(this._shader.attributes.position);        
     }
 
     clear() {

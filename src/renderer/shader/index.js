@@ -1,11 +1,24 @@
 export default class Shader {
     constructor({ gl }) {
         this._gl = gl;
-        this._program = this._gl.createProgram();
 
+        // setup program
+        this._program = this._gl.createProgram();
         this._gl.attachShader(this._program, this._load("vertex"));
         this._gl.attachShader(this._program, this._load("fragment"));
         this._gl.linkProgram(this._program);
+
+        this.attributes = new Proxy(this, {
+            get: function(target, prop) {
+                return target.getAttribLocation(prop);
+            }
+        });
+
+        this.uniforms = new Proxy(this, {
+            get: function(target, prop) {
+                return target.getUniformLocation(prop);
+            }
+        });
     }
 
     _load(type) {
@@ -19,14 +32,11 @@ export default class Shader {
         return this._program;
     }
 
-    get attributes() {
-        return {
-            position: this.getAttribLocation("position"),
-            color: this.getAttribLocation("color")
-        };
-    }
-
     getAttribLocation(attribute) {
         return this._gl.getAttribLocation(this.program, attribute);
+    }
+
+    getUniformLocation(uniform) {
+        return this._gl.getUniformLocation(this.program, uniform);
     }
 }
