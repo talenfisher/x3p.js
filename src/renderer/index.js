@@ -18,7 +18,8 @@ export default class Renderer {
         this._fieldOfView = options.fieldOfView || DEFAULTS.fieldOfView;
         this._projectionMatrix = mat4.create();
         this._modelViewMatrix = mat4.create();
-        this._shader = (new Shader({ gl: this._gl })).program;
+        this._shader = new Shader({ gl: this._gl });
+        this._buffers = {};
 
         this._bootstrap();
         this.clear();
@@ -40,6 +41,11 @@ export default class Renderer {
     _bootstrap() {
         // setup persepective
         mat4.perspective(this._projectionMatrix, this._fieldOfView, this._aspectRatio, this.zNear, this.zFar);
+
+        // create position buffer
+        this._buffers.position = this._gl.createBuffer();
+        this._gl.bindBuffer(this._gl, this._buffers.position);
+        this._gl.bufferData(this._gl.ARRAY_BUFFER, this._x3p.vertexPositions, this._gl.STATIC_DRAW);
     }
 
     clear() {
