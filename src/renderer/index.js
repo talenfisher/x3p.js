@@ -1,27 +1,39 @@
 import Shader from "./shader";
+import { mat4 } from "gl-matrix";
+
+const DEFAULTS = {
+    zNear: 0.1,
+    zFar: 100,
+    fieldOfView: 45 * Math.PI / 180
+};
 
 export default class Renderer {
-    constructor({ canvas, x3p }) {
-        this._checkEnvironment();
-        this._canvas = canvas;
-        this._gl = this._canvas.getContext("webgl");
+    constructor({ canvas, x3p, ...options }) {
+        this._checkWebGLSupport(canvas);
+        
         this._x3p = x3p;
+        this._aspectRatio = options.aspectRatio || (this._gl.canvas.clientWidth / this._gl.canvas.clientHeight);
+        this._zNear = options.zNear || DEFAULTS.zNear;
+        this._zFar = options.zFar || DEFAULTS.zFar;
+        this._fieldOfView = options.fieldOfView || DEFAULTS.fieldOfView;
+        this._projectionMatrix = mat4.create();
+        this._modelViewMatrix = mat4.create();
+        this._shader = (new Shader({ gl: this._gl })).program;
 
-        if(this._gl === null) throw new Error("WebGL not supported");
-        this._bootstrap();
+        this.clear();
     }
 
-    _checkEnvironment() {
+    _checkWebGLSupport(canvas) {
         if(typeof global !== "undefined") {
             throw new Error("Rendering not supported in Node.js yet.");
         }
-    }
 
-    _bootstrap() {
-        this.clear();
-        
-        let shader = new Shader({ gl: this._gl });
-        this._shader = shader.program;
+        this._canvas = canvas;
+        this._gl = this._canvas.getContext("webgl");
+
+        if(this._gl === null) {
+            throw new Error("WebGL not supported");
+        }
     }
 
     clear() {
