@@ -46,6 +46,8 @@ export default class Renderer {
         this._buffers.position = this._gl.createBuffer();
         this._gl.bindBuffer(this._gl, this._buffers.position);
         this._gl.bufferData(this._gl.ARRAY_BUFFER, this._x3p.vertexPositions, this._gl.STATIC_DRAW);
+        this._gl.vertexAttribPointer(this._shader.attributes.position, 3, this._gl.FLOAT, false, 0, 0);
+        this._gl.enableVertexAttribArray(this._shader.attributes.position);
     }
 
     clear() {

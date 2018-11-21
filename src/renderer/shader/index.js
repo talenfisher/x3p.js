@@ -19,7 +19,14 @@ export default class Shader {
         return this._program;
     }
 
+    get attributes() {
+        return {
+            position: this.getAttribLocation("position"),
+            color: this.getAttribLocation("color")
+        };
+    }
+
     getAttribLocation(attribute) {
-       return this._gl.getAttribLocation(this.program, attribute);
+        return this._gl.getAttribLocation(this.program, attribute);
     }
 }
