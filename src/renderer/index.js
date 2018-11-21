@@ -1,4 +1,5 @@
 import Shader from "./shader";
+
 export default class Renderer {
     constructor({ canvas, x3p }) {
         this._checkEnvironment();
