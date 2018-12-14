@@ -8,7 +8,7 @@ describe("X3P", () => {
             expect(new X3P({
                 file: "test",
                 name: "test"
-            })).rejects.toBe("Invalid X3P file specified");
+            })).rejects.toBe("Invalid X3P File Specified");
         });
 
         it("Should throw an error when supplied a zip container that doesn't have main.xml", () => {

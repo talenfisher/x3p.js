@@ -23,6 +23,7 @@
     "@types/elementtree": "^0.1.0",
     "@types/jest": "^23.3.10",
     "@types/jszip": "^3.1.4",
+    "@types/sax": "^1.0.1",
     "jest": "^23.6.0",
     "ts-jest": "^23.10.5",
     "typescript": "^3.2.2",
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "elementtree": "^0.1.7",
-    "jszip": "^3.1.5"
+    "jszip": "^3.1.5",
+    "sax": "^1.2.4"
   }
 }

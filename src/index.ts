@@ -1,6 +1,7 @@
 import { default as jszip, JSZipObject } from "jszip";
 import { parse, ElementTree } from "elementtree";
 import X3P from "./x3p";
+import Promisable from "./promisable";
 
 const ZipLoader = jszip();
 
@@ -9,9 +10,8 @@ interface LoaderOptions {
     name: string;
 }
 
-export default class Loader {
+export default class Loader extends Promisable<X3P> {
     private options: LoaderOptions;
-    private promise: Promise<X3P>;
     private zip?: jszip;
     private manifest?: ElementTree;
     private bindata?: ArrayBuffer;
@@ -19,6 +19,8 @@ export default class Loader {
     
 
     constructor(options: LoaderOptions) {
+        super();
+        
         this.options = options;
         this.promise = new Promise(this.load.bind(this));
     }
