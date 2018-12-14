@@ -1,16 +1,13 @@
 {
   "name": "x3p.js",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "JavaScript library for working with X3P files",
-  "main": "bin/x3p.js",
-  "directories": {
-    "test": "tests"
-  },
+  "main": "dist/index.js",
   "scripts": {
-    "test": "mocha tests --no-timeouts",
+    "test": "jest --colors",
     "lint": "eslint src",
-    "watch": "watch 'npm run build; npm run test' src tests",
-    "build": "parcel build src/index.js -d bin -o x3p.js --no-source-maps"
+    "watch": "watch 'npm run build && npm run test' src tests",
+    "build": "tsc"
   },
   "keywords": [
     "x3p",
@@ -19,24 +16,20 @@
   "author": "Talen Fisher",
   "repository": "https://github.com/talenfisher/x3p.js",
   "license": "MIT",
+  "browserslist": [
+    "chrome>=60"
+  ],
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.26.0",
-    "chai": "^4.2.0",
-    "eslint": "^5.8.0",
-    "mocha": "^5.2.0",
-    "parcel-bundler": "^1.10.3",
-    "parcel-plugin-raw-xml": "^1.0.1",
+    "@types/elementtree": "^0.1.0",
+    "@types/jest": "^23.3.10",
+    "@types/jszip": "^3.1.4",
+    "jest": "^23.6.0",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.2",
     "watch": "^1.0.2"
   },
   "dependencies": {
-    "color-to-vec4": "^0.1.1",
     "elementtree": "^0.1.7",
-    "gl-matrix": "^2.8.1",
     "jszip": "^3.1.5"
-  },
-  "browserslist": [
-    "chrome>=60"
-  ]
+  }
 }

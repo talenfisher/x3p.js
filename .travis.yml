@@ -5,6 +5,10 @@ node_js:
 
 before_script:
   - npm install
+  - git config user.email "travis@example.com"
+  - git config user.name "Travis CI"
+  - cd tests && git clone https://${GH_AUTH}@github.com/talenfisher/fix3p-testfiles.git data
+  - cd ../
 
 script:
   - npm run lint
