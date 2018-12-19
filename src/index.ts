@@ -1,77 +1,63 @@
-import { default as jszip, JSZipObject } from "jszip";
-import { parse, ElementTree } from "elementtree";
 import X3P from "./x3p";
+import jszip, { JSZipObject } from "jszip";
 import Promisable from "./promisable";
+import { ElementTree, parse } from "elementtree";
 
 const ZipLoader = jszip();
 
-interface LoaderOptions {
+export interface X3PLoaderOptions {
     file: any;
     name: string;
 }
-
-export default class Loader extends Promisable<X3P> {
-    private options: LoaderOptions;
+export default class X3PLoader extends Promisable<X3P> {
+    private options: X3PLoaderOptions;
+    private name: string;
     private zip?: jszip;
-    private manifest?: ElementTree;
-    private bindata?: ArrayBuffer;
-    private root: string = "";
-    
+    private root?: string;
+    private pointBuffer?: ArrayBuffer;
 
-    constructor(options: LoaderOptions) {
+
+    constructor(options: X3PLoaderOptions) {
         super();
-        
         this.options = options;
+        this.name = options.name;
         this.promise = new Promise(this.load.bind(this));
     }
 
-    load(resolve: any, reject: any) {
-        ZipLoader.loadAsync(this.options.file)
+    private async load(resolve: any, reject: any) {
+        let zip, manifest, search, file, pointFile, pointFileRecord, pointBuffer;
 
-        // load zip, check for manifest, 
-        .then(
-            async zip => { 
-                this.zip = zip;
-                let search = zip.file(/main\.xml$/g);
+        try {
+            this.zip = await ZipLoader.loadAsync(this.options.file);
+        } catch(e) {
+            return reject("Invalid X3P File Specified");
+        }
+        
+        // check for manifest
+        search = this.zip.file(/main\.xml$/g);
+        if(search.length == 0) {
+            return reject("X3P files must contain a main.xml file");
+        }
 
-                if(search.length == 0) {
-                    reject("X3P files must contain a main.xml");
-                }
+        // check for nesting inside another folder
+        file = search[0];
+        if(search.length > 0 && search[0].name !== "main.xml") {    
+            this.root = file.name.replace("main.xml", "");
+        }
 
-                if(search.length > 0 && search[0].name !== "main.xml") {
-                    let file = search[0];
-                    this.root = file.name.replace("main.xml", "");
-                    this.manifest = parse(await file.async("text"));
-                    
-                    let dataFileRecord = this.manifest.find("./Record3/DataLink/PointDataLink");
-                    let dataFile = dataFileRecord !== null ? dataFileRecord.text : null;
+        manifest = parse(await file.async("text"));    
+        pointFileRecord = manifest.find("./Record3/DataLink/PointDataLink");
+        pointFile = pointFileRecord !== null ? pointFileRecord.text : null;
+        pointBuffer = pointFile ? <ArrayBuffer> await this.read(pointFile.toString(), "arraybuffer") : undefined;
 
-                    if(dataFile) {
-                        this.bindata = <ArrayBuffer> await this.fetch(<string> dataFile, "arraybuffer");
-                    }
-                }
-            },
-            e => reject("Invalid X3P File Specified")
-        );
+        return resolve(new X3P({
+            loader: this,
+            manifest,
+            pointBuffer
+        }));
     }
 
-    /**
-     * Promise resolution proxy
-     */
-    then() {
-        //@ts-ignore
-        return this.promise.then.apply(this.promise, arguments);
-    }
-
-    /**
-     * Promise rejection proxy
-     */
-    catch() {
-        //@ts-ignore
-        return this.promise.catch.apply(this.promise, arguments);
-    }
-
-    fetch(filename: string, encoding: "base64"|"text"|"binarystring"|"array"|"uint8array"|"arraybuffer"|"blob"|"nodebuffer" = "text") {
+    public read(filename: string, encoding: "base64"|"text"|"binarystring"|"array"|"uint8array"|"arraybuffer"|"blob"|"nodebuffer" = "text") {
         if(!this.zip) return;
 
         let file = this.zip.file(this.root+filename);

@@ -1,12 +1,12 @@
-export default class Promiseable<T> {
+export default class Promisable<T> {
     //@ts-ignore
     protected promise: Promise<T>;
 
-    then() {
-        this.promise.then.apply(arguments);
+    get then() {
+        return this.promise.then.bind(this.promise);
     }
 
-    catch() {
-        this.promise.catch.apply(arguments);
+    get catch() {
+        return this.promise.catch.bind(this.promise);
     }
 }
