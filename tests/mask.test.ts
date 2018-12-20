@@ -48,4 +48,39 @@ describe("Mask", () => {
             expect(mask.width).toBe(0);
         });
     });
+
+    describe("get annotations", () => {
+        it("Should return undefined on an annotation that doesn't exist", () => {
+            let manifest = parse(`<root></root>`);
+            let mask = new Mask({ manifest });
+            expect(mask.annotations.red).toBe(undefined);
+        });
+
+        it("Should return the annotation value when it exists in the Mask definition", () => {
+            let manifest = parse(`<root></root>`);
+            let definition = parse(`<Mask><Annotations><Annotation color='red'>Example Label</Annotation></Annotations></Mask>`);
+            let mask = new Mask({ manifest, definition });
+
+            expect(mask.annotations.red).toBe("Example Label");
+        });
+    });
+
+    describe("set annotations", () => {
+        it("Should update an existing annotation", () => {
+            let manifest = parse(`<root></root>`);
+            let definition = parse(`<Mask><Annotations><Annotation color='red'>Example Label</Annotation></Annotations></Mask>`);
+            let mask = new Mask({ manifest, definition });
+            
+            mask.annotations.red = "Example 2";
+            expect(mask.annotations.red).toBe("Example 2");
+        });
+
+        it("Should create a new annotation if it doesn't already exist", () => {
+            let manifest = parse(`<root></root>`);
+            let mask = new Mask({ manifest });
+
+            mask.annotations.red = "Example Label";
+            expect(mask.annotations.red).toBe("Example Label");
+        });
+    });
 });
