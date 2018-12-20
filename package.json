@@ -22,6 +22,7 @@
   "devDependencies": {
     "@talenfisher/canvas": "^0.2.0",
     "@types/elementtree": "^0.1.0",
+    "@types/file-saver": "^2.0.0",
     "@types/jest": "^23.3.10",
     "@types/jszip": "^3.1.4",
     "@types/ndarray": "^1.0.6",
@@ -34,6 +35,7 @@
   },
   "dependencies": {
     "elementtree": "^0.1.7",
+    "file-saver": "^2.0.0",
     "jszip": "^3.1.5",
     "ndarray": "^1.0.18",
     "sax": "^1.2.4"

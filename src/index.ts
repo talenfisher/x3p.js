@@ -25,8 +25,8 @@ export type Encoding =
     "nodebuffer";
 
 export default class X3PLoader extends Promisable<X3P> {
+    public name: string;
     private options: X3PLoaderOptions;
-    private name: string;
     private zip?: jszip;
     private manifest?: ElementTree;
     private root?: string;
@@ -47,6 +47,18 @@ export default class X3PLoader extends Promisable<X3P> {
 
         let file = this.zip.file(this.root+filename);
         return file !== null ? file.async(encoding) : undefined;
+    }
+
+    public toBlob() {
+        if(!this.zip) return;
+
+        return this.zip.generateAsync({
+            type: "blob",
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 9,
+            },
+        });
     }
 
     private async load(resolve: any, reject: any) {
@@ -76,6 +88,7 @@ export default class X3PLoader extends Promisable<X3P> {
             loader: this,
             manifest: this.manifest,
             mask,
+            name: this.name,
             pointBuffer,
         }));
     }

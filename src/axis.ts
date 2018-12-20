@@ -15,7 +15,10 @@ export default class Axis {
 
     constructor({ name, manifest }: AxisOptions) {
         let root = manifest.find(`./Record1/Axes/C${name}`);
-        if(root === null) throw new Error(`Axis '${name}' is not defined in the manifest`);
+        
+        if(root === null) {
+            throw new Error(`Axis '${name}' is not defined in the manifest`);
+        }
 
         this.name = name;
         this.definition = root;
