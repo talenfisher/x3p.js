@@ -30,7 +30,7 @@ describe("X3P", () => {
             let loader = new X3PLoader({
                 file,
                 name: "test",
-            });
+            }); 
 
             let x3p = await loader as unknown as X3P;
             x3p.manifest.parse(`<root><test>1</test></root>`);

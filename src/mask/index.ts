@@ -36,6 +36,8 @@ export default class Mask {
     }
 
     private setupCanvas() {
+        if(this.width === 0 || this.height === 0) return;
+        
         this.canvas = new Canvas({ height: this.height, width: this.width });
 
         if(this.dataBuffer) {
