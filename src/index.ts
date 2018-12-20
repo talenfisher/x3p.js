@@ -2,7 +2,7 @@ import X3P from "./x3p";
 import jszip, { JSZipObject } from "jszip";
 import Promisable from "./promisable";
 import { ElementTree, parse } from "elementtree";
-import Mask from "./mask";
+import Mask from "./mask/index";
 
 const ZipLoader = jszip();
 
@@ -27,7 +27,7 @@ export default class X3PLoader extends Promisable<X3P> {
     }
 
     private async load(resolve: any, reject: any) {
-        let search, file, pointBuffer;
+        let search, file, pointBuffer, mask;
 
         try {
             this.zip = await ZipLoader.loadAsync(this.options.file);
@@ -49,11 +49,13 @@ export default class X3PLoader extends Promisable<X3P> {
 
         this.manifest = parse(await file.async("text"));        
         pointBuffer = await this.getPointBuffer();
+        mask = <Mask> await this.getMask();
 
         return resolve(new X3P({
             loader: this,
             manifest: this.manifest,
-            pointBuffer
+            pointBuffer,
+            mask
         }));
     }
 
@@ -62,8 +64,23 @@ export default class X3PLoader extends Promisable<X3P> {
 
         let pointFileRecord = this.manifest.find("./Record3/DataLink/PointDataLink");
         let pointFile = pointFileRecord !== null ? pointFileRecord.text : null;
-
         return pointFile ? <ArrayBuffer> await this.read(pointFile.toString(), "arraybuffer") : undefined;
+    }
+
+    /**
+     * Load the X3P's mask
+     */
+    private async getMask() {
+        if(!this.manifest || this.zip) return;
+
+        let definition = await this.getMaskDefinition();
+        let data = await this.getMaskData();
+        
+        return new Mask({
+            manifest: this.manifest,
+            definition,
+            data
+        });
     }
 
 
@@ -88,7 +105,7 @@ export default class X3PLoader extends Promisable<X3P> {
         let link = definition ? definition.find("./Link") : null;
         let filename = link !== null ? link.text : "bindata/texture.jpeg";
 
-        return this.read(<string> filename, "uint8array");
+        return <Promise<ArrayBuffer>> this.read(<string> filename, "arraybuffer");
     }
 
     public hasFile(filename: string) {
