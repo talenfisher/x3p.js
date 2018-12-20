@@ -1,4 +1,5 @@
 import Mask from "../src/mask";
+
 import { parse } from "elementtree";
 
 describe("Mask", () => {
@@ -58,9 +59,15 @@ describe("Mask", () => {
 
         it("Should return the annotation value when it exists in the Mask definition", () => {
             let manifest = parse(`<root></root>`);
-            let definition = parse(`<Mask><Annotations><Annotation color='red'>Example Label</Annotation></Annotations></Mask>`);
-            let mask = new Mask({ manifest, definition });
+            let definition = parse(`
+                <Mask>
+                    <Annotations>
+                        <Annotation color='red'>Example Label</Annotation>
+                    </Annotations>
+                </Mask>
+            `);
 
+            let mask = new Mask({ manifest, definition });
             expect(mask.annotations.red).toBe("Example Label");
         });
     });
@@ -68,7 +75,14 @@ describe("Mask", () => {
     describe("set annotations", () => {
         it("Should update an existing annotation", () => {
             let manifest = parse(`<root></root>`);
-            let definition = parse(`<Mask><Annotations><Annotation color='red'>Example Label</Annotation></Annotations></Mask>`);
+            let definition = parse(`
+                <Mask>
+                    <Annotations>
+                        <Annotation color='red'>Example Label</Annotation>
+                    </Annotations>
+                </Mask>
+            `);
+
             let mask = new Mask({ manifest, definition });
             
             mask.annotations.red = "Example 2";

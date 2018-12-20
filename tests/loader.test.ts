@@ -1,15 +1,14 @@
 import X3P from "../dist";
-import { readFileSync as read, readdirSync as readdir } from "fs";
+
+import { readdirSync as readdir, readFileSync as read } from "fs";
 import { resolve } from "path";
-
-
 
 describe("X3PLoader", () => {
     describe("constructor()", () => {
         it("Should throw an error when supplied a file that isn't an X3P", () => {
             expect(new X3P({
                 file: "test",
-                name: "test"
+                name: "test",
             })).rejects.toBe("Invalid X3P File Specified");
         });
 
@@ -17,8 +16,8 @@ describe("X3PLoader", () => {
             let file = read(resolve(__dirname, "data/bad/[nu] no-manifest.x3p"));
             
             expect(new X3P({
-                file: file,
-                name: "test"
+                file,
+                name: "test",
             })).rejects.toBe("X3P files must contain a main.xml file");
         });
 
@@ -26,8 +25,8 @@ describe("X3PLoader", () => {
             let file = read(resolve(__dirname, "data/good/complete.x3p"));
 
             expect(new X3P({
-                file: file,
-                name: "test"
+                file,
+                name: "test",
             })).resolves;
         });
     });

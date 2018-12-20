@@ -1,4 +1,5 @@
 import Axis from "../src/axis";
+
 import { parse } from "elementtree";
 
 describe("Axis", () => {
@@ -163,7 +164,6 @@ describe("Axis", () => {
             expect(axis.size).toBe(5);
         });
 
-
         it("Should return 0 when the size isn't specified in the manifest", () => {
             let manifest = parse(`
                 <root>
@@ -173,6 +173,6 @@ describe("Axis", () => {
 
             let axis = new Axis({ name: "X", manifest });
             expect(axis.size).toBe(0);
-        })
+        });
     });
 });
