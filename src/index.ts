@@ -2,19 +2,21 @@ import X3P from "./x3p";
 import jszip, { JSZipObject } from "jszip";
 import Promisable from "./promisable";
 import { ElementTree, parse } from "elementtree";
+import Mask from "./mask";
 
 const ZipLoader = jszip();
 
 export interface X3PLoaderOptions {
     file: any;
     name: string;
+    color?: string;
 }
 export default class X3PLoader extends Promisable<X3P> {
     private options: X3PLoaderOptions;
     private name: string;
     private zip?: jszip;
+    private manifest?: ElementTree;
     private root?: string;
-    private pointBuffer?: ArrayBuffer;
 
 
     constructor(options: X3PLoaderOptions) {
@@ -25,7 +27,7 @@ export default class X3PLoader extends Promisable<X3P> {
     }
 
     private async load(resolve: any, reject: any) {
-        let zip, manifest, search, file, pointFile, pointFileRecord, pointBuffer;
+        let search, file, pointBuffer;
 
         try {
             this.zip = await ZipLoader.loadAsync(this.options.file);
@@ -45,16 +47,52 @@ export default class X3PLoader extends Promisable<X3P> {
             this.root = file.name.replace("main.xml", "");
         }
 
-        manifest = parse(await file.async("text"));    
-        pointFileRecord = manifest.find("./Record3/DataLink/PointDataLink");
-        pointFile = pointFileRecord !== null ? pointFileRecord.text : null;
-        pointBuffer = pointFile ? <ArrayBuffer> await this.read(pointFile.toString(), "arraybuffer") : undefined;
+        this.manifest = parse(await file.async("text"));        
+        pointBuffer = await this.getPointBuffer();
 
         return resolve(new X3P({
             loader: this,
-            manifest,
+            manifest: this.manifest,
             pointBuffer
         }));
+    }
+
+    private async getPointBuffer() {
+        if(!this.manifest) return;
+
+        let pointFileRecord = this.manifest.find("./Record3/DataLink/PointDataLink");
+        let pointFile = pointFileRecord !== null ? pointFileRecord.text : null;
+
+        return pointFile ? <ArrayBuffer> await this.read(pointFile.toString(), "arraybuffer") : undefined;
+    }
+
+
+    /**
+     * Gets the mask definition.  First searches Record3 in main.xml, then for a mask.xml in the
+     * X3P's root directory.
+     */
+    private async getMaskDefinition() {
+        if(!this.manifest || !this.zip) return;
+
+        return this.manifest.find("./Record3/Mask") || 
+            this.hasFile("mask.xml") ? parse(<string> await this.read("mask.xml")) : undefined;
+    }
+
+    /**
+     * Extract the mask's image file using the mask definition.  If the definition or
+     * link doesn't exist, it looks for the mask data at bindata/texture.jpeg
+     * 
+     * @param definition definition for an X3P mask
+     */
+    private getMaskData(definition?: ElementTree) {
+        let link = definition ? definition.find("./Link") : null;
+        let filename = link !== null ? link.text : "bindata/texture.jpeg";
+
+        return this.read(<string> filename, "uint8array");
+    }
+
+    public hasFile(filename: string) {
+        return this.zip && this.zip.file(filename) !== null;
     }
 
     public read(filename: string, encoding: "base64"|"text"|"binarystring"|"array"|"uint8array"|"arraybuffer"|"blob"|"nodebuffer" = "text") {

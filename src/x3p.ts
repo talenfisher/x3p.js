@@ -32,8 +32,6 @@ export default class X3P {
             z: new Axis({ name: "Z", manifest: this.manifest })
         };
     }
-
-
 }
 
  
