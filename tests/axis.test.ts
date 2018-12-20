@@ -1,4 +1,4 @@
-import Axis from "../dist/axis";
+import Axis from "../src/axis";
 import { parse } from "elementtree";
 
 describe("Axis", () => {
