@@ -2,6 +2,7 @@ import AnnotationHandler from "./annotation-handler";
 
 import { Canvas } from "@talenfisher/canvas";
 import { Element, ElementTree, parse, SubElement } from "elementtree";
+import { resolve } from "path";
 
 export interface MaskOptions {
     manifest: ElementTree;
@@ -13,10 +14,10 @@ export interface MaskOptions {
 export default class Mask {
     public annotations: { [name: string]: any };
     public color: string;
+    public canvas?: Canvas;
     private manifest: ElementTree;
     private definition: ElementTree | Element;
     private dataBuffer?: ArrayBuffer;
-    private $canvas?: Canvas;
 
     constructor(options: MaskOptions) {
         this.manifest = options.manifest;
@@ -31,6 +32,19 @@ export default class Mask {
         
         this.definition = options.definition;
         this.annotations = new Proxy(this.definition, AnnotationHandler);
+        this.setupCanvas();
+    }
+
+    private setupCanvas() {
+        this.canvas = new Canvas({ height: this.height, width: this.width });
+
+        if(this.dataBuffer) {
+            let data = new Uint8ClampedArray(this.dataBuffer);
+            let imageData = new ImageData(data, this.width, this.height);
+            this.canvas.putImageData(imageData, 0, 0);            
+        } else {
+            this.canvas.clear(this.color);
+        }
     }
 
     get height() {
@@ -41,28 +55,5 @@ export default class Mask {
     get width() {
         let el = this.manifest.find("./Record3/MatrixDimension/SizeX");
         return el !== null ? Number(el.text) : 0;
-    }
-
-    get canvas() {
-        return new Promise((resolve, reject) => {
-            if(!this.$canvas) {
-                this.$canvas = new Canvas({ width: this.width, height: this.height });
-    
-                if(this.dataBuffer) {
-                    let image = new Image();
-                    image.onload = () => { 
-                        (<Canvas> this.$canvas).drawImage(image); 
-                        resolve(this.$canvas); 
-                    };
-
-                    image.src = URL.createObjectURL(new Blob([this.dataBuffer]));
-
-                } else {
-                    this.$canvas.clear(this.color);
-                    resolve(this.$canvas);
-                }
-
-            } else resolve(this.$canvas);
-        });
     }
 }

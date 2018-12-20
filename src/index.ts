@@ -136,14 +136,19 @@ export default class X3PLoader extends Promisable<X3P> {
 
     /**
      * Extract the mask's image file using the mask definition.  If the definition or
-     * link doesn't exist, it looks for the mask data at bindata/texture.jpeg
+     * link doesn't exist, it looks for the mask data at bindata/texture.png, and then 
+     * at bindata/texture.jpeg.
      * 
      * @param definition definition for an X3P mask
      */
     private getMaskData(definition?: ElementTree) {
         let link = definition ? definition.find("./Link") : null;
-        let filename = link !== null ? link.text : "bindata/texture.jpeg";
+        let filename = link !== null ? link.text : "bindata/texture.png";
+        
+        if(!this.hasFile(<string> filename) && this.hasFile("bindata/texture.jpeg")) {
+            filename = "bindata/texture.jpeg";
+        }
 
-        return <Promise<ArrayBuffer>> this.read(<string> filename, "arraybuffer");
+        return <Promise<ArrayBuffer> | undefined> this.read(<string> filename, "arraybuffer");
     }
 }

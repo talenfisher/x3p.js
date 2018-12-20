@@ -1,3 +1,5 @@
+import "jsdom-global/register";
+
 import X3P from "../dist";
 
 import { readdirSync as readdir, readFileSync as read } from "fs";

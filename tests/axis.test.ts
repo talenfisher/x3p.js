@@ -1,3 +1,4 @@
+import "jsdom-global/register";
 import Axis from "../src/axis";
 
 import { parse } from "elementtree";

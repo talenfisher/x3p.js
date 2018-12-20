@@ -1,3 +1,5 @@
+import "jsdom-global/register";
+
 import Mask from "../src/mask";
 
 import { parse } from "elementtree";
