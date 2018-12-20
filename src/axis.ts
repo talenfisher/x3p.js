@@ -11,6 +11,7 @@ export interface AxisOptions {
 export default class Axis {    
     public name: string;
     private definition: Element;
+    private manifest: ElementTree;
 
     constructor({ name, manifest }: AxisOptions) {
         let root = manifest.find(`./Record1/Axes/C${name}`);
@@ -18,6 +19,7 @@ export default class Axis {
 
         this.name = name;
         this.definition = root;
+        this.manifest = manifest;
     }
 
     get increment() {
@@ -32,6 +34,11 @@ export default class Axis {
             throw `'${el ? el.text : 'null'}' is not a valid data type`;
         }
 
-        return DataTypes[<"D"|"F"|"L"|"I"> (<string>el.text).toUpperCase()];
+        return DataTypes[<"D"|"F"|"L"|"I"> (<string> el.text).toUpperCase()];
+    }
+
+    get size() {
+        let el = this.manifest.find(`./Record3/MatrixDimension/Size${this.name}`);
+        return el !== null ? Number(el.text) : 0;
     }
 }

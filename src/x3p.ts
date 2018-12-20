@@ -1,5 +1,5 @@
 import jszip from "jszip";
-import Promisable from "../src/promisable";
+import Promisable from "./promisable";
 import { parse, ElementTree } from "elementtree";
 import X3PLoader from "index";
 import ndarray from "ndarray";
@@ -32,6 +32,8 @@ export default class X3P {
             z: new Axis({ name: "Z", manifest: this.manifest })
         };
     }
+
+
 }
 
  
