@@ -4,8 +4,8 @@
   "description": "JavaScript library for working with X3P files",
   "main": "dist/index.js",
   "scripts": {
+    "lint": "tslint --project .",
     "test": "jest --colors",
-    "lint": "eslint src",
     "watch": "watch 'npm run build && npm run test' src tests",
     "build": "tsc"
   },
@@ -28,6 +28,7 @@
     "@types/sax": "^1.0.1",
     "jest": "^23.6.0",
     "ts-jest": "^23.10.5",
+    "tslint": "^5.12.0",
     "typescript": "^3.2.2",
     "watch": "^1.0.2"
   },

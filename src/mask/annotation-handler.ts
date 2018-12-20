@@ -13,5 +13,5 @@ export default {
         el.set("color", prop);
         el.text = value;
         return true;
-    }
-}
+    },
+};

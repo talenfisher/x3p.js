@@ -1,6 +1,7 @@
-import { ElementTree, parse } from "elementtree";
 import AnnotationHandler from "./annotation-handler";
+
 import { Canvas } from "@talenfisher/canvas";
+import { ElementTree, parse } from "elementtree";
 
 export interface MaskOptions {
     manifest: ElementTree;
@@ -10,11 +11,11 @@ export interface MaskOptions {
 }
 
 export default class Mask {
+    public annotations: { [name: string]: any };
+    public color: string;
     private manifest: ElementTree;
     private definition: ElementTree;
     private dataBuffer?: ArrayBuffer;
-    public annotations: { [name: string]: any };
-    public color: string;
     private $canvas?: Canvas;
 
     constructor(options: MaskOptions) {

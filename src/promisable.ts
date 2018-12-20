@@ -1,5 +1,5 @@
 export default class Promisable<T> {
-    //@ts-ignore
+    // @ts-ignore
     protected promise: Promise<T>;
 
     get then() {

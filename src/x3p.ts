@@ -1,10 +1,11 @@
-import jszip from "jszip";
-import Promisable from "./promisable";
-import { parse, ElementTree } from "elementtree";
-import X3PLoader from "index";
-import ndarray from "ndarray";
 import Axis from "./axis";
-import Mask from "mask";
+import X3PLoader from "./index";
+import Mask from "./mask";
+import Promisable from "./promisable";
+
+import { ElementTree, parse } from "elementtree";
+import jszip from "jszip";
+import ndarray from "ndarray";
 
 const ZipLoader = jszip();
 
@@ -16,13 +17,13 @@ interface X3POptions {
 }
 
 export default class X3P {
+    public axes?: { x: Axis, y: Axis, z: Axis };
     private options: X3POptions;
     private loader: X3PLoader;
     private manifest: ElementTree;
     private mask: Mask;
     private pointBuffer?: ArrayBuffer;
     private matrix?: ndarray;
-    public axes?: { x: Axis, y: Axis, z: Axis };
 
     constructor(options: X3POptions) {
         this.options = options;
@@ -33,9 +34,7 @@ export default class X3P {
         this.axes = {
             x: new Axis({ name: "X", manifest: this.manifest }),
             y: new Axis({ name: "Y", manifest: this.manifest }),
-            z: new Axis({ name: "Z", manifest: this.manifest })
+            z: new Axis({ name: "Z", manifest: this.manifest }),
         };
     }
 }
-
- 

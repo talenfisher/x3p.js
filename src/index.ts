@@ -1,8 +1,10 @@
-import X3P from "./x3p";
-import jszip, { JSZipObject } from "jszip";
-import Promisable from "./promisable";
-import { ElementTree, parse } from "elementtree";
+
 import Mask from "./mask/index";
+import Promisable from "./promisable";
+import X3P from "./x3p";
+
+import { ElementTree, parse } from "elementtree";
+import jszip, { JSZipObject } from "jszip";
 
 const ZipLoader = jszip();
 
@@ -11,13 +13,23 @@ export interface X3PLoaderOptions {
     name: string;
     color?: string;
 }
+
+export type Encoding = 
+    "base64" |
+    "text" |
+    "binarystring" |
+    "array" |
+    "uint8array" |
+    "arraybuffer" |
+    "blob" |
+    "nodebuffer";
+
 export default class X3PLoader extends Promisable<X3P> {
     private options: X3PLoaderOptions;
     private name: string;
     private zip?: jszip;
     private manifest?: ElementTree;
     private root?: string;
-
 
     constructor(options: X3PLoaderOptions) {
         super();
@@ -26,36 +38,45 @@ export default class X3PLoader extends Promisable<X3P> {
         this.promise = new Promise(this.load.bind(this));
     }
 
-    private async load(resolve: any, reject: any) {
-        let search, file, pointBuffer, mask;
+    public hasFile(filename: string) {
+        return this.zip && this.zip.file(filename) !== null;
+    }
 
+    public read(filename: string, encoding: Encoding = "text") {
+        if(!this.zip) return;
+
+        let file = this.zip.file(this.root+filename);
+        return file !== null ? file.async(encoding) : undefined;
+    }
+
+    private async load(resolve: any, reject: any) {
         try {
             this.zip = await ZipLoader.loadAsync(this.options.file);
         } catch(e) {
             return reject("Invalid X3P File Specified");
         }
-        
+
         // check for manifest
-        search = this.zip.file(/main\.xml$/g);
-        if(search.length == 0) {
+        const search = this.zip.file(/main\.xml$/g);
+        if(search.length === 0) {
             return reject("X3P files must contain a main.xml file");
         }
 
         // check for nesting inside another folder
-        file = search[0];
+        let file = search[0];
         if(search.length > 0 && search[0].name !== "main.xml") {    
             this.root = file.name.replace("main.xml", "");
         }
 
         this.manifest = parse(await file.async("text"));        
-        pointBuffer = await this.getPointBuffer();
-        mask = <Mask> await this.getMask();
+        let pointBuffer = await this.getPointBuffer();
+        let mask = <Mask> await this.getMask();
 
         return resolve(new X3P({
             loader: this,
             manifest: this.manifest,
+            mask,
             pointBuffer,
-            mask
         }));
     }
 
@@ -79,10 +100,9 @@ export default class X3PLoader extends Promisable<X3P> {
         return new Mask({
             manifest: this.manifest,
             definition,
-            data
+            data,
         });
     }
-
 
     /**
      * Gets the mask definition.  First searches Record3 in main.xml, then for a mask.xml in the
@@ -106,16 +126,5 @@ export default class X3PLoader extends Promisable<X3P> {
         let filename = link !== null ? link.text : "bindata/texture.jpeg";
 
         return <Promise<ArrayBuffer>> this.read(<string> filename, "arraybuffer");
-    }
-
-    public hasFile(filename: string) {
-        return this.zip && this.zip.file(filename) !== null;
-    }
-
-    public read(filename: string, encoding: "base64"|"text"|"binarystring"|"array"|"uint8array"|"arraybuffer"|"blob"|"nodebuffer" = "text") {
-        if(!this.zip) return;
-
-        let file = this.zip.file(this.root+filename);
-        return file !== null ? file.async(encoding) : undefined;
     }
 }
