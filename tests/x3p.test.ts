@@ -17,7 +17,7 @@ describe("X3P", () => {
                 name: "test",
             });
 
-            let x3p = await loader;
+            let x3p = await loader as unknown as X3P;
             x3p.manifest.parse(`<root><test>1</test></root>`);
             x3p.save();
             
@@ -32,7 +32,7 @@ describe("X3P", () => {
                 name: "test",
             });
 
-            let x3p = await loader;
+            let x3p = await loader as unknown as X3P;
             x3p.manifest.parse(`<root><test>1</test></root>`);
             x3p.save();
 
