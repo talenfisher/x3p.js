@@ -49,6 +49,12 @@ export default class X3PLoader extends Promisable<X3P> {
         return file !== null ? file.async(encoding) : undefined;
     }
 
+    public write(filename: string, data: any) {
+        if(!this.zip) return;
+
+        this.zip.file(this.root+filename, data);
+    }
+
     public toBlob() {
         if(!this.zip) return;
 

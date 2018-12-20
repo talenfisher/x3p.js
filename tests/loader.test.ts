@@ -30,4 +30,34 @@ describe("X3PLoader", () => {
             })).resolves;
         });
     });
+
+    describe("write", () => {
+        it("should update existing files in the X3P", async () => {
+            let file = read(resolve(__dirname, "data/good/complete.x3p"));
+            let loader = new X3P({
+                file,
+                name: "test", 
+            });
+
+            await loader;
+            loader.write("main.xml", "This is a test");
+            
+            let manifest = await loader.read("main.xml");
+            expect(manifest).toBe("This is a test");
+        });
+
+        it("Should create new files in the X3P", async () => {
+            let file = read(resolve(__dirname, "data/good/complete.x3p"));
+            let loader = new X3P({
+                file, 
+                name: "test",
+            });
+
+            await loader;
+            loader.write("arbitrary.xml", "New File");
+            
+            let arbitrary = await loader.read("arbitrary.xml");
+            expect(arbitrary).toBe("New File");
+        });
+    });
 });    

@@ -20,9 +20,9 @@ interface X3POptions {
 
 export default class X3P {
     public axes?: { x: Axis, y: Axis, z: Axis };
+    public manifest: ElementTree;
+    private loader: X3PLoader; // public for testing purposes only
     private options: X3POptions;
-    private loader: X3PLoader;
-    private manifest: ElementTree;
     private mask: Mask;
     private pointBuffer?: ArrayBuffer;
     private matrix?: ndarray;
