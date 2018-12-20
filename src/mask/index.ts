@@ -1,5 +1,6 @@
-import { ElementTree, parse } from "elementtree";
+import { ElementTree, parse, SubElement } from "elementtree";
 import X3PLoader from "index";
+import AnnotationHandler from "./annotation-handler";
 
 export interface MaskOptions {
     manifest: ElementTree;
@@ -11,14 +12,16 @@ export interface MaskOptions {
 export default class Mask {
     private manifest: ElementTree;
     private definition: ElementTree;
-    private data?: ArrayBuffer;
+    private dataBuffer?: ArrayBuffer;
+    public annotations: { [name: string]: any };
     public color: string;
 
     constructor(options: MaskOptions) {
         this.manifest = options.manifest;
         this.definition = options.definition || parse(`<Mask></Mask>`);
         this.color = options.color || "#cd7f32";
-        this.data = options.data;
+        this.dataBuffer = options.data;
+        this.annotations = new Proxy(this.definition, AnnotationHandler);
     }
 
     get height() {
@@ -30,4 +33,5 @@ export default class Mask {
         let el = this.manifest.find("./Record3/MatrixDimension/SizeX");
         return el !== null ? Number(el.text) : 0;
     }
+
 }
