@@ -1,11 +1,11 @@
 import AnnotationHandler from "./annotation-handler";
 
 import { Canvas } from "@talenfisher/canvas";
-import { ElementTree, parse } from "elementtree";
+import { Element, ElementTree, parse, SubElement } from "elementtree";
 
 export interface MaskOptions {
     manifest: ElementTree;
-    definition?: ElementTree;
+    definition?: ElementTree | Element;
     color?: string;
     data?: ArrayBuffer;
 }
@@ -14,15 +14,22 @@ export default class Mask {
     public annotations: { [name: string]: any };
     public color: string;
     private manifest: ElementTree;
-    private definition: ElementTree;
+    private definition: ElementTree | Element;
     private dataBuffer?: ArrayBuffer;
     private $canvas?: Canvas;
 
     constructor(options: MaskOptions) {
         this.manifest = options.manifest;
-        this.definition = options.definition || parse(`<Mask></Mask>`);
         this.color = options.color || "#cd7f32";
         this.dataBuffer = options.data;
+        
+        // create definition if it doesn't exist
+        if(!options.definition) {
+            let Record3 = this.manifest.find("./Record3") || SubElement(this.manifest.getroot(), "Record3");
+            options.definition = SubElement(Record3, "Mask");
+        }
+        
+        this.definition = options.definition;
         this.annotations = new Proxy(this.definition, AnnotationHandler);
     }
 

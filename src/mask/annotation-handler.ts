@@ -1,13 +1,15 @@
-import { ElementTree, SubElement } from "elementtree";
+import { Element, ElementTree, SubElement } from "elementtree";
 
 export default {
-    get: (target: ElementTree, prop: string) => {
+    get: (target: ElementTree | Element, prop: string) => {
         let el = target.find(`./Annotations/Annotation[@color='${prop}']`);
         return el !== null ? el.text : undefined;
     },
 
-    set: (target: ElementTree, prop: string, value: any) => {
-        let annotations = target.find(`./Annotations`) || SubElement(target.getroot(), "Annotations");
+    set: (target: ElementTree | Element, prop: string, value: any) => {
+        // @ts-ignore
+        let root = (typeof target.getroot !== "undefined") ? (<ElementTree> target).getroot() : <Element> target;
+        let annotations = target.find(`./Annotations`) || SubElement(root, "Annotations");
         let el = annotations.find(`./Annotation[@color='${prop}']`) || SubElement(annotations, "Annotation");
 
         el.set("color", prop);
