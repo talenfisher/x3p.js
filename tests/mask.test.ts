@@ -2,7 +2,10 @@ import "jsdom-global/register";
 
 import Mask from "../src/mask";
 
-import { parse } from "elementtree";
+declare var window: any;
+const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
+const Parser = new window.DOMParser();
+const parse = (value: string) => Parser.parseFromString(DOCTYPE + value, "text/xml");
 
 describe("Mask", () => {
     describe("get height", () => {
@@ -16,7 +19,7 @@ describe("Mask", () => {
                     </Record3>
                 </root>
             `);
-
+            
             let mask = new Mask({ manifest });
             expect(mask.height).toBe(3);
         });
@@ -67,7 +70,7 @@ describe("Mask", () => {
                         <Annotation color='red'>Example Label</Annotation>
                     </Annotations>
                 </Mask>
-            `);
+            `).documentElement as Element;
 
             let mask = new Mask({ manifest, definition });
             expect(mask.annotations.red).toBe("Example Label");
@@ -83,7 +86,7 @@ describe("Mask", () => {
                         <Annotation color='red'>Example Label</Annotation>
                     </Annotations>
                 </Mask>
-            `);
+            `).documentElement as Element;
 
             let mask = new Mask({ manifest, definition });
             

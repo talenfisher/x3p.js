@@ -22,7 +22,6 @@
   "devDependencies": {
     "@talenfisher/canvas": "^0.2.0",
     "@types/blueimp-md5": "^2.7.0",
-    "@types/elementtree": "^0.1.0",
     "@types/file-saver": "^2.0.0",
     "@types/jest": "^23.3.10",
     "@types/jszip": "^3.1.4",
@@ -39,7 +38,6 @@
   },
   "dependencies": {
     "blueimp-md5": "^2.10.0",
-    "elementtree": "^0.1.7",
     "file-saver": "^2.0.0",
     "jszip": "^3.1.5",
     "ndarray": "^1.0.18",

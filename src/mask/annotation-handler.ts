@@ -1,19 +1,26 @@
-import { Element, ElementTree, SubElement } from "elementtree";
-
 export default {
-    get: (target: ElementTree | Element, prop: string) => {
-        let el = target.find(`./Annotations/Annotation[@color='${prop}']`);
-        return el !== null ? el.text : undefined;
+    get: (target: Element, prop: string) => {
+        let el = target.querySelector(`Annotations Annotation[color='${prop}']`);
+        return el ? el.innerHTML : undefined;
     },
 
-    set: (target: ElementTree | Element, prop: string, value: any) => {
-        // @ts-ignore
-        let root = (typeof target.getroot !== "undefined") ? (<ElementTree> target).getroot() : <Element> target;
-        let annotations = target.find(`./Annotations`) || SubElement(root, "Annotations");
-        let el = annotations.find(`./Annotation[@color='${prop}']`) || SubElement(annotations, "Annotation");
+    set: (target: Element, prop: string, value: any) => {
+        let doc = target.ownerDocument as Document;
+        
+        let annotations = target.querySelector(`Annotations`);
+        if(!annotations) {
+            annotations = doc.createElement("Annotations");
+            target.appendChild(annotations);
+        }
 
-        el.set("color", prop);
-        el.text = value;
+        let el = annotations.querySelector(`Annotation[color='${prop}']`);
+        if(!el) {
+            el = doc.createElement("Annotation");
+            el.setAttribute("color", prop);
+            annotations.appendChild(el);
+        }
+
+        el.innerHTML = value;
         return true;
     },
 };

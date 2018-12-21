@@ -3,10 +3,12 @@ import Mask from "./mask/index";
 import Promisable from "./promisable";
 import X3P from "./x3p";
 
-import { ElementTree, parse } from "elementtree";
 import jszip, { JSZipObject } from "jszip";
 
+declare var window: any;
+
 const ZipLoader = jszip();
+const Parser = new window.DOMParser();
 
 export interface X3PLoaderOptions {
     file: any;
@@ -28,7 +30,7 @@ export default class X3PLoader extends Promisable<X3P> {
     public name: string;
     private options: X3PLoaderOptions;
     private zip?: jszip;
-    private manifest?: ElementTree;
+    private manifest?: Document;
     private root?: string;
 
     constructor(options: X3PLoaderOptions) {
@@ -86,7 +88,7 @@ export default class X3PLoader extends Promisable<X3P> {
             this.root = file.name.replace("main.xml", "");
         }
 
-        this.manifest = parse(await file.async("text"));        
+        this.manifest = Parser.parseFromString(await file.async("text"), "application/xml") as Document;        
         let pointBuffer = await this.getPointBuffer();
         let mask = <Mask> await this.getMask();
 
@@ -102,8 +104,8 @@ export default class X3PLoader extends Promisable<X3P> {
     private async getPointBuffer() {
         if(!this.manifest) return;
 
-        let pointFileRecord = this.manifest.find("./Record3/DataLink/PointDataLink");
-        let pointFile = pointFileRecord !== null ? pointFileRecord.text : null;
+        let pointFileRecord = this.manifest.querySelector("Record3 DataLink PointDataLink");
+        let pointFile = pointFileRecord !== null ? pointFileRecord.innerHTML : null;
         return pointFile ? <ArrayBuffer> await this.read(pointFile.toString(), "arraybuffer") : undefined;
     }
 
@@ -129,9 +131,15 @@ export default class X3PLoader extends Promisable<X3P> {
      */
     private async getMaskDefinition() {
         if(!this.manifest || !this.zip) return;
+        
+        let definition: Element | undefined = this.manifest.querySelector("Record3 Mask") || undefined;
+        
+        if(!definition && this.hasFile("mask.xml")) {
+            let fileContents = await this.read("mask.xml") as string;
+            definition = Parser.parseFromString(fileContents, "application/xml").documentElement as Element;
+        }
 
-        return this.manifest.find("./Record3/Mask") || 
-            this.hasFile("mask.xml") ? parse(<string> await this.read("mask.xml")) : undefined;
+        return definition;
     }
 
     /**
@@ -141,14 +149,14 @@ export default class X3PLoader extends Promisable<X3P> {
      * 
      * @param definition definition for an X3P mask
      */
-    private getMaskData(definition?: ElementTree) {
-        let link = definition ? definition.find("./Link") : null;
-        let filename = link !== null ? link.text : "bindata/texture.png";
+    private getMaskData(definition?: Element) {
+        let link = definition ? definition.querySelector("Link") : null;
+        let filename = link !== null ? link.nodeValue : "bindata/texture.png";
         
         if(!this.hasFile(<string> filename) && this.hasFile("bindata/texture.jpeg")) {
             filename = "bindata/texture.jpeg";
         }
 
-        return <Promise<ArrayBuffer> | undefined> this.read(<string> filename, "arraybuffer");
+        return this.read(<string> filename, "arraybuffer") as Promise<ArrayBuffer> | undefined;
     }
 }

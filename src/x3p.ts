@@ -4,23 +4,27 @@ import Mask from "./mask";
 import Promisable from "./promisable";
 
 import md5 from "blueimp-md5";
-import { ElementTree, parse } from "elementtree";
 import { saveAs } from "file-saver";
 import jszip from "jszip";
 import ndarray from "ndarray";
 
+declare var window: any;
+
 const ZipLoader = jszip();
+const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
+const Serializer = new window.XMLSerializer();
+const serialize = (value: any) => DOCTYPE + Serializer.serializeToString(value);
 
 interface X3POptions {
     name: string;
     loader: X3PLoader;
-    manifest: ElementTree;
+    manifest: Document;
     mask: Mask;
     pointBuffer?: ArrayBuffer;
 }
 export default class X3P {
     public axes?: { x: Axis, y: Axis, z: Axis };
-    public manifest: ElementTree;
+    public manifest: Document;
     private loader: X3PLoader; // public for testing purposes only
     private options: X3POptions;
     private mask: Mask;
@@ -43,7 +47,7 @@ export default class X3P {
     }
 
     public save() {
-        let manifest = this.manifest.write();
+        let manifest = serialize(this.manifest);
         this.loader.write("main.xml", manifest);
         this.loader.write("md5checksum.hex", `${md5(manifest)} *main.xml`);
     }

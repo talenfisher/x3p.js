@@ -1,12 +1,16 @@
 import "jsdom-global/register";
 
 import md5 from "blueimp-md5";
-import { parse } from "elementtree";
 import { readdirSync as readdir, readFileSync as read } from "fs";
 import { resolve } from "path";
 
 import X3PLoader from "../src";
 import X3P from "../src/x3p";
+
+declare var window: any;
+
+const Parser = new window.DOMParser();
+const parse = (value: string) => Parser.parseFromString(value, "application/xml");
 
 describe("X3P", () => {
     describe("save", () => {
@@ -18,11 +22,11 @@ describe("X3P", () => {
             });
 
             let x3p = await loader as unknown as X3P;
-            x3p.manifest.parse(`<root><test>1</test></root>`);
+            x3p.manifest = parse(`<root><test>1</test></root>`);
             x3p.save();
             
             let manifest = await loader.read("main.xml");
-            expect(manifest).toBe("<?xml version='1.0' encoding='utf-8'?>\n<root><test>1</test></root>");
+            expect(manifest).toBe(`<?xml version="1.0" encoding="UTF-8"?><root><test>1</test></root>`);
         });
 
         it("Should update md5checksum.hex with the new checksum of main.xml", async () => {
@@ -33,7 +37,7 @@ describe("X3P", () => {
             }); 
 
             let x3p = await loader as unknown as X3P;
-            x3p.manifest.parse(`<root><test>1</test></root>`);
+            x3p.manifest = parse(`<root><test>1</test></root>`);
             x3p.save();
 
             let expectedChecksum = md5(<string> await loader.read("main.xml"));
