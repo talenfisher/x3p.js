@@ -39,7 +39,7 @@ describe("X3P", () => {
             }); 
 
             let x3p = await loader as unknown as X3P;
-            x3p.manifest = parse(`<root><test>1</test></root>`);
+            x3p.manifest.set("Record1 Revision", "CSAFE-X3P");
             x3p.save();
 
             let expectedChecksum = md5(await loader.read("main.xml") as string);
