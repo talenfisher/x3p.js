@@ -3,7 +3,7 @@
     <Record1>
         <Revision></Revision>
         <FeatureType></FeatureType>
-        <Axes> 
+        <Axes>
             <CX>
                 <AxisType></AxisType>
                 <DataType></DataType>
@@ -48,7 +48,7 @@
         </MatrixDimension>
         <DataLink>
             <PointDataLink></PointDataLink>
-            <MD5Checksum></MD5Checksum>
+            <MD5ChecksumPointData></MD5ChecksumPointData>
         </DataLink>
     </Record3>
     <Record4>

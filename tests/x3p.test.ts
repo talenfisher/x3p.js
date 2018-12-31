@@ -6,6 +6,7 @@ import { resolve } from "path";
 
 import X3PLoader from "../src";
 import X3P from "../src/x3p";
+import Manifest from "../src/manifest";
 
 declare var window: any;
 
@@ -15,6 +16,7 @@ const parse = (value: string) => Parser.parseFromString(value, "application/xml"
 describe("X3P", () => {
     describe("save", () => {
         it("Should update main.xml in the loader's zip container", async () => {
+            let expected = read(resolve(__dirname, "expects/x3p.save.1.xml"), { encoding: "utf-8" });
             let file = read(resolve(__dirname, "data/good/complete.x3p"));
             let loader = new X3PLoader({
                 file,
@@ -22,11 +24,11 @@ describe("X3P", () => {
             });
 
             let x3p = await loader as unknown as X3P;
-            x3p.manifest = parse(`<root><test>1</test></root>`);
+            x3p.manifest.set("Record1 Revision", "CSAFE-X3P");
             x3p.save();
             
             let manifest = await loader.read("main.xml");
-            expect(manifest).toBe(`<?xml version="1.0" encoding="UTF-8"?><root><test>1</test></root>`);
+            expect(manifest).toBe(expected);
         });
 
         it("Should update md5checksum.hex with the new checksum of main.xml", async () => {

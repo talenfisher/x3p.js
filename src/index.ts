@@ -1,7 +1,9 @@
 
 import Mask from "./mask/index";
+import Manifest from "./manifest";
 import Promisable from "./promisable";
 import X3P from "./x3p";
+import Tree from "./tree.xml";
 
 import jszip, { JSZipObject } from "jszip";
 
@@ -30,7 +32,7 @@ export default class X3PLoader extends Promisable<X3P> {
     public name: string;
     private options: X3PLoaderOptions;
     private zip?: jszip;
-    private manifest?: Document;
+    private manifest?: Manifest;
     private root?: string;
 
     constructor(options: X3PLoaderOptions) {
@@ -88,7 +90,7 @@ export default class X3PLoader extends Promisable<X3P> {
             this.root = file.name.replace("main.xml", "");
         }
 
-        this.manifest = Parser.parseFromString(await file.async("text"), "application/xml") as Document;        
+        this.manifest = new Manifest(await file.async("text"));
         let pointBuffer = await this.getPointBuffer();
         let mask = await this.getMask() as Mask;
 
@@ -104,7 +106,7 @@ export default class X3PLoader extends Promisable<X3P> {
     private async getPointBuffer() {
         if(!this.manifest) return;
 
-        let pointFileRecord = this.manifest.querySelector("Record3 DataLink PointDataLink");
+        let pointFileRecord = this.manifest.getNode("Record3 DataLink PointDataLink");
         let pointFile = pointFileRecord !== null ? pointFileRecord.innerHTML : null;
         return pointFile ? await this.read(pointFile.toString(), "arraybuffer") as ArrayBuffer: undefined;
     }
@@ -132,7 +134,7 @@ export default class X3PLoader extends Promisable<X3P> {
     private async getMaskDefinition() {
         if(!this.manifest || !this.zip) return;
         
-        let definition: Element | undefined = this.manifest.querySelector("Record3 Mask") || undefined;
+        let definition: Element | undefined = this.manifest.getNode("Record3 Mask") || undefined;
         
         if(!definition && this.hasFile("mask.xml")) {
             let fileContents = await this.read("mask.xml") as string;

@@ -9,13 +9,7 @@ import { saveAs } from "file-saver";
 import jszip from "jszip";
 import ndarray from "ndarray";
 
-
-declare var window: any;
-
 const ZipLoader = jszip();
-const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
-const Serializer = new window.XMLSerializer();
-const serialize = (value: any) => DOCTYPE + Serializer.serializeToString(value);
 
 interface X3POptions {
     name: string;
@@ -49,7 +43,7 @@ export default class X3P {
     }
 
     public save() {
-        let manifest = serialize(this.manifest);
+        let manifest = this.manifest.toString();
         this.loader.write("main.xml", manifest);
         this.loader.write("md5checksum.hex", `${md5(manifest)} *main.xml`);
     }

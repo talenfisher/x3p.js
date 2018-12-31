@@ -3,7 +3,7 @@
     <Record1>
         <Revision>CSAFE-X3P</Revision>
         <FeatureType/>
-        <Axes> 
+        <Axes>
             <CX>
                 <AxisType/>
                 <DataType/>
@@ -48,7 +48,7 @@
         </MatrixDimension>
         <DataLink>
             <PointDataLink/>
-            <MD5Checksum/>
+            <MD5ChecksumPointData/>
         </DataLink>
     </Record3>
     <Record4>
