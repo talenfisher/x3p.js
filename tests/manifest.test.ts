@@ -51,6 +51,22 @@ describe("Manifest", () => {
         });
     });
 
+    describe("getNode", () => {
+        it("Should return a node when it exists", () => {
+            let source = DOCTYPE + `<root><Record1><Revision>CSAFE-X3P</Revision></Record1></root>`;
+            let manifest = new Manifest(source);
+
+            expect(manifest.getNode("Record1 Revision")).toBeInstanceOf(Node);
+        });
+
+        it("Should return a node with a corresponding value from the manifest", () => {
+            let source = DOCTYPE + `<root><Record1><Revision>CSAFE-X3P</Revision></Record1></root>`;
+            let manifest = new Manifest(source);
+
+            expect(manifest.getNode("Record1 Revision").innerHTML).toBe("CSAFE-X3P");
+        });
+    });
+
     describe("set", () => {
         it("Should update a node's value", () => {
             let source = DOCTYPE + `<root><Record1><Revision>Test</Revision></Record1></root>`;
@@ -66,6 +82,32 @@ describe("Manifest", () => {
             manifest.set("Record5 FunElement", "Party");
 
             expect(manifest.get("Record5 FunElement")).toBe("Party");
+        });
+    });
+
+    describe("has", () => {
+        it("Should return true if the selector resolves to a node in the manifest", () => {
+            let source = DOCTYPE + `<root><Record1><Revision>Test</Revision></Record1></root>`;
+            let manifest = new Manifest(source);
+            
+            expect(manifest.has("Record1 Revision")).toBe(true);
+        });
+
+        it("Should return false if the selector does not resolve to a node in the manifest", () => {
+            let source = DOCTYPE + `<root></root>`;
+            let manifest = new Manifest(source);
+            
+            expect(manifest.has("Record5 FunElement")).toBe(false);
+        });
+    });
+
+    describe("remove", () => {
+        it("Should remove an element from the manifest", () => {
+            let source = DOCTYPE + `<root><Record1></Record1></root>`;
+            let manifest = new Manifest(source);
+
+            manifest.remove("Record1");
+            expect(manifest.has("Record1")).toBe(false);
         });
     });
 

@@ -1,12 +1,14 @@
 import Axis from "./axis";
 import X3PLoader from "./index";
 import Mask from "./mask";
+import Manifest from "./manifest";
 import Promisable from "./promisable";
 
 import md5 from "blueimp-md5";
 import { saveAs } from "file-saver";
 import jszip from "jszip";
 import ndarray from "ndarray";
+
 
 declare var window: any;
 
@@ -18,13 +20,13 @@ const serialize = (value: any) => DOCTYPE + Serializer.serializeToString(value);
 interface X3POptions {
     name: string;
     loader: X3PLoader;
-    manifest: Document;
+    manifest: Manifest;
     mask: Mask;
     pointBuffer?: ArrayBuffer;
 }
 export default class X3P {
     public axes?: { x: Axis, y: Axis, z: Axis };
-    public manifest: Document;
+    public manifest: Manifest;
     private loader: X3PLoader; // public for testing purposes only
     private options: X3POptions;
     private mask: Mask;

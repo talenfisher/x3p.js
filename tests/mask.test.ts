@@ -1,16 +1,17 @@
 import "jsdom-global/register";
 
 import Mask from "../src/mask";
+import Manifest from "../src/manifest";
 
 declare var window: any;
-const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
+
 const Parser = new window.DOMParser();
-const parse = (value: string) => Parser.parseFromString(DOCTYPE + value, "text/xml");
+const parse = (value: string) => Parser.parseFromString(value, "application/xml");
 
 describe("Mask", () => {
     describe("get height", () => {
         it("Should return the value of SizeY in the manifest", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record3>
                         <MatrixDimension>
@@ -25,7 +26,7 @@ describe("Mask", () => {
         });
 
         it("Should return 0 if SizeY is not in the manifest", () => {
-            let manifest = parse(`<root></root>`);
+            let manifest = new Manifest(`<root></root>`);
             let mask = new Mask({ manifest });
 
             expect(mask.height).toBe(0);
@@ -34,7 +35,7 @@ describe("Mask", () => {
 
     describe("get width", () => {
         it("Should return the value of SizeX in the manifest", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record3>
                         <MatrixDimension>
@@ -49,7 +50,7 @@ describe("Mask", () => {
         });
 
         it("Should return 0 when SizeX is not in the manifest", () => {
-            let manifest = parse(`<root></root>`);
+            let manifest = new Manifest(`<root></root>`);
             let mask = new Mask({ manifest });
             expect(mask.width).toBe(0);
         });
@@ -57,13 +58,13 @@ describe("Mask", () => {
 
     describe("get annotations", () => {
         it("Should return undefined on an annotation that doesn't exist", () => {
-            let manifest = parse(`<root></root>`);
+            let manifest = new Manifest(`<root></root>`);
             let mask = new Mask({ manifest });
             expect(mask.annotations.red).toBe(undefined);
         });
 
         it("Should return the annotation value when it exists in the Mask definition", () => {
-            let manifest = parse(`<root></root>`);
+            let manifest = new Manifest(`<root></root>`);
             let definition = parse(`
                 <Mask>
                     <Annotations>
@@ -79,7 +80,7 @@ describe("Mask", () => {
 
     describe("set annotations", () => {
         it("Should update an existing annotation", () => {
-            let manifest = parse(`<root></root>`);
+            let manifest = new Manifest(`<root></root>`);
             let definition = parse(`
                 <Mask>
                     <Annotations>
@@ -95,7 +96,7 @@ describe("Mask", () => {
         });
 
         it("Should create a new annotation if it doesn't already exist", () => {
-            let manifest = parse(`<root></root>`);
+            let manifest = new Manifest(`<root></root>`);
             let mask = new Mask({ manifest });
 
             mask.annotations.red = "Example Label";

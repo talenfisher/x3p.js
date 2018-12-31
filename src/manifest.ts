@@ -66,6 +66,10 @@ export default class Manifest {
         return (!Number.isNaN(parseFloat(value)) && isFinite(value)) ? Number(value) : value;
     }
 
+    public getNode(selector: string) {
+        return this.tree.querySelector(selector);
+    }
+
     public set(selector: string, value: any) {
         let element = this.tree.querySelector(selector);
 
@@ -89,6 +93,16 @@ export default class Manifest {
         }
 
         element.innerHTML = value;
+    }
+
+    public has(selector: string) {
+        return this.tree.querySelector(selector) !== null;
+    }
+
+    public remove(selector: string) {
+        if(!this.has(selector)) return;
+        let node = this.getNode(selector);
+        node.parentNode.removeChild(node);
     }
 
     public getTree() {

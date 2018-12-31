@@ -1,9 +1,10 @@
 import AnnotationHandler from "./annotation-handler";
+import Manifest from "../manifest";
 
 import { Canvas } from "@talenfisher/canvas";
 
 export interface MaskOptions {
-    manifest: Document;
+    manifest: Manifest;
     definition?: Element;
     color?: string;
     data?: ArrayBuffer;
@@ -13,7 +14,7 @@ export default class Mask {
     public annotations: { [name: string]: any };
     public color: string;
     public canvas?: Canvas;
-    private manifest: Document;
+    private manifest: Manifest;
     private definition: Element;
     private dataBuffer?: ArrayBuffer;
 
@@ -24,20 +25,11 @@ export default class Mask {
         
         // create definition if it doesn't exist
         if(!options.definition) {
-            let Record3 = this.manifest.querySelector("Record3");
-            
-            if(!Record3) {
-                Record3 = this.manifest.createElement("Record3");
-                
-                let root = this.manifest.documentElement as Element;
-                root.appendChild(Record3);
-            }
-
-            options.definition = this.manifest.createElement("Mask");
-            Record3.appendChild(options.definition);
+            this.manifest.set("Record3 Mask", "");
+            options.definition = this.manifest.getNode("Record3 Mask");
         }
         
-        this.definition = options.definition;
+        this.definition = options.definition as Element;
         this.annotations = new Proxy(this.definition, AnnotationHandler);
         this.setupCanvas();
     }
@@ -57,12 +49,10 @@ export default class Mask {
     }
 
     get height() {
-        let el = this.manifest.querySelector("Record3 MatrixDimension SizeY");
-        return el ? Number(el.innerHTML) : 0;
+        return this.manifest.get("Record3 MatrixDimension SizeY") || 0;
     }
 
     get width() {
-        let el = this.manifest.querySelector("Record3 MatrixDimension SizeX");
-        return el ? Number(el.innerHTML) : 0;
+        return this.manifest.get("Record3 MatrixDimension SizeX") || 0;
     }
 }

@@ -1,23 +1,21 @@
 import "jsdom-global/register";
 import Axis from "../src/axis";
+import Manifest from "../src/manifest";
 
 declare var window: any;
-
-const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
-const Parser = new window.DOMParser();
-const parse = (value: string) => Parser.parseFromString(DOCTYPE + value, "application/xml");
 
 describe("Axis", () => {
     describe("constructor", () => {
         it("Should throw an error when the axis is not defined in the manifest's Record1", () => {
-            let manifest = parse(`<root></root>`);
+            let manifest = new Manifest(`<root></root>`);
+            manifest.remove("Record1 Axes CX");
             expect(() => new Axis({ name: "X", manifest })).toThrow("Axis 'X' is not defined in the manifest");
         });
     });
 
     describe("get increment", () => {
         it("Should return the axis increment when present in the manifest", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1>
                         <Axes>
@@ -34,15 +32,7 @@ describe("Axis", () => {
         });
 
         it("Should return 0 when there is no increment in the manifest", () => {
-            let manifest = parse(`
-                <root>
-                    <Record1>
-                        <Axes>
-                            <CX></CX>
-                        </Axes>
-                    </Record1>
-                </root>
-            `);
+            let manifest = new Manifest(`<root></root>`);
 
             let axis = new Axis({ name: "X", manifest });
             expect(axis.increment).toBe(0);
@@ -51,7 +41,7 @@ describe("Axis", () => {
 
     describe("get dataType", () => {
         it("Should return Float64Array if manifest definition is D", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1>
                         <Axes>
@@ -68,7 +58,7 @@ describe("Axis", () => {
         });
 
         it("Should return Float32Array if manifest definition is F", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1>
                         <Axes>
@@ -85,7 +75,7 @@ describe("Axis", () => {
         });
 
         it("Should return Int32Array if manifest definition is L", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1>
                         <Axes>
@@ -102,7 +92,7 @@ describe("Axis", () => {
         });
 
         it("Should return Int16Array if manifest definition is I", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1>
                         <Axes>
@@ -119,7 +109,7 @@ describe("Axis", () => {
         });
 
         it("Should throw an error if the definition's data type is invalid", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1>
                         <Axes>
@@ -136,7 +126,7 @@ describe("Axis", () => {
         });
 
         it("Should throw an error if the definition's data type is not present", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1>
                         <Axes>
@@ -154,7 +144,7 @@ describe("Axis", () => {
 
     describe("get size", () => {
         it("Should return the size when present in the manifest", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1><Axes><CX></CX></Axes></Record1>
                     <Record3>
@@ -170,7 +160,7 @@ describe("Axis", () => {
         });
 
         it("Should return 0 when the size isn't specified in the manifest", () => {
-            let manifest = parse(`
+            let manifest = new Manifest(`
                 <root>
                     <Record1><Axes><CX></CX></Axes></Record1>
                 </root>
