@@ -4,7 +4,6 @@ import Mask from "./mask";
 import Manifest from "./manifest";
 import Promisable from "./promisable";
 
-import md5 from "blueimp-md5";
 import { saveAs } from "file-saver";
 import jszip from "jszip";
 import ndarray from "ndarray";
@@ -43,9 +42,8 @@ export default class X3P {
     }
 
     public save() {
-        let manifest = this.manifest.toString();
-        this.loader.write("main.xml", manifest);
-        this.loader.write("md5checksum.hex", `${md5(manifest)} *main.xml`);
+        this.loader.write("main.xml", this.manifest.toString());
+        this.loader.write("md5checksum.hex", `${this.manifest.checksum} *main.xml`);
     }
 
     public async download(filename = this.name) {
