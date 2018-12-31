@@ -8,12 +8,14 @@ const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
 const Parser = new window.DOMParser();
 const Serializer = new window.XMLSerializer();
 const serialize = (value: any) => DOCTYPE + "\n" + Serializer.serializeToString(value);
+const $string = Symbol();
 
 export default class Manifest {
     private source: string;
     private data: Document;
     private tree = Parser.parseFromString(Tree, "text/xml");
     private openNodes: string[] = [];
+    private [$string]?: string;
 
     constructor(source: string) {
         this.source = source;
@@ -95,6 +97,7 @@ export default class Manifest {
         }
 
         element.innerHTML = value;
+        this[$string] = undefined;
     }
 
     public has(selector: string) {
@@ -105,6 +108,7 @@ export default class Manifest {
         if(!this.has(selector)) return;
         let node = this.getNode(selector);
         node.parentNode.removeChild(node);
+        this[$string] = undefined;
     }
 
     public getTree() {
@@ -116,7 +120,7 @@ export default class Manifest {
         return md5(stringVal);
     }
 
-    public toString() {
-        return serialize(this.tree);
+    public toString(): string {
+        return (this[$string] ? this[$string] : this[$string] = serialize(this.tree)) as string;
     }
 }
