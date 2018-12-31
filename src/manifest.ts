@@ -13,7 +13,6 @@ const $string = Symbol();
 const $checksum = Symbol();
 
 export default class Manifest {
-    private source: string;
     private data: Document;
     private tree = Parser.parseFromString(Tree, "text/xml");
     private openNodes: string[] = [];
@@ -23,8 +22,7 @@ export default class Manifest {
     private [$checksum]?: string;
 
     constructor(source: string) {
-        this.source = source;
-        this.data = Parser.parseFromString(this.source, "text/xml");
+        this.data = Parser.parseFromString(source, "text/xml");
         this.merge();
     }
 
