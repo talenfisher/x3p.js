@@ -3,9 +3,8 @@ import Mask from "./mask/index";
 import Manifest from "./manifest";
 import Promisable from "./promisable";
 import X3P from "./x3p";
-import Tree from "./tree.xml";
 
-import jszip, { JSZipObject } from "jszip";
+import jszip from "jszip";
 
 declare var window: any;
 

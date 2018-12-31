@@ -2,13 +2,9 @@ import Axis from "./axis";
 import X3PLoader from "./index";
 import Mask from "./mask";
 import Manifest from "./manifest";
-import Promisable from "./promisable";
 
 import { saveAs } from "file-saver";
-import jszip from "jszip";
 import ndarray from "ndarray";
-
-const ZipLoader = jszip();
 
 interface X3POptions {
     name: string;
@@ -20,7 +16,7 @@ interface X3POptions {
 export default class X3P {
     public axes?: { x: Axis, y: Axis, z: Axis };
     public manifest: Manifest;
-    private loader: X3PLoader; // public for testing purposes only
+    private loader: X3PLoader;
     private options: X3POptions;
     private mask: Mask;
     private pointBuffer?: ArrayBuffer;
