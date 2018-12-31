@@ -40,7 +40,6 @@ export default class Mask {
         this.definition = options.definition;
         this.annotations = new Proxy(this.definition, AnnotationHandler);
         this.setupCanvas();
-        
     }
 
     private setupCanvas() {

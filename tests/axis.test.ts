@@ -5,9 +5,7 @@ declare var window: any;
 
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
 const Parser = new window.DOMParser();
-const parse = (value: string) => { 
-    return Parser.parseFromString(DOCTYPE + value, "application/xml"); 
-};
+const parse = (value: string) => Parser.parseFromString(DOCTYPE + value, "application/xml");
 
 describe("Axis", () => {
     describe("constructor", () => {

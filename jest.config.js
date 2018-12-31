@@ -1,14 +1,11 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  verbose: true,
-  transformIgnorePatterns: [],
-  transform: {".*": "ts-jest"},
-  globals: {
-      "ts-jest": {
-          tsConfig: {
-              allowJs: true
-          }
-      }
-  }
+    preset: 'ts-jest',
+    testEnvironment: 'node',
+    verbose: true,
+    transformIgnorePatterns: [],
+    transform: {
+        ".*(?:xml)$": "<rootDir>/tests/loaders/string.js",
+        ".*(?:ts|tsx|js|xml)$": "ts-jest",
+    },
+
 };

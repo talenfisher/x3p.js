@@ -12,7 +12,8 @@
         "curly": [false],
         "prefer-const": [false],
         "object-literal-sort-keys": [false],
-        "no-unused-expression": [false]
+        "no-unused-expression": [false],
+        "max-classes-per-file": [false, 1],
     },
     "rulesDirectory": []
 }

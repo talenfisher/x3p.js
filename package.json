@@ -6,8 +6,7 @@
   "scripts": {
     "lint": "tslint --project .",
     "test": "jest --colors",
-    "watch": "watch 'npm run build && npm run test' src tests",
-    "build": "tsc"
+    "watch": "watch 'npm run test' src tests"
   },
   "keywords": [
     "x3p",
@@ -29,8 +28,10 @@
     "@types/sax": "^1.0.1",
     "canvas": "^2.2.0",
     "jest": "^23.6.0",
+    "jest-transform-stub": "^1.0.0",
     "jsdom": "^13.1.0",
     "jsdom-global": "^3.0.2",
+    "nativejsx": "^4.3.0",
     "ts-jest": "^23.10.5",
     "tslint": "^5.12.0",
     "typescript": "^3.2.2",

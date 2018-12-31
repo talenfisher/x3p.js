@@ -40,7 +40,7 @@ describe("X3P", () => {
             x3p.manifest = parse(`<root><test>1</test></root>`);
             x3p.save();
 
-            let expectedChecksum = md5(<string> await loader.read("main.xml"));
+            let expectedChecksum = md5(await loader.read("main.xml") as string);
             let actualChecksum = await loader.read("md5checksum.hex");
             expect(actualChecksum).toBe(`${expectedChecksum} *main.xml`);
         });

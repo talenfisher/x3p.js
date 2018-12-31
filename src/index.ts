@@ -90,7 +90,7 @@ export default class X3PLoader extends Promisable<X3P> {
 
         this.manifest = Parser.parseFromString(await file.async("text"), "application/xml") as Document;        
         let pointBuffer = await this.getPointBuffer();
-        let mask = <Mask> await this.getMask();
+        let mask = await this.getMask() as Mask;
 
         return resolve(new X3P({
             loader: this,
@@ -106,7 +106,7 @@ export default class X3PLoader extends Promisable<X3P> {
 
         let pointFileRecord = this.manifest.querySelector("Record3 DataLink PointDataLink");
         let pointFile = pointFileRecord !== null ? pointFileRecord.innerHTML : null;
-        return pointFile ? <ArrayBuffer> await this.read(pointFile.toString(), "arraybuffer") : undefined;
+        return pointFile ? await this.read(pointFile.toString(), "arraybuffer") as ArrayBuffer: undefined;
     }
 
     /**
@@ -153,10 +153,10 @@ export default class X3PLoader extends Promisable<X3P> {
         let link = definition ? definition.querySelector("Link") : null;
         let filename = link !== null ? link.nodeValue : "bindata/texture.png";
         
-        if(!this.hasFile(<string> filename) && this.hasFile("bindata/texture.jpeg")) {
+        if(!this.hasFile(filename as string) && this.hasFile("bindata/texture.jpeg")) {
             filename = "bindata/texture.jpeg";
         }
 
-        return this.read(<string> filename, "arraybuffer") as Promise<ArrayBuffer> | undefined;
+        return this.read(filename as string, "arraybuffer") as Promise<ArrayBuffer> | undefined;
     }
 }

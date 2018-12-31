@@ -32,11 +32,12 @@ export default class Axis {
     get dataType() {
         let el = this.definition.querySelector(`DataType`);
         
-        if(el === null || !DataTypeKeys.includes(<string> el.innerHTML)) {
-            throw new Error(`'${el ? el.innerHTML : "null"}' is not a valid data type`);
+        if(el === null || !DataTypeKeys.includes(el.innerHTML as string)) {
+            let received = el ? el.innerHTML : "null";
+            throw new Error(`'${received}' is not a valid data type`);
         }
 
-        return DataTypes[< "D" | "F" | "L" | "I"> (<string> el.innerHTML).toUpperCase()];
+        return DataTypes[(el.innerHTML as string).toUpperCase() as "D" | "F" | "L" | "I"];
     }
 
     get size() {
