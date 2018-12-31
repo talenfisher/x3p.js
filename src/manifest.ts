@@ -1,6 +1,11 @@
 import Tree from "./tree.xml";
+
 declare var window: any;
+
+const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
 const Parser = new window.DOMParser();
+const Serializer = new window.XMLSerializer();
+const serialize = (value: any) => DOCTYPE + "\n" + Serializer.serializeToString(value);
 
 export default class Manifest {
     private source: string;
@@ -50,15 +55,47 @@ export default class Manifest {
     }
 
     private get activeNode() {
-        return this.tree.querySelector(this.pathName);
+        return this.pathName ? this.tree.querySelector(this.pathName) : undefined;
     }
 
     public get(selector: string) {
-        let value = this.tree.querySelector(selector).innerHTML;
+        let element = this.tree.querySelector(selector);
+        if(!element) return undefined;
+        
+        let value = element.innerHTML;
         return (!Number.isNaN(parseFloat(value)) && isFinite(value)) ? Number(value) : value;
+    }
+
+    public set(selector: string, value: any) {
+        let element = this.tree.querySelector(selector);
+
+        if(!element) {
+            let nodes = selector.split(" ");
+            
+            for(let i = 0; i < nodes.length; i++) {
+                let selector = nodes.slice(0, i + 1).join(" ");
+                let node = this.tree.querySelector(selector);
+
+                if(!node) {
+                    let parent = i === 0 ? this.tree.documentElement : undefined;
+                    parent = parent || this.tree.querySelector(nodes.slice(0, i).join(" "));                    
+                    
+                    node = this.tree.createElement(nodes[i]);
+                    parent.appendChild(node);
+                }
+
+                element = node;
+            }
+        }
+
+        element.innerHTML = value;
     }
 
     public getTree() {
         return this.tree;
+    }
+
+    public toString() {
+        return serialize(this.tree);
     }
 }
