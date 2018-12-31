@@ -7,15 +7,20 @@ declare var window: any;
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
 const Parser = new window.DOMParser();
 const Serializer = new window.XMLSerializer();
-const serialize = (value: any) => DOCTYPE + "\n" + Serializer.serializeToString(value);
+const serialize = (value: any): string => DOCTYPE + "\n" + Serializer.serializeToString(value);
+
 const $string = Symbol();
+const $checksum = Symbol();
 
 export default class Manifest {
     private source: string;
     private data: Document;
     private tree = Parser.parseFromString(Tree, "text/xml");
     private openNodes: string[] = [];
+    
+    // cache helpers
     private [$string]?: string;
+    private [$checksum]?: string;
 
     constructor(source: string) {
         this.source = source;
@@ -97,7 +102,9 @@ export default class Manifest {
         }
 
         element.innerHTML = value;
+        
         this[$string] = undefined;
+        this[$checksum] = undefined;
     }
 
     public has(selector: string) {
@@ -108,7 +115,9 @@ export default class Manifest {
         if(!this.has(selector)) return;
         let node = this.getNode(selector);
         node.parentNode.removeChild(node);
+        
         this[$string] = undefined;
+        this[$checksum] = undefined;
     }
 
     public getTree() {
@@ -116,8 +125,7 @@ export default class Manifest {
     }
 
     public get checksum() {
-        let stringVal = this.toString();
-        return md5(stringVal);
+        return this[$checksum] ? this[$checksum] : this[$checksum] = md5(this.toString());
     }
 
     public toString(): string {
