@@ -1,6 +1,6 @@
 export default {
-    D: Float64Array,
-    F: Float32Array,
-    L: Int32Array,
-    I: Int16Array,
+    D: "Float64",
+    F: "Float32",
+    L: "Int32",
+    I: "Int16",
 };

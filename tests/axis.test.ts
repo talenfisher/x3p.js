@@ -40,7 +40,7 @@ describe("Axis", () => {
     });
 
     describe("get dataType", () => {
-        it("Should return Float64Array if manifest definition is D", () => {
+        it("Should return Float64 if manifest definition is D", () => {
             let manifest = new Manifest(`
                 <root>
                     <Record1>
@@ -54,10 +54,10 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe(Float64Array);
+            expect(axis.dataType).toBe("Float64");
         });
 
-        it("Should return Float32Array if manifest definition is F", () => {
+        it("Should return Float32 if manifest definition is F", () => {
             let manifest = new Manifest(`
                 <root>
                     <Record1>
@@ -71,10 +71,10 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe(Float32Array);
+            expect(axis.dataType).toBe("Float32");
         });
 
-        it("Should return Int32Array if manifest definition is L", () => {
+        it("Should return Int32 if manifest definition is L", () => {
             let manifest = new Manifest(`
                 <root>
                     <Record1>
@@ -88,10 +88,10 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe(Int32Array);
+            expect(axis.dataType).toBe("Int32");
         });
 
-        it("Should return Int16Array if manifest definition is I", () => {
+        it("Should return Int16 if manifest definition is I", () => {
             let manifest = new Manifest(`
                 <root>
                     <Record1>
@@ -105,7 +105,7 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe(Int16Array);
+            expect(axis.dataType).toBe("Int16");
         });
 
         it("Should throw an error if the definition's data type is invalid", () => {
