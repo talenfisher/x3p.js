@@ -1,3 +1,5 @@
+// Proxy handlers for Mask Annotations
+
 export default {
     get: (target: Element, prop: string) => {
         let el = target.querySelector(`Annotations Annotation[color='${prop}']`);
