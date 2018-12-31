@@ -120,4 +120,11 @@ describe("Manifest", () => {
             expect(manifest.toString()).toBe(expects);
         });
     });
+
+    describe("get checksum", () => {
+        it("Should return the md5 checksum of the manifest", () => {
+            let manifest = new Manifest(`<root></root>`);
+            expect(manifest.checksum).toBe("cfc3ed722019bb5647f7715f720b9f02");
+        });
+    });
 });

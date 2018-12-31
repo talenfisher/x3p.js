@@ -1,5 +1,7 @@
 import Tree from "./tree.xml";
 
+import md5 from "blueimp-md5";
+
 declare var window: any;
 
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -107,6 +109,11 @@ export default class Manifest {
 
     public getTree() {
         return this.tree;
+    }
+
+    public get checksum() {
+        let stringVal = this.toString();
+        return md5(stringVal);
     }
 
     public toString() {
