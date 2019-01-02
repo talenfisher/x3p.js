@@ -32,7 +32,7 @@ export default class Matrix {
         this.dataType = this.z.dataType;
     }
 
-    public get(x: number, y: number) {
+    public get(x: number, y: number, z?: number) {
         let byteOffset = this.getByteOffset(x, y);
         let byteValue;
 
@@ -42,12 +42,14 @@ export default class Matrix {
         } catch(error) {
             return undefined;
         }
-        
-        return [
+
+        let result = [
             this.x.increment * x,
             this.y.increment * y,
             byteValue,
         ];
+        
+        return z ? result[z] : result;
     }
 
     public getByteOffset(x: number, y: number) {
