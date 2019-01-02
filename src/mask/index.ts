@@ -1,5 +1,5 @@
-import AnnotationHandler from "./annotation-handler";
 import Manifest from "../manifest";
+import AnnotationHandler from "./annotation-handler";
 
 import { Canvas } from "@talenfisher/canvas";
 

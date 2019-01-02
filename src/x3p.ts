@@ -1,7 +1,7 @@
 import Axis from "./axis";
 import X3PLoader from "./index";
-import Mask from "./mask";
 import Manifest from "./manifest";
+import Mask from "./mask";
 
 import { saveAs } from "file-saver";
 import ndarray from "ndarray";

@@ -1,7 +1,7 @@
 import "jsdom-global/register";
 
-import Mask from "../src/mask";
 import Manifest from "../src/manifest";
+import Mask from "../src/mask";
 
 declare var window: any;
 

@@ -1,6 +1,6 @@
 
-import Mask from "./mask/index";
 import Manifest from "./manifest";
+import Mask from "./mask/index";
 import Promisable from "./promisable";
 import X3P from "./x3p";
 

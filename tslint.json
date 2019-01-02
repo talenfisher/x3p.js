@@ -13,7 +13,7 @@
         "prefer-const": [false],
         "object-literal-sort-keys": [false],
         "no-unused-expression": [false],
-        "max-classes-per-file": [false, 1],
+        "max-classes-per-file": [false, 1]
     },
     "rulesDirectory": []
 }
