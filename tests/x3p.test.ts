@@ -4,9 +4,9 @@ import md5 from "blueimp-md5";
 import { readdirSync as readdir, readFileSync as read } from "fs";
 import { resolve } from "path";
 
-import X3PLoader from "../src";
-import X3P from "../src/x3p";
 import Manifest from "../src/manifest";
+import X3P from "../src/x3p";
+import X3PLoader from "../src";
 
 declare var window: any;
 

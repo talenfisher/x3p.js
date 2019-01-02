@@ -54,7 +54,7 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe("Float64");
+            expect(axis.dataType.name).toBe("Float64");
         });
 
         it("Should return Float32 if manifest definition is F", () => {
@@ -71,7 +71,7 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe("Float32");
+            expect(axis.dataType.name).toBe("Float32");
         });
 
         it("Should return Int32 if manifest definition is L", () => {
@@ -88,7 +88,7 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe("Int32");
+            expect(axis.dataType.name).toBe("Int32");
         });
 
         it("Should return Int16 if manifest definition is I", () => {
@@ -105,7 +105,7 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(axis.dataType).toBe("Int16");
+            expect(axis.dataType.name).toBe("Int16");
         });
 
         it("Should throw an error if the definition's data type is invalid", () => {
@@ -122,7 +122,7 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(() => axis.dataType).toThrow("'a' is not a valid data type");
+            expect(() => axis.dataType.name).toThrow("'a' is not a valid data type");
         });
 
         it("Should throw an error if the definition's data type is not present", () => {
@@ -138,7 +138,7 @@ describe("Axis", () => {
             `);
 
             let axis = new Axis({ name: "X", manifest });
-            expect(() => axis.dataType).toThrow("'null' is not a valid data type");
+            expect(() => axis.dataType.name).toThrow("'null' is not a valid data type");
         });
     });
 

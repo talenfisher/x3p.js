@@ -1,6 +1,6 @@
 export default {
-    D: "Float64",
-    F: "Float32",
-    L: "Int32",
-    I: "Int16",
+    D: { name: "Float64", bytes: 8 },
+    F: { name: "Float32", bytes: 4 },
+    L: { name: "Int32", bytes: 4 },
+    I: { name: "Int16", bytes: 2 },
 };
