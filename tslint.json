@@ -14,7 +14,8 @@
         "object-literal-sort-keys": [false],
         "no-unused-expression": [false],
         "max-classes-per-file": [false, 1],
-        "ordered-imports": [false]
+        "ordered-imports": [false],
+        "max-line-length": [true, 200]
     },
     "rulesDirectory": []
 }

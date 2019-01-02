@@ -32,7 +32,7 @@ export default class Matrix {
         this.dataType = this.z.dataType;
     }
 
-    public get(x: number, y: number, z?: number) {
+    public get(x: number, y: number, axis?: number) {
         let byteOffset = this.getByteOffset(x, y);
         let byteValue;
 
@@ -49,7 +49,35 @@ export default class Matrix {
             byteValue,
         ];
         
-        return z ? result[z] : result;
+        return typeof axis !== "undefined" ? result[axis] : result;
+    }
+    
+    // computes central difference
+    public getCDiff(x: number, y: number, axis: number) {
+        let result = [];
+
+        for(let i = 0; i < 3; i++) {
+            let dx = 0.0;
+            let dy = 0.0;
+
+            if(y % this.y.size !== 0) { 
+                let right = this.get(x + 1, y, i);
+                let left = this.get(x - 1, y, i);
+
+                dx = isNaN(right) || isNaN(left) ? 0.0 : (right - left) / 2;
+            }
+
+            if(x % this.x.size !== 0) {
+                let right = this.get(x, y + 1, i);
+                let left = this.get(x, y - 1, i);
+
+                dy = isNaN(right) || isNaN(left) ? 0.0 : (right - left) / 2;
+            }
+
+            result[i] = [ dx, dy ];
+        }
+
+        return typeof result !== "undefined" ? result[axis] : result;
     }
 
     public getByteOffset(x: number, y: number) {
