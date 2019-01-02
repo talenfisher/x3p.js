@@ -1,6 +1,5 @@
 import Axis from "./axis";
 import Manifest from "./manifest";
-import DataTypes from "./data-types";
 
 interface MatrixOptions {
     axes: { x: Axis, y: Axis, z: Axis };
@@ -17,7 +16,6 @@ export default class Matrix {
     private pointBuffer: ArrayBuffer;
     private dataView: DataView;
     private dataType: { name: string, bytes: number };
-    private dataGetter: any;
 
     private x: Axis;
     private y: Axis;
@@ -32,7 +30,6 @@ export default class Matrix {
         this.y = options.axes.y;
         this.z = options.axes.z;
         this.dataType = this.z.dataType;
-        this.dataGetter = this.dataView[`get${this.dataType}`];
     }
 
     public get(x: number, y: number) {
