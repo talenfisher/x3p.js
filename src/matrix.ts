@@ -53,10 +53,12 @@ export default class Matrix {
     }
     
     // computes central difference
-    public getCDiff(x: number, y: number, axis: number) {
+    public getCDiff(x: number, y: number, axis?: number) {
         let result = [];
+        let start = typeof axis === "undefined" ? 0 : axis;
+        let end = typeof axis === "undefined" ? 3 : axis + 1;
 
-        for(let i = 0; i < 3; i++) {
+        for(let i = start; i < end; i++) {
             let dx = 0.0;
             let dy = 0.0;
 
@@ -77,7 +79,39 @@ export default class Matrix {
             result[i] = [ dx, dy ];
         }
 
-        return typeof result !== "undefined" ? result[axis] : result;
+        return typeof axis !== "undefined" ? result[axis] : result;
+    }
+
+    // Computes a vertex normal, adapted from 
+    // the algorithm found in gl-surface3d by Mikola Lysenko
+    public getNormal(x: number, y: number, axis?: number) {
+        let cdiff = this.getCDiff(x, y);
+        
+        let dx = cdiff[0] as number[];
+        let dy = cdiff[1] as number[];
+        let dz = cdiff[2] as number[];
+
+        let nx = (dy[0] * dz[1]) - (dy[1] * dz[0]);
+        let ny = (dz[0] * dx[1]) - (dz[1] * dx[0]);
+        let nz = (dx[0] * dy[1]) - (dx[1] - dy[0]);
+
+        let nl = Math.sqrt((nx * nx) + (ny * ny) + (nz * nz));
+        if(nl < 1e-8) {
+            nl = Math.max(Math.abs(nx), Math.abs(ny), Math.abs(nz));
+
+            if(nl < 1e-8) {
+                nz = 1.0;
+                ny = nx = 0.0;
+                nl = 1.0;
+            } else {
+                nl = 1.0 / nl;
+            }
+        } else {
+            nl = 1.0 / Math.sqrt(nl);
+        }
+
+        let result = [ nx, ny, nz ];
+        return typeof axis !== "undefined" ? result[axis] : result;
     }
 
     public getByteOffset(x: number, y: number) {
