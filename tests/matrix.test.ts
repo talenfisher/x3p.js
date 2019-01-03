@@ -249,4 +249,20 @@ describe("Matrix", () => {
             expect(matrix.min).toBe(1);
         });
     });
+
+    describe("get size", () => {
+        it("Should return the element size in the matrix", () => {
+            let manifest = new Manifest(MANIFEST_SRC);
+            let axes = {
+                x: new Axis({ name: "X", manifest }),
+                y: new Axis({ name: "Y", manifest }),
+                z: new Axis({ name: "Z", manifest }),
+            };
+
+            let pointBuffer = createArrayBuffer([ 2, 3, 8, 2, 6, 1, 2, 8, 2 ]);
+            let matrix = new Matrix({ axes, manifest, pointBuffer });
+
+            expect(matrix.size).toBe(9);
+        });
+    });
 });
