@@ -2,9 +2,9 @@ import Axis from "./axis";
 import X3PLoader from "./index";
 import Manifest from "./manifest";
 import Mask from "./mask";
+import Matrix from "./matrix";
 
 import { saveAs } from "file-saver";
-import ndarray from "ndarray";
 
 interface X3POptions {
     name: string;
@@ -21,7 +21,7 @@ export default class X3P {
     private loader: X3PLoader;
     private options: X3POptions;
     private mask: Mask;
-    private matrix?: ndarray;
+    private matrix?: Matrix;
     private name: string;
 
     constructor(options: X3POptions) {
@@ -36,6 +36,14 @@ export default class X3P {
             y: new Axis({ name: "Y", manifest: this.manifest }),
             z: new Axis({ name: "Z", manifest: this.manifest }),
         };
+
+        if(this.pointBuffer) {
+            this.matrix = new Matrix({
+                manifest: this.manifest,
+                axes: this.axes,
+                pointBuffer: this.pointBuffer,
+            });
+        }
     }
 
     public save() {
