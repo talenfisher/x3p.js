@@ -44,7 +44,7 @@ export default class Matrix {
 
         try {
             byteValue = this.getData(byteOffset);
-            if(isNaN(byteValue)) throw new RangeError();
+            if(isNaN(byteValue) || !isFinite(byteValue)) throw new RangeError();
         } catch(error) {
             return undefined;
         }
@@ -148,6 +148,14 @@ export default class Matrix {
 
     public get size() {
         return this.x.size * this.y.size;
+    }
+
+    public get sizeX() {
+        return this.x.size;
+    }
+
+    public get sizeY() {
+        return this.y.size;
     }
 
     public getByteOffset(x: number, y: number) {
