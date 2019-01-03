@@ -1,6 +1,8 @@
 import Axis from "./axis";
 import Manifest from "./manifest";
 
+const $getter = Symbol();
+
 interface MatrixOptions {
     axes: { x: Axis, y: Axis, z: Axis };
     manifest: Manifest;
@@ -17,6 +19,8 @@ export default class Matrix {
     private dataView: DataView;
     private dataType: { name: string, bytes: number };
 
+    private [$getter]: any;
+
     private x: Axis;
     private y: Axis;
     private z: Axis;
@@ -29,7 +33,9 @@ export default class Matrix {
         this.x = options.axes.x;
         this.y = options.axes.y;
         this.z = options.axes.z;
+
         this.dataType = this.z.dataType;
+        this[$getter] = this.dataView[`get${this.dataType.name}`];
     }
 
     public get(x: number, y: number, axis?: number) {
@@ -37,7 +43,7 @@ export default class Matrix {
         let byteValue;
 
         try {
-            byteValue = this.dataView[`get${this.dataType.name}`](byteOffset);
+            byteValue = this.getData(byteOffset);
             if(isNaN(byteValue)) throw new RangeError();
         } catch(error) {
             return undefined;
@@ -114,7 +120,41 @@ export default class Matrix {
         return typeof axis !== "undefined" ? result[axis] : result;
     }
 
+    public get max() {
+        let max = this.getData(0);
+        let current = max;
+
+        for(let i = 1; i < this.size; i++) {
+            current = this.getData(i * this.dataType.bytes);
+            
+            if(current > max) max = current;
+        }
+
+        return max;
+    }
+
+    public get min() {
+        let min = this.getData(0);
+        let current = min;
+
+        for(let i = 1; i < this.size; i++) {
+            current = this.getData(i * this.dataType.bytes);
+
+            if(current < min) min = current;
+        }
+
+        return min;
+    }
+
+    public get size() {
+        return this.x.size * this.y.size;
+    }
+
     public getByteOffset(x: number, y: number) {
         return ((x * this.y.size) + y) * this.dataType.bytes;
+    }
+
+    private getData(offset: number) {
+        return this[$getter].apply(this.dataView, [ offset ]);
     }
 }

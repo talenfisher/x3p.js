@@ -217,4 +217,36 @@ describe("Matrix", () => {
             expect(cdiff[1]).toBe(0);
         });
     });
+
+    describe("get max", () => {
+        it("Should return the maximum z value in the matrix", () => {
+            let manifest = new Manifest(MANIFEST_SRC);
+            let axes = {
+                x: new Axis({ name: "X", manifest }),
+                y: new Axis({ name: "Y", manifest }),
+                z: new Axis({ name: "Z", manifest }),
+            };
+
+            let pointBuffer = createArrayBuffer([ 2, 3, 8, 2, 6, 3, 2, 8, 2 ]);
+            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            
+            expect(matrix.max).toBe(8);
+        });
+    });
+
+    describe("get min", () => {
+        it("Should return the minimum z value in the matrix", () => {
+            let manifest = new Manifest(MANIFEST_SRC);
+            let axes = {
+                x: new Axis({ name: "X", manifest }),
+                y: new Axis({ name: "Y", manifest }),
+                z: new Axis({ name: "Z", manifest }),
+            };
+
+            let pointBuffer = createArrayBuffer([ 2, 3, 8, 2, 6, 1, 2, 8, 2 ]);
+            let matrix = new Matrix({ axes, manifest, pointBuffer });
+
+            expect(matrix.min).toBe(1);
+        });
+    });
 });
