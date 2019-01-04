@@ -3,6 +3,7 @@ import X3PLoader from "./index";
 import Manifest from "./manifest";
 import Mask from "./mask";
 import Matrix from "./matrix";
+import Renderer from "./renderer";
 
 import { saveAs } from "file-saver";
 
@@ -17,11 +18,11 @@ export default class X3P {
     public axes: { x: Axis, y: Axis, z: Axis };
     public manifest: Manifest;
     public pointBuffer?: ArrayBuffer;
+    public matrix?: Matrix;
 
     private loader: X3PLoader;
     private options: X3POptions;
     private mask: Mask;
-    private matrix?: Matrix;
     private name: string;
 
     constructor(options: X3POptions) {
@@ -56,5 +57,17 @@ export default class X3P {
         if(!blob) return;
 
         saveAs(blob, filename);
+    }
+
+    public render(canvas: HTMLCanvasElement) {
+        if(!this.pointBuffer) return;
+
+        let renderer = new Renderer({
+            x3p: this,
+            canvas,
+        });
+
+        requestAnimationFrame(() => renderer.draw());
+        return renderer;
     }
 }

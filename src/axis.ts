@@ -43,4 +43,12 @@ export default class Axis {
         let value = this.manifest.get(`Record3 MatrixDimension Size${this.name}`);
         return value || 0;
     }
+
+    public cache() {
+        return {
+            increment: this.increment,
+            dataType: this.dataType,
+            size: this.size,
+        } as Axis;
+    }
 }

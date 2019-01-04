@@ -13,3 +13,8 @@ declare module "gl-vao" {
 
     export default function createVAO(gl: WebGLRenderingContext, options: any[]): GLVao;
 }
+
+declare module "*.glsl" {
+    const value: string;
+    export default value;
+}

@@ -32,7 +32,7 @@ export default class X3PLoader extends Promisable<X3P> {
     private options: X3PLoaderOptions;
     private zip?: jszip;
     private manifest?: Manifest;
-    private root?: string;
+    private root?: string = "";
 
     constructor(options: X3PLoaderOptions) {
         super();
@@ -104,10 +104,8 @@ export default class X3PLoader extends Promisable<X3P> {
 
     private async getPointBuffer() {
         if(!this.manifest) return;
-
-        let pointFileRecord = this.manifest.getNode("Record3 DataLink PointDataLink");
-        let pointFile = pointFileRecord !== null ? pointFileRecord.innerHTML : null;
-        return pointFile ? await this.read(pointFile.toString(), "arraybuffer") as ArrayBuffer: undefined;
+        let pointFile = this.manifest.get("Record3 DataLink PointDataLink");
+        return pointFile ? await this.read(pointFile, "arraybuffer") as ArrayBuffer : undefined;
     }
 
     /**

@@ -1,8 +1,6 @@
 import Axis from "./axis";
 import Manifest from "./manifest";
 
-const $getter = Symbol();
-
 interface MatrixOptions {
     axes: { x: Axis, y: Axis, z: Axis };
     manifest: Manifest;
@@ -14,37 +12,49 @@ interface DataView {
 }
 
 export default class Matrix {
+    public readonly min: number;
+    public readonly max: number;
+
+    public readonly x: Axis;
+    public readonly y: Axis;
+    public readonly z: Axis;
+
     private manifest: Manifest;
     private pointBuffer: ArrayBuffer;
-    private dataView: DataView;
+    private dataView: Float64Array | Float32Array | Int32Array | Int16Array;
     private dataType: { name: string, bytes: number };
-
-    private [$getter]: any;
-
-    private x: Axis;
-    private y: Axis;
-    private z: Axis;
 
     constructor(options: MatrixOptions) {
         this.manifest = options.manifest;
         this.pointBuffer = options.pointBuffer;
-        this.dataView = new DataView(this.pointBuffer);
 
-        this.x = options.axes.x;
-        this.y = options.axes.y;
-        this.z = options.axes.z;
+        this.x = options.axes.x.cache();
+        this.y = options.axes.y.cache();
+        this.z = options.axes.z.cache();
 
         this.dataType = this.z.dataType;
-        this[$getter] = this.dataView[`get${this.dataType.name}`];
+        this.dataView = new this.z.dataType.view(this.pointBuffer);
+        
+        let max, min, current;        
+        min = max = current = this.dataView[0];
+        for(let i = 1; i < this.dataView.length; i++) {
+            current = this.dataView[i];
+            
+            if(current > max) max = current;
+            if(current < min) min = current;
+        }
+
+        this.min = min;
+        this.max = max;
     }
 
     public get(x: number, y: number, axis?: number) {
-        let byteOffset = this.getByteOffset(x, y);
-        let byteValue;
+        let offset = (x * this.y.size) + y;
+        let value;
 
         try {
-            byteValue = this.getData(byteOffset);
-            if(isNaN(byteValue) || !isFinite(byteValue)) throw new RangeError();
+            value = this.dataView[offset];
+            if(isNaN(value) || !isFinite(value)) throw new RangeError();
         } catch(error) {
             return undefined;
         }
@@ -52,7 +62,7 @@ export default class Matrix {
         let result = [
             this.x.increment * x,
             this.y.increment * y,
-            byteValue,
+            value,
         ];
         
         return typeof axis !== "undefined" ? result[axis] : result;
@@ -69,15 +79,15 @@ export default class Matrix {
             let dy = 0.0;
 
             if(y % this.y.size !== 0) { 
-                let right = this.get(x + 1, y, i);
-                let left = this.get(x - 1, y, i);
+                let right = this.get(x + 1, y, i) as number;
+                let left = this.get(x - 1, y, i) as number;
 
                 dx = isNaN(right) || isNaN(left) ? 0.0 : (right - left) / 2;
             }
 
             if(x % this.x.size !== 0) {
-                let right = this.get(x, y + 1, i);
-                let left = this.get(x, y - 1, i);
+                let right = this.get(x, y + 1, i) as number;
+                let left = this.get(x, y - 1, i) as number;
 
                 dy = isNaN(right) || isNaN(left) ? 0.0 : (right - left) / 2;
             }
@@ -120,49 +130,7 @@ export default class Matrix {
         return typeof axis !== "undefined" ? result[axis] : result;
     }
 
-    public get max() {
-        let max = this.getData(0);
-        let current = max;
-
-        for(let i = 1; i < this.size; i++) {
-            current = this.getData(i * this.dataType.bytes);
-            
-            if(current > max) max = current;
-        }
-
-        return max;
-    }
-
-    public get min() {
-        let min = this.getData(0);
-        let current = min;
-
-        for(let i = 1; i < this.size; i++) {
-            current = this.getData(i * this.dataType.bytes);
-
-            if(current < min) min = current;
-        }
-
-        return min;
-    }
-
     public get size() {
         return this.x.size * this.y.size;
-    }
-
-    public get sizeX() {
-        return this.x.size;
-    }
-
-    public get sizeY() {
-        return this.y.size;
-    }
-
-    public getByteOffset(x: number, y: number) {
-        return ((x * this.y.size) + y) * this.dataType.bytes;
-    }
-
-    private getData(offset: number) {
-        return this[$getter].apply(this.dataView, [ offset ]);
     }
 }

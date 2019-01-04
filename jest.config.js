@@ -4,8 +4,8 @@ module.exports = {
     verbose: true,
     transformIgnorePatterns: [],
     transform: {
-        ".*(?:xml)$": "<rootDir>/tests/loaders/string.js",
-        ".*(?:ts|tsx|js|xml)$": "ts-jest",
+        ".*(?:xml|glsl)$": "<rootDir>/tests/loaders/string.js",
+        ".*(?:ts|tsx|js|xml|glsl)$": "ts-jest",
     },
 
 };
