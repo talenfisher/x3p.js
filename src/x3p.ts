@@ -3,7 +3,7 @@ import X3PLoader from "./index";
 import Manifest from "./manifest";
 import Mask from "./mask";
 import Matrix from "./matrix";
-// import Renderer from "./renderer";
+import Renderer from "./renderer";
 
 import { saveAs } from "file-saver";
 
@@ -59,14 +59,14 @@ export default class X3P {
         saveAs(blob, filename);
     }
 
-    // public render(canvas: HTMLCanvasElement) {
-    //     if(!this.pointBuffer) return;
+    public render(canvas: HTMLCanvasElement) {
+        if(!this.pointBuffer) return;
 
-    //     let renderer = new Renderer({
-    //         x3p: this,
-    //         canvas,
-    //     });
+        let renderer = new Renderer({
+            x3p: this,
+            canvas,
+        });
 
-    //     return renderer;
-    // }
+        return renderer;
+    }
 }

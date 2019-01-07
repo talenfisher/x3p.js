@@ -37,9 +37,7 @@ describe("X3PLoader", () => {
             let file: File|null = new File([ contents ], "complete.x3p");
             let x3p = new X3P({ file });
 
-            try {
-                await x3p; // this fails in node
-            } catch(e) {} 
+            await x3p;
 
             return expect(x3p.name).toBe("complete.x3p");
         });

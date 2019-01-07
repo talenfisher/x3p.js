@@ -7,7 +7,7 @@ interface Window {
 declare var window: any;
 
 (async () => {
-    let response = await fetch("./index.html");
+    let response = await fetch("./test.x3p");
     let file = await response.arrayBuffer();
 
     window.x3p = (await new X3P({ file, name: "test" })) as any;

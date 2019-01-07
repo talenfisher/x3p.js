@@ -83,8 +83,6 @@ export default class Mesh {
         this.vao.bind();
         this.vao.draw(this.gl.TRIANGLES, this.vertexCount); 
         this.vao.unbind();
-
-        debugger;
     }
 
     public update() {

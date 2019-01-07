@@ -1,7 +1,6 @@
 import Mesh from "./mesh";
 import X3P from "../x3p";
 import CameraOptions from "./camera";
-import AxesOptions from "./axes";
 
 import createScene from "@talenfisher/gl-plot3d";
 
@@ -24,8 +23,7 @@ export default class Renderer {
             canvas: this.canvas,
             pixelRatio: 1,
             autoResize: false,
-            camera: CameraOptions,
-            axes: AxesOptions,
+            camera: CameraOptions
         });
 
         this.mesh = new Mesh(options);
