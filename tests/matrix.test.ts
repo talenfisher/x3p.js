@@ -263,6 +263,6 @@ describe("Matrix", () => {
             let matrix = new Matrix({ axes, manifest, pointBuffer });
 
             expect(matrix.size).toBe(9);
-        });
+        }); 
     });
 });

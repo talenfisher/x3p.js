@@ -129,3 +129,4 @@ export default class Manifest {
         return this[$checksum] ? this[$checksum] : this[$checksum] = md5(this.toString());
     }
 }
+ 
