@@ -3,7 +3,6 @@ import Manifest from "./manifest";
 
 interface MatrixOptions {
     axes: { x: Axis, y: Axis, z: Axis };
-    manifest: Manifest;
     pointBuffer: ArrayBuffer;
 }
 
@@ -19,21 +18,19 @@ export default class Matrix {
     public readonly y: Axis;
     public readonly z: Axis;
 
-    private manifest: Manifest;
     private pointBuffer: ArrayBuffer;
-    private dataView: Float64Array | Float32Array | Int32Array | Int16Array;
+    private dataView: any;
     private dataType: { name: string, bytes: number };
 
     constructor(options: MatrixOptions) {
-        this.manifest = options.manifest;
         this.pointBuffer = options.pointBuffer;
 
-        this.x = options.axes.x.cache();
-        this.y = options.axes.y.cache();
-        this.z = options.axes.z.cache();
+        this.x = options.axes.x;
+        this.y = options.axes.y;
+        this.z = options.axes.z;
 
         this.dataType = this.z.dataType;
-        this.dataView = new this.z.dataType.view(this.pointBuffer);
+        this.constructView();
         
         let max, min, current;        
         min = max = current = this.dataView[0];
@@ -132,5 +129,19 @@ export default class Matrix {
 
     public get size() {
         return this.x.size * this.y.size;
+    }
+
+    public constructView() {
+        let result;
+
+        switch(this.dataType.name) {
+            case 'Float64': result = new Float64Array(this.pointBuffer); break;
+            case 'Float32': result = new Float32Array(this.pointBuffer); break;
+            case 'Int32': result = new Int32Array(this.pointBuffer); break;
+            case 'Int16': result = new Int16Array(this.pointBuffer); break;
+            default: break;
+        }
+
+        this.dataView = result;
     }
 }

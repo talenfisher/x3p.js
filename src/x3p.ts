@@ -40,7 +40,6 @@ export default class X3P {
 
         if(this.pointBuffer) {
             this.matrix = new Matrix({
-                manifest: this.manifest,
                 axes: this.axes,
                 pointBuffer: this.pointBuffer,
             });

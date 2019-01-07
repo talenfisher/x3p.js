@@ -18,7 +18,6 @@ const STRIDE = 4 * (3 + 3 + 2);
 export default class Mesh {
 
     private x3p: X3P;
-    private matrix: Matrix;
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext; 
     private vao: GLVao;
@@ -35,7 +34,6 @@ export default class Mesh {
 
     constructor(options: MeshOptions) {
         this.x3p = options.x3p;
-        this.matrix = this.x3p.matrix as Matrix;
         this.canvas = options.canvas;
 
         let context = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
@@ -86,55 +84,25 @@ export default class Mesh {
     }
 
     public update() {
-        this.vertexCount = 0;
+        let worker = new Worker("./worker.ts");
         
-        let min = this.matrix.min;
-        let max = this.matrix.max;
-        let diff = max - min;
-
-        let sx = this.matrix.x.size - 1;
-        let sy = this.matrix.y.size - 1;
-        let size = sx * sy * 6;
-        size = Math.pow(2, Math.ceil(Math.log(size) / Math.log(2)));
-
-        let coords = mallocFloat(8 * size);
-        let ptr = 0;
-
-        xLoop: for(let x = 0; x < sx; x++) {
-            yLoop: for(let y = 0; y < sy; y++) {
-
-                for(let dx = 0; dx < 2; dx++) {
-                    for(let dy = 0; dy < 2; dy++) {
-                        let z = this.matrix.get(1 + x + dx, 1 + y + dy, 2);
-                        if(typeof z === "undefined") continue yLoop;
-                    }
-                }
-
-                for(let q = 0; q < 6; q++) {
-                    let i = x + Quad[q][0];
-                    let j = y + Quad[q][1];
-
-                    let vertex = this.matrix.get(i + 1, j + 1) as number[];
-                    let normal = this.matrix.getNormal(i + 1, j + 1) as number[];
-
-                    coords[ptr++] = vertex[0];
-                    coords[ptr++] = vertex[1];
-                    coords[ptr++] = (vertex[2] - min) / diff;
-
-                    coords[ptr++] = normal[0];
-                    coords[ptr++] = normal[1];
-                    coords[ptr++] = normal[2];
-
-                    coords[ptr++] = i / (sx + 1);
-                    coords[ptr++] = j / (sy + 1);
-                    
-                    this.vertexCount++;
-                }
+        // @ts-ignore
+        worker.postMessage({ 
+            pointBuffer: this.x3p.pointBuffer,
+            axes: {
+                x: this.x3p.axes.x.cache(),
+                y: this.x3p.axes.y.cache(),
+                z: this.x3p.axes.z.cache(),
             }
-        }
+        }, [ this.x3p.pointBuffer as ArrayBuffer ]);
 
-        this.coordinateBuffer.update(coords.subarray(0, ptr));
-        freeFloat(coords);
+        worker.onmessage = e => {
+            this.vertexCount = e.data.vertexCount;
+            this.coordinateBuffer.update(e.data.coords.subarray(0, e.data.elementCount));
+            console.log(e.data.coords);
+            freeFloat(e.data.coords);
+            worker.terminate();
+        }
     }
 
     public isOpaque() {
