@@ -13,7 +13,7 @@ const Parser = new window.DOMParser();
 
 export interface X3PLoaderOptions {
     file: any;
-    name: string;
+    name?: string;
     color?: string;
 }
 
@@ -28,7 +28,7 @@ export type Encoding =
     "nodebuffer";
 
 export default class X3PLoader extends Promisable<X3P> {
-    public name: string;
+    public name?: string;
     private options: X3PLoaderOptions;
     private zip?: jszip;
     private manifest?: Manifest;
@@ -37,7 +37,7 @@ export default class X3PLoader extends Promisable<X3P> {
     constructor(options: X3PLoaderOptions) {
         super();
         this.options = options;
-        this.name = options.name;
+        this.name = options.file.name || options.name || "file.x3p";
         this.promise = new Promise(this.load.bind(this));
     }
 
@@ -97,7 +97,7 @@ export default class X3PLoader extends Promisable<X3P> {
             loader: this,
             manifest: this.manifest,
             mask,
-            name: this.name,
+            name: this.name as string,
             pointBuffer,
         }));
     }

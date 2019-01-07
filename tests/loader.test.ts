@@ -31,21 +31,34 @@ describe("X3PLoader", () => {
                 name: "test",
             })).resolves;
         });
+
+        it("Should accept a File object and use its name instead of the name parameter", async () => {
+            let contents = read(resolve(__dirname, "data/good/complete.x3p"));            
+            let file: File|null = new File([ contents ], "complete.x3p");
+            let x3p = new X3P({ file });
+
+            try {
+                await x3p; // this fails in node
+            } catch(e) {} 
+
+            return expect(x3p.name).toBe("complete.x3p");
+        });
     });
 
     describe("write", () => {
         it("should update existing files in the X3P", async () => {
-            let file = read(resolve(__dirname, "data/good/complete.x3p"));
+            let contents = read(resolve(__dirname, "data/good/complete.x3p"));
+
             let loader = new X3P({
-                file,
-                name: "test", 
+                file: contents,
+                name: "test.x3p", 
             });
 
             await loader;
             loader.write("main.xml", "This is a test");
             
             let manifest = await loader.read("main.xml");
-            expect(manifest).toBe("This is a test");
+            return expect(manifest).toBe("This is a test");
         });
 
         it("Should create new files in the X3P", async () => {
