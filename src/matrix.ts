@@ -1,5 +1,4 @@
 import Axis from "./axis";
-import Manifest from "./manifest";
 
 interface MatrixOptions {
     axes: { x: Axis, y: Axis, z: Axis };
@@ -19,8 +18,9 @@ export default class Matrix {
     public readonly z: Axis;
 
     private pointBuffer: ArrayBuffer;
-    private dataView: any;
+    private dataView: DataView;
     private dataType: { name: string, bytes: number };
+    private dataGetter: any;
 
     constructor(options: MatrixOptions) {
         this.pointBuffer = options.pointBuffer;
@@ -30,15 +30,18 @@ export default class Matrix {
         this.z = options.axes.z;
 
         this.dataType = this.z.dataType;
-        this.constructView();
+        this.dataView = new DataView(this.pointBuffer);
+        this.dataGetter = this.dataView[`get${this.dataType.name}`];
         
         let max, min, current;        
-        min = max = current = this.dataView[0];
-        for(let i = 1; i < this.dataView.length; i++) {
-            current = this.dataView[i];
-            
-            if(current > max) max = current;
-            if(current < min) min = current;
+        min = max = current = this.getDataAt(0, 0);
+
+        for(let x = 1; x < this.x.size; x++) {
+            for(let y = 0; y < this.y.size; y++) {
+                current = this.getDataAt(x, y);
+                if(current > max) max = current;
+                if(current < min) min = current;
+            }
         }
 
         this.min = min;
@@ -46,11 +49,10 @@ export default class Matrix {
     }
 
     public get(x: number, y: number, axis?: number) {
-        let offset = (x * this.y.size) + y;
         let value;
 
         try {
-            value = this.dataView[offset];
+            value = this.getDataAt(x, y);
             if(isNaN(value) || !isFinite(value)) throw new RangeError();
         } catch(error) {
             return undefined;
@@ -131,17 +133,12 @@ export default class Matrix {
         return this.x.size * this.y.size;
     }
 
-    public constructView() {
-        let result;
+    public getDataAt(x: number, y: number) {
+        let offset = this.getByteOffset(x, y);
+        return this.dataGetter.apply(this.dataView, [ offset ]);
+    }
 
-        switch(this.dataType.name) {
-            case 'Float64': result = new Float64Array(this.pointBuffer); break;
-            case 'Float32': result = new Float32Array(this.pointBuffer); break;
-            case 'Int32': result = new Int32Array(this.pointBuffer); break;
-            case 'Int16': result = new Int16Array(this.pointBuffer); break;
-            default: break;
-        }
-
-        this.dataView = result;
+    private getByteOffset(x: number, y: number) {
+        return ((x * this.y.size) + y) * this.dataType.bytes;
     }
 }

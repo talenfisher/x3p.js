@@ -23,10 +23,10 @@ export default class Renderer {
             canvas: this.canvas,
             pixelRatio: 1,
             autoResize: false,
-            camera: CameraOptions
+            camera: CameraOptions,
         });
 
         this.mesh = new Mesh(options);
         this.scene.add(this.mesh);
     }
-} 
+}

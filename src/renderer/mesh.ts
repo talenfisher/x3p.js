@@ -65,7 +65,6 @@ export default class Mesh {
             },
         ]);
 
-
         this.update();
     }
 
@@ -93,16 +92,18 @@ export default class Mesh {
                 x: this.x3p.axes.x.cache(),
                 y: this.x3p.axes.y.cache(),
                 z: this.x3p.axes.z.cache(),
-            }
+            },
         }, [ this.x3p.pointBuffer as ArrayBuffer ]);
 
-        worker.onmessage = e => {
+        worker.onmessage = (e) => {
             this.vertexCount = e.data.vertexCount;
             this.coordinateBuffer.update(e.data.coords.subarray(0, e.data.elementCount));
-            console.log(e.data.coords);
+
+            console.log(e.data.coords); // tslint:disable-line
+
             freeFloat(e.data.coords);
             worker.terminate();
-        }
+        };
     }
 
     public isOpaque() {

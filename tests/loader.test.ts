@@ -34,7 +34,7 @@ describe("X3PLoader", () => {
 
         it("Should accept a File object and use its name instead of the name parameter", async () => {
             let contents = read(resolve(__dirname, "data/good/complete.x3p"));            
-            let file: File|null = new File([ contents ], "complete.x3p");
+            let file: File | null = new File([ contents ], "complete.x3p");
             let x3p = new X3P({ file });
 
             await x3p;

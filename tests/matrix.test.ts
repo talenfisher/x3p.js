@@ -39,13 +39,12 @@ const MANIFEST_SRC = `
 `;
 
 function createArrayBuffer(array: number[]) {
-    let buffer = new ArrayBuffer(array.length * 16);
+    let buffer = new ArrayBuffer(array.length * 8);
     let view = new DataView(buffer);
     
     for(let i = 0; i < array.length; i++) {
         view.setFloat64(i * 8, array[i]);
     }
-
     return buffer;
 }
 
@@ -61,7 +60,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 5, 2, 6, 9, 2, 9, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
 
             // @ts-ignore
             expect(matrix.get(1, 0)[0]).toBe(0.5);
@@ -78,7 +77,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 5, 2, 6, 9, 2, 9, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
 
             // @ts-ignore
             expect(matrix.get(0, 1)[1]).toBe(2);
@@ -94,7 +93,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 5, 2, 6, 9, 2, 9, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
 
             // @ts-ignore
             expect(matrix.get(0, 1)[2]).toBe(3);
@@ -110,7 +109,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 5, 2, 6, 9, 2, 9, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
 
             expect(matrix.get(0, 1, 2)).toBe(3);
         });
@@ -129,7 +128,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 5, 2, 6, 9, 2, 9, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
             let cDiff = matrix.getCDiff(1, 1, 0);
             
             expect(cDiff[0]).toBe(1);
@@ -148,7 +147,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 5, 2, 6, 9, 2, 9, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
             let cdiff = matrix.getCDiff(0, 0, 2);
 
             expect(cdiff[0]).toBe(0);
@@ -165,7 +164,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, NaN, 5, 2, 6, 9, 2, 9, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
             let cdiff = matrix.getCDiff(1, 1, 2);
 
             expect(cdiff[0]).toBe(0);
@@ -181,7 +180,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 5, 2, 6, 9, 2, NaN, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
             let cdiff = matrix.getCDiff(1, 1, 2);
 
             expect(cdiff[0]).toBe(0);
@@ -196,7 +195,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ NaN, 3, 5, 2, 6, 9, 2, 8, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
             let cdiff = matrix.getCDiff(0, 1, 2);
             
             expect(cdiff[1]).toBe(0);
@@ -211,7 +210,7 @@ describe("Matrix", () => {
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, NaN, 2, 6, 9, 2, 8, 3 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
             let cdiff = matrix.getCDiff(0, 1, 2);
 
             expect(cdiff[1]).toBe(0);
@@ -222,13 +221,15 @@ describe("Matrix", () => {
         it("Should return the maximum z value in the matrix", () => {
             let manifest = new Manifest(MANIFEST_SRC);
             let axes = {
-                x: new Axis({ name: "X", manifest }),
-                y: new Axis({ name: "Y", manifest }),
-                z: new Axis({ name: "Z", manifest }),
+                x: new Axis({ name: "X", manifest }).cache(),
+                y: new Axis({ name: "Y", manifest }).cache(),
+                z: new Axis({ name: "Z", manifest }).cache(),
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 8, 2, 6, 3, 2, 8, 2 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let dataView = new DataView(pointBuffer);
+            
+            let matrix = new Matrix({ axes, pointBuffer });
             
             expect(matrix.max).toBe(8);
         });
@@ -238,13 +239,13 @@ describe("Matrix", () => {
         it("Should return the minimum z value in the matrix", () => {
             let manifest = new Manifest(MANIFEST_SRC);
             let axes = {
-                x: new Axis({ name: "X", manifest }),
-                y: new Axis({ name: "Y", manifest }),
-                z: new Axis({ name: "Z", manifest }),
+                x: new Axis({ name: "X", manifest }).cache(),
+                y: new Axis({ name: "Y", manifest }).cache(),
+                z: new Axis({ name: "Z", manifest }).cache(),
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 8, 2, 6, 1, 2, 8, 2 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
 
             expect(matrix.min).toBe(1);
         });
@@ -254,13 +255,13 @@ describe("Matrix", () => {
         it("Should return the element size in the matrix", () => {
             let manifest = new Manifest(MANIFEST_SRC);
             let axes = {
-                x: new Axis({ name: "X", manifest }),
-                y: new Axis({ name: "Y", manifest }),
-                z: new Axis({ name: "Z", manifest }),
+                x: new Axis({ name: "X", manifest }).cache(),
+                y: new Axis({ name: "Y", manifest }).cache(),
+                z: new Axis({ name: "Z", manifest }).cache(),
             };
 
             let pointBuffer = createArrayBuffer([ 2, 3, 8, 2, 6, 1, 2, 8, 2 ]);
-            let matrix = new Matrix({ axes, manifest, pointBuffer });
+            let matrix = new Matrix({ axes, pointBuffer });
 
             expect(matrix.size).toBe(9);
         }); 

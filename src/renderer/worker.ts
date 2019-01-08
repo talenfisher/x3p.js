@@ -2,7 +2,7 @@ import { mallocFloat } from "typedarray-pool";
 import Matrix from "../matrix";
 import Quad from "./quad";
 
-self.onmessage = e => {
+self.onmessage = (e) => {
     let matrix = new Matrix(e.data);
     let vertexCount = 0;
         
@@ -54,6 +54,6 @@ self.onmessage = e => {
     self.postMessage({
         vertexCount,
         elementCount: ptr,
-        coords
+        coords,
     });
 };
