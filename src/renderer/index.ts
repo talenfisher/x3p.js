@@ -26,6 +26,8 @@ export default class Renderer {
             camera: CameraOptions,
         });
 
+        debugger; // tslint:disable-line
+
         this.mesh = new Mesh(options);
         this.scene.add(this.mesh);
     }

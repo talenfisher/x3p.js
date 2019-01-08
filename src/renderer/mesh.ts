@@ -5,7 +5,7 @@ import Identity from "./identity";
 import createShader from "./shaders/index";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
-import { mallocFloat, freeFloat } from "typedarray-pool";
+import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
 
 interface MeshOptions {
@@ -16,7 +16,6 @@ interface MeshOptions {
 const STRIDE = 4 * (3 + 3 + 2);
 
 export default class Mesh {
-
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext; 

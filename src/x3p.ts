@@ -37,13 +37,6 @@ export default class X3P {
             y: new Axis({ name: "Y", manifest: this.manifest }),
             z: new Axis({ name: "Z", manifest: this.manifest }),
         };
-
-        if(this.pointBuffer) {
-            this.matrix = new Matrix({
-                axes: this.axes,
-                pointBuffer: this.pointBuffer,
-            });
-        }
     }
 
     public save() {
