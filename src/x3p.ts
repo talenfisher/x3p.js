@@ -57,6 +57,12 @@ export default class X3P {
         let renderer = new Renderer({
             x3p: this,
             canvas,
+            lighting: {
+                ambient: 0.1,
+                diffuse: 0.4,
+                specular: 0.3,
+                roughness: 0.5,
+            },
         });
 
         return renderer;

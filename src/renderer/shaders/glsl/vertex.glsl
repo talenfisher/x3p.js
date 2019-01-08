@@ -5,8 +5,9 @@ attribute vec3 normal;
 attribute vec2 tCoord;
 
 uniform mat4 model, view, projection, inverseModel;
+uniform vec3 lightPosition, eyePosition;
 
-varying vec3 worldCoordinate;
+varying vec3 worldCoordinate, lightDirection, eyeDirection, surfaceNormal;
 varying vec4 vColor;
 
 void main() {
@@ -16,4 +17,10 @@ void main() {
 
     gl_Position = clipPosition;
     vColor = vec4(1.0, 0.0, 0.0, 1.0);
+
+    vec4 cameraCoordinate = view * worldPosition;
+    cameraCoordinate.xyz /= cameraCoordinate.w;
+    lightDirection = lightPosition - cameraCoordinate.xyz;
+    eyeDirection = eyePosition - cameraCoordinate.xyz;
+    surfaceNormal = normalize((vec4(normal, 0) * inverseModel).xyz);
 }

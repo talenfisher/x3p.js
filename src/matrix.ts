@@ -3,10 +3,15 @@ import Axis from "./axis";
 interface MatrixOptions {
     axes: { x: Axis, y: Axis, z: Axis };
     pointBuffer: ArrayBuffer;
+    epsilon?: number;
 }
 
 interface DataView {
     [name: string]: any;
+}
+
+function isNumeric(value: string | number) {
+    return !isNaN(value as number) && isFinite(value as number);
 }
 
 export default class Matrix {
@@ -17,6 +22,7 @@ export default class Matrix {
     public readonly y: Axis;
     public readonly z: Axis;
 
+    private epsilon = 1;
     private pointBuffer: ArrayBuffer;
     private dataView: DataView;
     private dataType: { name: string, bytes: number };
@@ -29,6 +35,7 @@ export default class Matrix {
         this.y = options.axes.y;
         this.z = options.axes.z;
 
+        this.epsilon = options.epsilon || this.epsilon;
         this.dataType = this.z.dataType;
         this.dataView = new DataView(this.pointBuffer);
         this.dataGetter = this.dataView[`get${this.dataType.name}`];
@@ -53,7 +60,7 @@ export default class Matrix {
 
         try {
             value = this.getDataAt(x, y);
-            if(isNaN(value) || !isFinite(value)) throw new RangeError();
+            if(!isNumeric(value)) throw new RangeError();
         } catch(error) {
             return undefined;
         }
@@ -61,7 +68,7 @@ export default class Matrix {
         let result = [
             this.x.increment * x,
             this.y.increment * y,
-            value,
+            value / this.epsilon,
         ];
         
         return typeof axis !== "undefined" ? result[axis] : result;
@@ -81,14 +88,14 @@ export default class Matrix {
                 let right = this.get(x + 1, y, i) as number;
                 let left = this.get(x - 1, y, i) as number;
 
-                dx = isNaN(right) || isNaN(left) ? 0.0 : (right - left) / 2;
+                dx = !isNumeric(right) || !isNumeric(left) ? 0.0 : (right - left) / 2;
             }
 
             if(x % this.x.size !== 0) {
                 let right = this.get(x, y + 1, i) as number;
                 let left = this.get(x, y - 1, i) as number;
 
-                dy = isNaN(right) || isNaN(left) ? 0.0 : (right - left) / 2;
+                dy = !isNumeric(right) || !isNumeric(left) ? 0.0 : (right - left) / 2;
             }
 
             result[i] = [ dx, dy ];

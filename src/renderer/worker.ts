@@ -3,6 +3,7 @@ import Matrix from "../matrix";
 import Quad from "./quad";
 
 self.onmessage = (e) => {
+    let options = Object.assign(e.data, { epsilon: 0.0001 });
     let matrix = new Matrix(e.data);
     let vertexCount = 0;
         

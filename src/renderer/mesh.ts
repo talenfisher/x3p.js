@@ -7,10 +7,13 @@ import createShader from "./shaders/index";
 import createBuffer, { GLBuffer } from "gl-buffer";
 import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
+import { invert, multiply } from "gl-mat4";
+import LightingOptions from "./lighting";
 
 interface MeshOptions {
     x3p: X3P;
     canvas: HTMLCanvasElement;
+    lighting?: LightingOptions;
 }
 
 const STRIDE = 4 * (3 + 3 + 2);
@@ -29,6 +32,14 @@ export default class Mesh {
         model: Identity,
         view: Identity,
         projection: Identity,
+        inverseModel: Identity.slice(),
+        ambient: 1,
+        diffuse: 1,
+        specular: 1,
+        roughness: 1,
+        fresnel: 1,
+        lightPosition: [0, 0, 0],
+        eyePosition: [0, 0, 0],
     };
 
     constructor(options: MeshOptions) {
@@ -64,15 +75,39 @@ export default class Mesh {
             },
         ]);
 
-        this.update();
+        this.update(options);
     }
 
     public draw(options: any) {
+        this.gl.disable(this.gl.CULL_FACE);
+        
         let uniforms = this.uniforms;
         uniforms.model = options.model || Identity;
         uniforms.projection = options.projection || Identity;
         uniforms.view = options.view || Identity;
+        uniforms.inverseModel = invert(uniforms.inverseModel, uniforms.model);
 
+        let invCameraMatrix = Identity;
+        multiply(invCameraMatrix, uniforms.view, uniforms.model);
+        multiply(invCameraMatrix, uniforms.projection, invCameraMatrix);
+        invert(invCameraMatrix, invCameraMatrix);
+
+        let w = invCameraMatrix[15];
+        for(let i = 0; i < 3; i++) {
+            uniforms.eyePosition[i] = invCameraMatrix[12 + i] / invCameraMatrix[15];
+            w += uniforms.lightPosition[i] * invCameraMatrix[4 * i + 3];
+        }
+
+        for(let i = 0; i < 3; i++) {
+            let s = invCameraMatrix[12 + i];
+            
+            for(let j = 0; j < 3; j++) {
+                s += invCameraMatrix[4 * j + i] * uniforms.lightPosition[j];
+            }
+
+            uniforms.lightPosition[i] = s / w;
+        }
+ 
         this.shader.bind();
         this.shader.uniforms = uniforms;
 
@@ -81,9 +116,15 @@ export default class Mesh {
         this.vao.unbind();
     }
 
-    public update() {
+    public update(options?: MeshOptions) {
         let worker = new Worker("./worker.ts");
-        
+
+        // update lighting uniforms
+        if(options && options.lighting) {
+            let lighting = options.lighting;
+            Object.assign(this.uniforms, lighting);
+        }
+
         // @ts-ignore
         worker.postMessage({ 
             pointBuffer: this.x3p.pointBuffer,
