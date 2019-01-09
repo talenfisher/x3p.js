@@ -7,7 +7,9 @@
     "lint": "tslint --project .",
     "test": "jest --colors",
     "test:render": "parcel serve tests/browser/index.html",
-    "watch": "watch 'npm run test' src tests"
+    "watch": "watch 'npm run test' src tests",
+    "build": "parcel build src/index.ts -d dist",
+    "postversion": "git push --follow-tags"
   },
   "keywords": [
     "x3p",

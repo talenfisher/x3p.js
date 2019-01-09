@@ -19,6 +19,7 @@ interface MeshOptions {
 const STRIDE = 4 * (3 + 3 + 2);
 
 export default class Mesh {
+    private bounds?: number[][];
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext; 
@@ -80,12 +81,12 @@ export default class Mesh {
 
     public draw(options: any) {
         this.gl.disable(this.gl.CULL_FACE);
-        
+
         let uniforms = this.uniforms;
         uniforms.model = options.model || Identity;
         uniforms.projection = options.projection || Identity;
         uniforms.view = options.view || Identity;
-        uniforms.inverseModel = invert(uniforms.inverseModel, uniforms.model);
+        invert(uniforms.inverseModel, uniforms.model);
 
         let invCameraMatrix = Identity;
         multiply(invCameraMatrix, uniforms.view, uniforms.model);
@@ -138,8 +139,9 @@ export default class Mesh {
         worker.onmessage = (e) => {
             this.vertexCount = e.data.vertexCount;
             this.coordinateBuffer.update(e.data.coords.subarray(0, e.data.elementCount));
+            this.bounds = e.data.bounds;
 
-            console.log(e.data.coords); // tslint:disable-line
+            console.log("Finished buffering"); // tslint:disable-line
 
             freeFloat(e.data.coords);
             worker.terminate();

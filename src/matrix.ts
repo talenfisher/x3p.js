@@ -66,9 +66,9 @@ export default class Matrix {
         }
 
         let result = [
-            this.x.increment * x,
-            this.y.increment * y,
-            value / this.epsilon,
+            (this.x.increment / this.epsilon) * x,
+            (this.y.increment / this.epsilon) * y,
+            (value / this.epsilon) * 5,
         ];
         
         return typeof axis !== "undefined" ? result[axis] : result;
@@ -84,14 +84,14 @@ export default class Matrix {
             let dx = 0.0;
             let dy = 0.0;
 
-            if(y % this.y.size !== 0) { 
+            if(x % this.x.size !== 0) { 
                 let right = this.get(x + 1, y, i) as number;
                 let left = this.get(x - 1, y, i) as number;
 
                 dx = !isNumeric(right) || !isNumeric(left) ? 0.0 : (right - left) / 2;
             }
 
-            if(x % this.x.size !== 0) {
+            if(y % this.y.size !== 0) {
                 let right = this.get(x, y + 1, i) as number;
                 let left = this.get(x, y - 1, i) as number;
 

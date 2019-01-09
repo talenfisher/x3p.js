@@ -2,9 +2,12 @@ import { mallocFloat } from "typedarray-pool";
 import Matrix from "../matrix";
 import Quad from "./quad";
 
+const EPSILON = 0.0001;
+
 self.onmessage = (e) => {
-    let options = Object.assign(e.data, { epsilon: 0.0001 });
-    let matrix = new Matrix(e.data);
+
+    let options = Object.assign(e.data, { epsilon: EPSILON });
+    let matrix = new Matrix(options);
     let vertexCount = 0;
         
     let min = matrix.min;
@@ -51,10 +54,16 @@ self.onmessage = (e) => {
         }
     }
 
-    // @ts-ignore
-    self.postMessage({
+    let ix = matrix.x.increment / EPSILON;
+    let iy = matrix.y.increment / EPSILON;
+
+    let data = {
         vertexCount,
         elementCount: ptr,
+        bounds: [ [0, 0, 0], [ sx * ix, sy * iy, max ] ],
         coords,
-    });
+    };
+
+    // @ts-ignore
+    self.postMessage(data, [ coords.buffer ]);
 };
