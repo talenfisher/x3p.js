@@ -55,6 +55,9 @@
     "glsl-specular-beckmann": "^1.1.2",
     "jszip": "^3.1.5",
     "ndarray": "^1.0.18",
+    "ndarray-gradient": "^1.0.0",
+    "ndarray-scratch": "^1.2.0",
+    "ndarray-show": "^2.0.0",
     "sax": "^1.2.4",
     "typedarray-pool": "^1.1.0"
   }

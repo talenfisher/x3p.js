@@ -1,4 +1,4 @@
-import DataTypes from "./data-types";
+import DataTypes, { DataType } from "./data-types";
 import Manifest from "./manifest";
 
 const DataTypeKeys = Object.keys(DataTypes);
@@ -28,7 +28,7 @@ export default class Axis {
         return el !== null ? Number(el.innerHTML) : 0;
     }
 
-    get dataType() {
+    get dataType(): DataType {
         let el = this.definition.querySelector(`DataType`);
         
         if(el === null || !DataTypeKeys.includes(el.innerHTML as string)) {

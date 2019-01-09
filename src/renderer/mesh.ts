@@ -1,5 +1,4 @@
 import X3P from "../x3p";
-import Matrix from "../matrix";
 import Quad from "./quad";
 import Identity from "./identity";
 import createShader from "./shaders/index";
@@ -140,8 +139,6 @@ export default class Mesh {
             this.vertexCount = e.data.vertexCount;
             this.coordinateBuffer.update(e.data.coords.subarray(0, e.data.elementCount));
             this.bounds = e.data.bounds;
-
-            console.log("Finished buffering"); // tslint:disable-line
 
             freeFloat(e.data.coords);
             worker.terminate();
