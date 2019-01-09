@@ -40,6 +40,7 @@
     "jest-transform-stub": "^1.0.0",
     "jsdom": "^13.1.0",
     "parcel-bundler": "^1.11.0",
+    "parcel-plugin-raw-xml": "^1.0.1",
     "ts-jest": "^23.10.5",
     "tslint": "^5.12.0",
     "typescript": "^3.2.2",
