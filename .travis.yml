@@ -12,6 +12,7 @@ before_script:
   - cd ../
 
 script:
+  - npm run build
   - npm run lint
   - npm run test
 
