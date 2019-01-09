@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ISO5436>
     <Record1>
-        <Revision disabled=""></Revision>
+        <Revision disabled="true"></Revision>
         <FeatureType disabled=""></FeatureType>
         <Axes>
             <CX>

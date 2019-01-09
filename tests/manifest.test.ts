@@ -57,6 +57,13 @@ describe("Manifest", () => {
             expect(manifest.getNode("Record1 Revision")).toBeInstanceOf(Node);
         });
 
+        it("Should retain attributes", () => {
+            let source = DOCTYPE + `<root><Record1><Revision>CSAFE-X3P</Revision></Record1></root>`;
+            let manifest = new Manifest(source);
+
+            expect(manifest.getNode("Record1 Revision").hasAttribute("disabled")).toBe(true);
+        });
+
         it("Should return a node with a corresponding value from the manifest", () => {
             let source = DOCTYPE + `<root><Record1><Revision>CSAFE-X3P</Revision></Record1></root>`;
             let manifest = new Manifest(source);
