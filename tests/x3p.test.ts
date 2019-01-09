@@ -1,5 +1,3 @@
-import "jsdom-global/register";
-
 import md5 from "blueimp-md5";
 import { readdirSync as readdir, readFileSync as read } from "fs";
 import { resolve } from "path";

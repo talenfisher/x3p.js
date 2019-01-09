@@ -1,5 +1,3 @@
-import "jsdom-global/register";
-
 import Manifest from "../src/manifest";
 import Mask from "../src/mask";
 

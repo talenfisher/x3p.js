@@ -1,5 +1,3 @@
-import "jsdom-global/register";
-
 import { readFileSync as read } from "fs";
 import { resolve } from "path";
 

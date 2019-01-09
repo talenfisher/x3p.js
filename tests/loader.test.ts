@@ -1,5 +1,3 @@
-import "jsdom-global/register";
-
 import X3P from "../src";
 
 import { readdirSync as readdir, readFileSync as read } from "fs";
@@ -44,6 +42,7 @@ describe("X3PLoader", () => {
 
             await loader;
             loader.write("main.xml", "This is a test");
+            console.log("test");
             
             let manifest = await loader.read("main.xml");
             return expect(manifest).toBe("This is a test");

@@ -1,8 +1,6 @@
-import "jsdom-global/register";
 import Axis from "../src/axis";
 import Manifest from "../src/manifest";
 
-declare var window: any;
 
 describe("Axis", () => {
     describe("constructor", () => {

@@ -85,9 +85,9 @@ export default class Mesh {
         uniforms.model = options.model || Identity;
         uniforms.projection = options.projection || Identity;
         uniforms.view = options.view || Identity;
-        invert(uniforms.inverseModel, uniforms.model);
+        uniforms.inverseModel = invert(uniforms.inverseModel, uniforms.model);
 
-        let invCameraMatrix = Identity;
+        let invCameraMatrix = Identity.slice();
         multiply(invCameraMatrix, uniforms.view, uniforms.model);
         multiply(invCameraMatrix, uniforms.projection, invCameraMatrix);
         invert(invCameraMatrix, invCameraMatrix);
@@ -120,10 +120,10 @@ export default class Mesh {
         let worker = new Worker("./worker.ts");
 
         // update lighting uniforms
-        if(options && options.lighting) {
+      /*  if(options && options.lighting) {
             let lighting = options.lighting;
             Object.assign(this.uniforms, lighting);
-        }
+        } */
 
         // @ts-ignore
         worker.postMessage({ 

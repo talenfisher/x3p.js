@@ -2,7 +2,6 @@ import Axis from "./axis";
 import X3PLoader from "./index";
 import Manifest from "./manifest";
 import Mask from "./mask";
-import Matrix from "./matrix";
 import Renderer from "./renderer";
 
 import { saveAs } from "file-saver";
@@ -18,7 +17,6 @@ export default class X3P {
     public axes: { x: Axis, y: Axis, z: Axis };
     public manifest: Manifest;
     public pointBuffer?: ArrayBuffer;
-    public matrix?: Matrix;
 
     private loader: X3PLoader;
     private options: X3POptions;

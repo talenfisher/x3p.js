@@ -3,6 +3,7 @@ import Tree from "./tree.xml";
 import md5 from "blueimp-md5";
 
 declare var window: any;
+declare var jsdom: any;
 
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
 const Parser = new window.DOMParser();
