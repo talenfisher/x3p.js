@@ -37,7 +37,7 @@ export default class Renderer {
             camera: CameraOptions,
         });
 
-        this.mesh = new Mesh(options);
+        this.mesh = new Mesh(Object.assign(options, { gl: this.gl }));
         this.scene.add(this.mesh);
     }
 }

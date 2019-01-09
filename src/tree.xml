@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ISO5436>
     <Record1>
-        <Revision></Revision>
-        <FeatureType></FeatureType>
+        <Revision disabled=""></Revision>
+        <FeatureType disabled=""></FeatureType>
         <Axes>
             <CX>
-                <AxisType></AxisType>
-                <DataType></DataType>
-                <Increment></Increment>
-                <Offset></Offset>
+                <AxisType disabled=""></AxisType>
+                <DataType disabled=""></DataType>
+                <Increment disabled=""></Increment>
+                <Offset disabled=""></Offset>
             </CX>
             <CY>
-                <AxisType></AxisType>
-                <DataType></DataType>
-                <Increment></Increment>
-                <Offset></Offset>
+                <AxisType disabled=""></AxisType>
+                <DataType disabled=""></DataType>
+                <Increment disabled=""></Increment>
+                <Offset disabled=""></Offset>
             </CY>
             <CZ>
-                <AxisType></AxisType>
-                <DataType></DataType>
-                <Increment></Increment>
-                <Offset></Offset>
+                <AxisType disabled=""></AxisType>
+                <DataType disabled=""></DataType>
+                <Increment disabled=""></Increment>
+                <Offset disabled=""></Offset>
             </CZ>
         </Axes>
     </Record1>
@@ -42,16 +42,16 @@
     </Record2>
     <Record3>
         <MatrixDimension>
-            <SizeX></SizeX>
-            <SizeY></SizeY>
-            <SizeZ></SizeZ>
+            <SizeX disabled=""></SizeX>
+            <SizeY disabled=""></SizeY>
+            <SizeZ disabled=""></SizeZ>
         </MatrixDimension>
         <DataLink>
-            <PointDataLink></PointDataLink>
-            <MD5ChecksumPointData></MD5ChecksumPointData>
+            <PointDataLink disabled=""></PointDataLink>
+            <MD5ChecksumPointData disabled=""></MD5ChecksumPointData>
         </DataLink>
     </Record3>
     <Record4>
-        <ChecksumFile></ChecksumFile>
+        <ChecksumFile disabled=""></ChecksumFile>
     </Record4>
 </ISO5436>

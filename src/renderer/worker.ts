@@ -3,6 +3,7 @@ import { DataTypeNameLower, TypedArray } from "../data-types";
 import Quad from "./quad";
 
 import ndarray from "ndarray";
+import zeros from "zeros";
 import gradient from "ndarray-gradient";
 import show from "ndarray-show";
 
@@ -46,7 +47,7 @@ class WorkerUtil {
         ];
 
         this.shape = [ this.axes[0].size, this.axes[1].size ];
-        this.paddedShape = [ this.axes[0].size + 2, this.axes[1].size + 2 ];
+        this.paddedShape = [ this.shape[0] + 2, this.shape[1] + 2 ];
 
         let data;
         switch(this.axes[2].name) {
@@ -63,7 +64,7 @@ class WorkerUtil {
         for(let i = 0; i < 3; i++) {
             let dtype = this.axes[i].dataType;
             let name = dtype.name.toLowerCase() as DataTypeNameLower;
-            this.coords[i] = ndarray(malloc(data.length + 2, name), this.paddedShape);
+            this.coords[i] = zeros(this.paddedShape, name);
         }
 
         this.computeMatrix();
@@ -90,19 +91,19 @@ class WorkerUtil {
         const ix = this.axes[0].increment / EPSILON;
         const iy = this.axes[1].increment / EPSILON;
 
-        for(let i = 1; i < sx + 1; i++) {
-            for(let j = 1; j < sy + 1; j++) {
-                let data = this.data.get(i - 1, j - 1);
+        for(let i = 0; i < sx; i++) {
+            for(let j = 0; j < sy; j++) {
+                let data = this.data.get(i, j);
                 let values = [
-                    ((i - 1) % sx) * ix,
-                    ((i === 1) ? ++cy : cy) * iy,
+                    (i % sx) * ix,
+                    ((i === 0) ? ++cy : cy) * iy,
                     (data / EPSILON) * MULTIPLY,
                 ];
 
                 for(let k = 0; k < 3; k++) {
                     let axis = this.coords[k];
 
-                    axis.set(i, j, values[k]);
+                    axis.set(i + 1, j + 1, values[k]);
 
                     if(!isNaN(values[k])) {
                         this.lo[k] = Math.min(this.lo[k], values[k]);
@@ -167,23 +168,21 @@ class WorkerUtil {
         this.vertexCount = 0;
 
         let ptr = 0;
-        let count = (this.shape[0] - 1) * (this.shape[1] - 1) * 6;
+        let count = (this.paddedShape[0] - 1) * (this.paddedShape[1] - 1) * 6;
         this.coordBuffer = mallocFloat(nextPow2(8 * count));
 
         let hi = this.hi[2];
         let lo = this.lo[2];
         let diff = hi - lo;
 
-        i_loop: for(let i = 0; i < this.shape[0] - 1; i++) {
-            j_loop: for(let j = 0; j < this.shape[1] - 1; j++) {
+        i_loop: for(let i = 0; i < this.paddedShape[0] - 1; i++) {
+            j_loop: for(let j = 0; j < this.paddedShape[1] - 1; j++) {
                 
                 // skip if any vertices in the quadrilateral are undefined
                 for(let dx = 0; dx < 2; dx++) {
                     for(let dy = 0; dy < 2; dy++) {
-                        for(let k = 0; k < 3; k++) {
-                            let val = this.coords[k].get(1 + i + dx, 1 + j + dy);
-                            if(isNaN(val) || !isFinite(val)) continue j_loop;
-                        }
+                        let val = this.coords[2].get(1 + i + dx, 1 + j + dy);
+                        if(isNaN(val) || !isFinite(val)) continue j_loop;
                     }
                 }
 

@@ -8,7 +8,7 @@
     "test": "jest --colors",
     "test:render": "parcel serve tests/browser/index.html",
     "watch": "watch 'npm run test' src tests",
-    "build": "parcel build src/index.ts -d dist",
+    "build": "parcel build src/index.ts -d dist --global X3P",
     "postversion": "git push --follow-tags"
   },
   "keywords": [
@@ -60,6 +60,7 @@
     "ndarray-scratch": "^1.2.0",
     "ndarray-show": "^2.0.0",
     "sax": "^1.2.4",
-    "typedarray-pool": "^1.1.0"
+    "typedarray-pool": "^1.1.0",
+    "zeros": "^1.0.0"
   }
 }

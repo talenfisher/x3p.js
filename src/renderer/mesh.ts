@@ -11,6 +11,7 @@ import LightingOptions from "./lighting";
 
 interface MeshOptions {
     x3p: X3P;
+    gl: WebGLRenderingContext;
     canvas: HTMLCanvasElement;
     lighting?: LightingOptions;
 }
@@ -45,13 +46,7 @@ export default class Mesh {
     constructor(options: MeshOptions) {
         this.x3p = options.x3p;
         this.canvas = options.canvas;
-
-        let context = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
-        if(context === null) {
-            throw new Error(`Unable to get the WebGL Rendering Context`);
-        }
-
-        this.gl = context;
+        this.gl = options.gl;
         this.shader = createShader(this.gl);
         this.coordinateBuffer = createBuffer(this.gl);
         this.vao = createVAO(this.gl, [
@@ -120,10 +115,10 @@ export default class Mesh {
         let worker = new Worker("./worker.ts");
 
         // update lighting uniforms
-      /*  if(options && options.lighting) {
+        if(options && options.lighting) {
             let lighting = options.lighting;
             Object.assign(this.uniforms, lighting);
-        } */
+        } 
 
         // @ts-ignore
         worker.postMessage({ 
