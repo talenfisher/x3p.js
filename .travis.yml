@@ -21,6 +21,7 @@ before_deploy:
   - npm version $TRAVIS_TAG
 
 deploy:
+  skip_cleanup: true
   provider: npm
   email: tqfisher@iastate.edu
   api_key: $NPM_TOKEN
