@@ -25,9 +25,9 @@
         </Axes>
     </Record1>
     <Record2>
-        <Date></Date>
+        <Date type="date"></Date>
         <Creator></Creator>
-        <CalibrationDate></CalibrationDate>
+        <CalibrationDate type="date"></CalibrationDate>
         <Comment></Comment>
         <Instrument>
             <Manufacturer></Manufacturer>

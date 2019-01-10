@@ -5,15 +5,25 @@ import md5 from "blueimp-md5";
 declare var window: any;
 declare var jsdom: any;
 
+const ATTRIBUTES = [
+    "disabled",
+    "type",
+];
+
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
 const Parser = new window.DOMParser();
 const Serializer = new window.XMLSerializer();
-const serialize = (value: any): string => {
-    for(let node of value.querySelectorAll("[disabled]")) {
-        node.removeAttribute("disabled");
-    }
 
-    return DOCTYPE + "\n" + Serializer.serializeToString(value);
+const serialize = (value: any): string => {
+    
+    for(let node of value.querySelectorAll("*")) {
+        for(let attr of ATTRIBUTES) {
+            node.removeAttribute(attr);
+        }
+    }
+    
+    let result = Serializer.serializeToString(value);
+    return result.match(/<\?xml/g) ? result : DOCTYPE + "\n" + result;
 };
 
 const $string = Symbol();
@@ -23,6 +33,7 @@ export default class Manifest {
     private data: Document;
     private tree = Parser.parseFromString(Tree, "text/xml");
     private openNodes: string[] = [];
+    private error?: Element;
     
     // cache helpers
     private [$string]?: string;
@@ -30,6 +41,8 @@ export default class Manifest {
 
     constructor(source: string) {
         this.data = Parser.parseFromString(source, "text/xml");
+
+        this.removeErrors();
         this.merge();
     }
 
@@ -122,6 +135,19 @@ export default class Manifest {
         }
 
         this.openNodes.pop();
+    }
+
+    private removeErrors() {
+        // remove parsererror and store it in this.error
+        let error = this.data.querySelector("parsererror");
+        if(error) {
+            let errorParent = error.parentElement;
+            
+            if(errorParent) {
+                errorParent.removeChild(error);
+                this.error = error;
+            }
+        }
     }
 
     private get pathName() {

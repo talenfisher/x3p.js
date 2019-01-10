@@ -16,6 +16,13 @@ describe("Manifest", () => {
             let manifest = new Manifest(source);
             expect(manifest.get("Record1 Revision")).toBe("Test");
         });
+
+        it("Should remove parsererrors from the tree", () => {
+            let source = DOCTYPE + `<p:root><Record1><Revision>Test</Revision></Record1></p:root>`; // p namespace undefined
+            let manifest = new Manifest(source);
+
+            expect(manifest.get("parsererror")).toBe(undefined);
+        });
     
         it("Should merge multiple records into the resulting tree", () => {
             let source = DOCTYPE + `<root><Record1><Revision>Test</Revision></Record1><Record2><Creator>Talen</Creator></Record2></root>`;
