@@ -16,11 +16,8 @@ script:
   - npm run lint
   - npm run test
 
-before_deploy: 
-  - git add . && git commit -m "."
-  - npm version $TRAVIS_TAG
-
 deploy:
+  skip_cleanup: true
   provider: npm
   email: tqfisher@iastate.edu
   api_key: $NPM_TOKEN
