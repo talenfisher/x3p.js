@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ISO5436>
+    <Record1>
+        <Revision disabled="true"></Revision>
+        <FeatureType disabled=""></FeatureType>
+        <Axes>
+            <CX>
+                <AxisType disabled=""></AxisType>
+                <DataType disabled=""></DataType>
+                <Increment disabled=""></Increment>
+                <Offset disabled=""></Offset>
+            </CX>
+            <CY>
+                <AxisType disabled=""></AxisType>
+                <DataType disabled=""></DataType>
+                <Increment disabled=""></Increment>
+                <Offset disabled=""></Offset>
+            </CY>
+            <CZ>
+                <AxisType disabled=""></AxisType>
+                <DataType disabled=""></DataType>
+                <Increment disabled=""></Increment>
+                <Offset disabled=""></Offset>
+            </CZ>
+        </Axes>
+    </Record1>
+    <Record2>
+        <Date></Date>
+        <Creator></Creator>
+        <CalibrationDate></CalibrationDate>
+        <Comment></Comment>
+        <Instrument>
+            <Manufacturer></Manufacturer>
+            <Model></Model>
+            <Serial></Serial>
+            <Version></Version>
+        </Instrument>
+        <ProbingSystem>
+            <Type></Type>
+            <Identification></Identification>
+        </ProbingSystem>
+    </Record2>
+    <Record3>
+        <MatrixDimension>
+            <SizeX disabled=""></SizeX>
+            <SizeY disabled=""></SizeY>
+            <SizeZ disabled=""></SizeZ>
+        </MatrixDimension>
+        <DataLink>
+            <PointDataLink disabled=""></PointDataLink>
+            <MD5ChecksumPointData disabled=""></MD5ChecksumPointData>
+        </DataLink>
+    </Record3>
+    <Record4>
+        <ChecksumFile disabled=""></ChecksumFile>
+    </Record4>
+</ISO5436>
