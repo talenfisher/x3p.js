@@ -46,7 +46,7 @@ class WorkerUtil {
             options.axes.z,
         ];
 
-        this.shape = [ this.axes[0].size, this.axes[1].size ];
+        this.shape = [ this.axes[1].size, this.axes[0].size ];
         this.paddedShape = [ this.shape[0] + 2, this.shape[1] + 2 ];
 
         let data;
@@ -80,9 +80,6 @@ class WorkerUtil {
     }
 
     private computeMatrix() {
-        let cy = -1;
-        const [ x, y, z ] = this.coords;
-
         // sizes
         const sx = this.axes[0].size;
         const sy = this.axes[1].size;
@@ -91,18 +88,17 @@ class WorkerUtil {
         const ix = this.axes[0].increment / EPSILON;
         const iy = this.axes[1].increment / EPSILON;
 
-        for(let i = 0; i < sx; i++) {
-            for(let j = 0; j < sy; j++) {
+        for(let i = 0; i < sy; i++) {
+            for(let j = 0; j < sx; j++) {
                 let data = this.data.get(i, j);
                 let values = [
-                    (i % sx) * ix,
-                    ((i === 0) ? ++cy : cy) * iy,
+                    i * ix,
+                    j * iy,
                     (data / EPSILON) * MULTIPLY,
                 ];
 
                 for(let k = 0; k < 3; k++) {
                     let axis = this.coords[k];
-
                     axis.set(i + 1, j + 1, values[k]);
 
                     if(!isNaN(values[k])) {
