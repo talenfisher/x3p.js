@@ -12,6 +12,6 @@ export default function create(gl: WebGLRenderingContext) {
     shader.attributes.vCoord.location = 0;
     shader.attributes.normal.location = 1;
     shader.attributes.tCoord.location = 2;
-
+    
     return shader;
 }

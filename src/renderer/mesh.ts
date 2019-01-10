@@ -74,7 +74,7 @@ export default class Mesh {
     }
 
     public draw(options: any) {
-        this.gl.disable(this.gl.CULL_FACE);
+        // this.gl.disable(this.gl.CULL_FACE);
 
         let uniforms = this.uniforms;
         uniforms.model = options.model || Identity;
