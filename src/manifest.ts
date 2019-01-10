@@ -21,8 +21,9 @@ const serialize = (value: any): string => {
             node.removeAttribute(attr);
         }
     }
-
-    return DOCTYPE + "\n" + Serializer.serializeToString(value);
+    
+    let result = Serializer.serializeToString(value);
+    return result.match(/<\?xml/g) ? result : DOCTYPE + "\n" + result;
 };
 
 const $string = Symbol();
