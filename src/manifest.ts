@@ -33,6 +33,7 @@ export default class Manifest {
     private data: Document;
     private tree = Parser.parseFromString(Tree, "text/xml");
     private openNodes: string[] = [];
+    private error?: Element;
     
     // cache helpers
     private [$string]?: string;
@@ -40,6 +41,8 @@ export default class Manifest {
 
     constructor(source: string) {
         this.data = Parser.parseFromString(source, "text/xml");
+
+        this.removeErrors();
         this.merge();
     }
 
@@ -132,6 +135,19 @@ export default class Manifest {
         }
 
         this.openNodes.pop();
+    }
+
+    private removeErrors() {
+        // remove parsererror and store it in this.error
+        let error = this.data.querySelector("parsererror");
+        if(error) {
+            let errorParent = error.parentElement;
+            
+            if(errorParent) {
+                errorParent.removeChild(error);
+                this.error = error;
+            }
+        }
     }
 
     private get pathName() {
