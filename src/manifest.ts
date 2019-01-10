@@ -5,12 +5,21 @@ import md5 from "blueimp-md5";
 declare var window: any;
 declare var jsdom: any;
 
+const ATTRIBUTES = [
+    "disabled",
+    "type",
+];
+
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
 const Parser = new window.DOMParser();
 const Serializer = new window.XMLSerializer();
+
 const serialize = (value: any): string => {
-    for(let node of value.querySelectorAll("[disabled]")) {
-        node.removeAttribute("disabled");
+    
+    for(let node of value.querySelectorAll("*")) {
+        for(let attr of ATTRIBUTES) {
+            node.removeAttribute(attr);
+        }
     }
 
     return DOCTYPE + "\n" + Serializer.serializeToString(value);
