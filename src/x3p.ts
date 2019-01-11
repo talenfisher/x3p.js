@@ -3,8 +3,10 @@ import X3PLoader from "./index";
 import Manifest from "./manifest";
 import Mask from "./mask";
 import Renderer from "./renderer";
+import { bufferToTypedArray } from "./data-types";
 
 import { saveAs } from "file-saver";
+import ndarray = require("ndarray");
 
 interface X3POptions {
     name: string;
@@ -18,6 +20,7 @@ export default class X3P {
     public manifest: Manifest;
     public pointBuffer?: ArrayBuffer;
     public mask: Mask;
+    public matrix?: ndarray;
 
     private loader: X3PLoader;
     private options: X3POptions;
@@ -35,6 +38,13 @@ export default class X3P {
             y: new Axis({ name: "Y", manifest: this.manifest }),
             z: new Axis({ name: "Z", manifest: this.manifest }),
         };
+
+        if(this.pointBuffer) {
+            let dtype = this.axes.z.dataType.name;
+            let arr = bufferToTypedArray(this.pointBuffer, dtype);
+            let shape = [ this.axes.y.size, this.axes.x.size ];
+            this.matrix = ndarray(arr, shape);
+        }
     }
 
     public save() {
