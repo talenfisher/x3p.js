@@ -4,6 +4,7 @@ import Quad from "./quad";
 
 import ndarray from "ndarray";
 import zeros from "zeros";
+import fill from "ndarray-fill";
 import gradient from "ndarray-gradient";
 import show from "ndarray-show";
 
@@ -28,13 +29,11 @@ class WorkerUtil {
     
     private pointBuffer: ArrayBuffer;
     private axes: Axis[] = [];
-    private data: ndarray;
     private dataLength: number;
     private coordBuffer?: TypedArray;
     private normals?: ndarray;
 
     private shape: number[];
-    private paddedShape: number[];
     private lo = [ Infinity, Infinity, Infinity ];
     private hi = [ -Infinity, -Infinity, -Infinity ];
 
@@ -47,7 +46,6 @@ class WorkerUtil {
         ];
 
         this.shape = [ this.axes[1].size, this.axes[0].size ];
-        this.paddedShape = [ this.shape[0] + 2, this.shape[1] + 2 ];
 
         let data;
         switch(this.axes[2].name) {
@@ -58,16 +56,35 @@ class WorkerUtil {
             case "Int16":   data = new Int16Array(this.pointBuffer);   break;
         }
 
-        this.data = ndarray(data, this.shape);
-        this.dataLength = this.paddedShape[0] * this.paddedShape[1];
+        this.coords[2] = ndarray(data, this.shape);
+        this.dataLength = this.shape[0] * this.shape[1];
 
-        for(let i = 0; i < 3; i++) {
+        for(let i = 0; i < 2; i++) {
             let dtype = this.axes[i].dataType;
             let name = dtype.name.toLowerCase() as DataTypeNameLower;
-            this.coords[i] = zeros(this.paddedShape, name);
+            this.coords[i] = ndarray(malloc(this.dataLength, name), this.shape);
         }
 
-        this.computeMatrix();
+        const ix = this.axes[0].increment / EPSILON;
+        const iy = this.axes[1].increment / EPSILON;
+        
+        fill(this.coords[0], (i: number, j: number) => j * iy);
+        fill(this.coords[1], (i: number, j: number) => i * ix);
+        
+              
+        // this.computeMatrix();
+        this.lo = [ 0, 0, Infinity ];
+        this.hi = [ this.shape[1] * iy, this.shape[0] * ix, -Infinity ];
+        
+        for(let i = 0; i < data.length; i++) {
+            data[i] = (data[i] / EPSILON) * MULTIPLY;
+
+            if(!isNaN(data[i]) && isFinite(data[i])) {
+                this.lo[2] = Math.min(this.lo[2], data[i]);
+                this.hi[2] = Math.max(this.hi[2], data[i]);
+            }
+        }
+
         this.computeNormals();
         this.buffer();
     }
@@ -79,18 +96,16 @@ class WorkerUtil {
         free(this.coords[2].data);
     }
 
-    private computeMatrix() {
+   /* private computeMatrix() {
         // sizes
         const sx = this.axes[0].size;
         const sy = this.axes[1].size;
 
         // increments
-        const ix = this.axes[0].increment / EPSILON;
-        const iy = this.axes[1].increment / EPSILON;
-
-        for(let i = 0; i < sy; i++) {
-            for(let j = 0; j < sx; j++) {
-                let data = this.data.get(i, j);
+        
+        for(let i = 0; i < sx; i++) {
+            for(let j = 0; j < sy; j++) {
+                let data = this.data.get(j, i);
                 let values = [
                     i * ix,
                     j * iy,
@@ -99,7 +114,7 @@ class WorkerUtil {
 
                 for(let k = 0; k < 3; k++) {
                     let axis = this.coords[k];
-                    axis.set(i + 1, j + 1, values[k]);
+                    axis.set(j + 1, i + 1, values[k]);
 
                     if(!isNaN(values[k])) {
                         this.lo[k] = Math.min(this.lo[k], values[k]);
@@ -107,22 +122,22 @@ class WorkerUtil {
                     }
                 }
             }
-        }
+        } 
     }
-
+*/
     private computeNormals() {
-        let shape = [ 3, this.paddedShape[0], this.paddedShape[1], 2 ];
+        let shape = [ 3, this.shape[0], this.shape[1], 2 ];
         let dfields = ndarray(mallocFloat(this.dataLength * 3 * 2), shape);
 
         for(let i = 0; i < 3; i++) {
-            gradient(dfields.pick(i), this.coords[i], "mirror");
+            gradient(dfields.pick(i), this.coords[i], "wrap");
         } 
 
-        let normalsShape = [ this.paddedShape[0], this.paddedShape[1], 3 ];
+        let normalsShape = [ this.shape[0], this.shape[1], 3 ];
         let normals = ndarray(mallocFloat(this.dataLength * 3), normalsShape);
 
-        for(let i = 0; i < this.paddedShape[0]; i++) {
-            for(let j = 0; j < this.paddedShape[1]; j++) {
+        for(let i = 0; i < this.shape[0]; i++) {
+            for(let j = 0; j < this.shape[1]; j++) {
                 let dxdu = dfields.get(0, i, j, 0);
                 let dxdv = dfields.get(0, i, j, 1);
                 let dydu = dfields.get(1, i, j, 0);
@@ -164,15 +179,15 @@ class WorkerUtil {
         this.vertexCount = 0;
 
         let ptr = 0;
-        let count = (this.paddedShape[0] - 1) * (this.paddedShape[1] - 1) * 6;
+        let count = (this.shape[0] - 1) * (this.shape[1] - 1) * 6;
         this.coordBuffer = mallocFloat(nextPow2(8 * count));
 
         let hi = this.hi[2];
         let lo = this.lo[2];
         let diff = hi - lo;
 
-        i_loop: for(let i = 0; i < this.paddedShape[0] - 1; i++) {
-            j_loop: for(let j = 0; j < this.paddedShape[1] - 1; j++) {
+        i_loop: for(let i = 0; i < this.shape[0] - 1; i++) {
+            j_loop: for(let j = 0; j < this.shape[1] - 1; j++) {
                 
                 // skip if any vertices in the quadrilateral are undefined
                 for(let dx = 0; dx < 2; dx++) {
@@ -186,8 +201,8 @@ class WorkerUtil {
                 let tv = j / this.shape[1];
 
                 for(let k = 0; k < 6; k++) {
-                    let ix = i + Quad[k][0] + 1;
-                    let iy = j + Quad[k][1] + 1;
+                    let ix = i + Quad[k][0];
+                    let iy = j + Quad[k][1];
                     
                     this.coordBuffer[ptr++] = this.coords[0].get(ix, iy);
                     this.coordBuffer[ptr++] = this.coords[1].get(ix, iy);
@@ -212,6 +227,7 @@ class WorkerUtil {
             vertexCount: this.vertexCount,
             elementCount: this.elementCount,
             coords: this.coordBuffer,
+            intensity: this.coords[2],
             bounds: [ this.lo, this.hi ],
         };
     }
