@@ -9,9 +9,9 @@ varying vec3 worldCoordinate, lightDirection, eyeDirection, surfaceNormal;
 varying vec4 vColor;
 
 void main() {
-    if(outOfRange(clipBounds[0], clipBounds[1], worldCoordinate)) {
-        discard;
-    }
+    // if(outOfRange(clipBounds[0], clipBounds[1], worldCoordinate)) {
+    //     discard;
+    // }
 
     vec3 N = normalize(surfaceNormal);
     vec3 V = normalize(eyeDirection);

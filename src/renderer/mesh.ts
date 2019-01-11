@@ -12,7 +12,6 @@ import { TypedArray } from "../data-types";
 
 interface MeshOptions {
     x3p: X3P;
-    gl: WebGLRenderingContext;
     canvas: HTMLCanvasElement;
     lighting?: LightingOptions;
 }
@@ -22,7 +21,6 @@ const STRIDE = 4 * (3 + 3 + 2);
 export default class Mesh {
     public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
     private bounds?: number[][];
-    private intensity?: TypedArray;
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext; 
@@ -30,18 +28,17 @@ export default class Mesh {
     private coordinateBuffer: GLBuffer;
     private vertexCount: number = 0;
     private shader: any;
-    private camera: any;
 
     private uniforms = {
         model: Identity,
         view: Identity,
-        projection: Identity,
+        projection: Identity.slice(),
         inverseModel: Identity.slice(),
         ambient: 1,
         diffuse: 1,
         specular: 1,
         roughness: 1,
-        fresnel: 1,
+        fresnel: 1.5,
         lightPosition: [0, 0, 0],
         eyePosition: [0, 0, 0],
         clipBounds: this.clipBounds,
@@ -50,7 +47,7 @@ export default class Mesh {
     constructor(options: MeshOptions) {
         this.x3p = options.x3p;
         this.canvas = options.canvas;
-        this.gl = options.gl;
+        this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
         this.shader = createShader(this.gl);
         this.coordinateBuffer = createBuffer(this.gl);
         this.vao = createVAO(this.gl, [
@@ -79,11 +76,11 @@ export default class Mesh {
 
     public draw(options: any) {
         this.gl.disable(this.gl.CULL_FACE);
-
+        
         let uniforms = this.uniforms;
-        uniforms.model = options.model || Identity;
-        uniforms.projection = options.projection || Identity;
-        uniforms.view = options.view || Identity;
+        uniforms.model = options.model;
+        uniforms.projection = options.projection;
+        uniforms.view = options.view;
         uniforms.inverseModel = invert(uniforms.inverseModel, uniforms.model);
         uniforms.clipBounds = this.clipBounds as number[][]; // gl-plot3d adjusts this
 
@@ -139,7 +136,6 @@ export default class Mesh {
             this.vertexCount = e.data.vertexCount;
             this.coordinateBuffer.update(e.data.coords.subarray(0, e.data.elementCount));
             this.bounds = e.data.bounds;
-            this.intensity = e.data.intensity;
 
             freeFloat(e.data.coords);
             worker.terminate();

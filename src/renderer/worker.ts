@@ -67,21 +67,21 @@ class WorkerUtil {
 
         const ix = this.axes[0].increment / EPSILON;
         const iy = this.axes[1].increment / EPSILON;
-        
-        fill(this.coords[0], (i: number, j: number) => j * iy);
-        fill(this.coords[1], (i: number, j: number) => i * ix);
-        
-              
-        // this.computeMatrix();
+
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[1] * iy, this.shape[0] * ix, -Infinity ];
         
-        for(let i = 0; i < data.length; i++) {
-            data[i] = (data[i] / EPSILON) * MULTIPLY;
+        fill(this.coords[0], (i: number, j: number) => j * iy);
+        fill(this.coords[1], (i: number, j: number) => i * ix);    
+        
+        let z = this.coords[2].data;
+        for(let i = 0; i < z.length; i++) {
+            z[i] /= EPSILON;
+            z[i] *= MULTIPLY;
 
-            if(!isNaN(data[i]) && isFinite(data[i])) {
-                this.lo[2] = Math.min(this.lo[2], data[i]);
-                this.hi[2] = Math.max(this.hi[2], data[i]);
+            if(!isNaN(z[i]) && isFinite(z[i])) {
+                this.lo[2] = Math.min(this.lo[2], z[i]);
+                this.hi[2] = Math.max(this.hi[2], z[i]);
             }
         }
 
@@ -96,35 +96,6 @@ class WorkerUtil {
         free(this.coords[2].data);
     }
 
-   /* private computeMatrix() {
-        // sizes
-        const sx = this.axes[0].size;
-        const sy = this.axes[1].size;
-
-        // increments
-        
-        for(let i = 0; i < sx; i++) {
-            for(let j = 0; j < sy; j++) {
-                let data = this.data.get(j, i);
-                let values = [
-                    i * ix,
-                    j * iy,
-                    (data / EPSILON) * MULTIPLY,
-                ];
-
-                for(let k = 0; k < 3; k++) {
-                    let axis = this.coords[k];
-                    axis.set(j + 1, i + 1, values[k]);
-
-                    if(!isNaN(values[k])) {
-                        this.lo[k] = Math.min(this.lo[k], values[k]);
-                        this.hi[k] = Math.max(this.hi[k], values[k]);
-                    }
-                }
-            }
-        } 
-    }
-*/
     private computeNormals() {
         let shape = [ 3, this.shape[0], this.shape[1], 2 ];
         let dfields = ndarray(mallocFloat(this.dataLength * 3 * 2), shape);
@@ -182,10 +153,6 @@ class WorkerUtil {
         let count = (this.shape[0] - 1) * (this.shape[1] - 1) * 6;
         this.coordBuffer = mallocFloat(nextPow2(8 * count));
 
-        let hi = this.hi[2];
-        let lo = this.lo[2];
-        let diff = hi - lo;
-
         i_loop: for(let i = 0; i < this.shape[0] - 1; i++) {
             j_loop: for(let j = 0; j < this.shape[1] - 1; j++) {
                 
@@ -206,7 +173,7 @@ class WorkerUtil {
                     
                     this.coordBuffer[ptr++] = this.coords[0].get(ix, iy);
                     this.coordBuffer[ptr++] = this.coords[1].get(ix, iy);
-                    this.coordBuffer[ptr++] = (this.coords[2].get(ix, iy) - lo) / diff;
+                    this.coordBuffer[ptr++] = this.coords[2].get(ix, iy);
 
                     let normals = this.normals as ndarray;
                     this.coordBuffer[ptr++] = normals.get(ix, iy, 0);
@@ -227,7 +194,6 @@ class WorkerUtil {
             vertexCount: this.vertexCount,
             elementCount: this.elementCount,
             coords: this.coordBuffer,
-            intensity: this.coords[2],
             bounds: [ this.lo, this.hi ],
         };
     }

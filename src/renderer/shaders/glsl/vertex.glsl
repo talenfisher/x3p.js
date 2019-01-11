@@ -11,11 +11,9 @@ varying vec3 worldCoordinate, eyeDirection, lightDirection, surfaceNormal;
 varying vec4 vColor;
 
 void main() {
-    worldCoordinate = vCoord;
+    worldCoordinate = vCoord.xyz;
     vec4 worldPosition = model * vec4(worldCoordinate, 1.0);
-    vec4 clipPosition = projection * view * worldPosition;
-
-    gl_Position = clipPosition;
+    gl_Position = projection * view * worldPosition;
     vColor = vec4(1.0, 0.0, 0.0, 1.0);
 
     vec4 cameraCoordinate = view * worldPosition;

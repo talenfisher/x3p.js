@@ -34,11 +34,11 @@ export default class Renderer {
         this.scene = createScene({
             canvas: this.canvas,
             pixelRatio: 1,
-            autoResize: false,
+            // autoResize: false,
             camera: CameraOptions,
         });
 
-        this.mesh = new Mesh(Object.assign({ gl: this.gl }, options));
+        this.mesh = new Mesh(options);
         this.scene.add(this.mesh);
     }
 }
