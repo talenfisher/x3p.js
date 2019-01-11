@@ -1,7 +1,6 @@
 import Axis from "../src/axis";
 import Manifest from "../src/manifest";
 
-
 describe("Axis", () => {
     describe("constructor", () => {
         it("Should throw an error when the axis is not defined in the manifest's Record1", () => {

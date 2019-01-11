@@ -3,10 +3,8 @@ import { DataTypeNameLower, TypedArray } from "../data-types";
 import Quad from "./quad";
 
 import ndarray from "ndarray";
-import zeros from "zeros";
 import fill from "ndarray-fill";
 import gradient from "ndarray-gradient";
-import show from "ndarray-show";
 
 import Axis from "axis";
 
