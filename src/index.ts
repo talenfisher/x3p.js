@@ -113,32 +113,12 @@ export default class X3PLoader extends Promisable<X3P> {
      */
     private async getMask() {
         if(!this.manifest || !this.zip) return;
-
-        let definition = await this.getMaskDefinition();
         let data = await this.getMaskData();
         
         return new Mask({
             manifest: this.manifest,
-            definition,
             data,
         });
-    }
-
-    /**
-     * Gets the mask definition.  First searches Record3 in main.xml, then for a mask.xml in the
-     * X3P's root directory.
-     */
-    private async getMaskDefinition() {
-        if(!this.manifest || !this.zip) return;
-        
-        let definition: Element | undefined = this.manifest.getNode("Record3 Mask") || undefined;
-        
-        if(!definition && this.hasFile("mask.xml")) {
-            let fileContents = await this.read("mask.xml") as string;
-            definition = Parser.parseFromString(fileContents, "application/xml").documentElement as Element;
-        }
-
-        return definition;
     }
 
     /**

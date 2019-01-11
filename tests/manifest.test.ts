@@ -31,6 +31,13 @@ describe("Manifest", () => {
             expect(manifest.get("Record1 Revision")).toBe("Test");
             expect(manifest.get("Record2 Creator")).toBe("Talen");
         });
+
+        it("Should merge attributes", () => {
+            let source = DOCTYPE + `<root><Record3><Mask><Annotations><Annotation color="red">test</Annotation></Annotations></Mask></Record3></root>`;
+            let manifest = new Manifest(source);
+
+            expect(manifest.get(`Annotation[color="red"]`)).toBe("test");
+        });
     
         it("Should add records that don't exist in the standard to the tree", () => {
             let source = DOCTYPE + `<root><Record5><FunElement>Party</FunElement></Record5></root>`;
@@ -136,7 +143,7 @@ describe("Manifest", () => {
     describe("get checksum", () => {
         it("Should return the md5 checksum of the manifest", () => {
             let manifest = new Manifest(`<root></root>`);
-            expect(manifest.checksum).toBe("cfc3ed722019bb5647f7715f720b9f02");
+            expect(manifest.checksum).toBe("b51cd5ded47f5b48df84632e38076dd0");
         });
     });
 });

@@ -50,6 +50,7 @@
             <PointDataLink/>
             <MD5ChecksumPointData/>
         </DataLink>
+        <Mask/>
     </Record3>
     <Record4>
         <ChecksumFile/>

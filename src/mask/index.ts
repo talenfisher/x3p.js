@@ -6,7 +6,6 @@ import createTexture from "gl-texture2d";
 
 export interface MaskOptions {
     manifest: Manifest;
-    definition?: Element;
     color?: string;
     data?: ArrayBuffer;
 }
@@ -24,13 +23,7 @@ export default class Mask {
         this.color = options.color || "#cd7f32";
         this.dataBuffer = options.data;
         
-        // create definition if it doesn't exist
-        if(!options.definition) {
-            this.manifest.set("Record3 Mask", "");
-            options.definition = this.manifest.getNode("Record3 Mask");
-        }
-        
-        this.definition = options.definition as Element;
+        this.definition = this.manifest.getNode("Record3 Mask");
         this.annotations = new Proxy(this.definition, AnnotationHandler);
         this.setupCanvas();
     }

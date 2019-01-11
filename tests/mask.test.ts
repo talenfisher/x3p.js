@@ -62,32 +62,38 @@ describe("Mask", () => {
         });
 
         it("Should return the annotation value when it exists in the Mask definition", () => {
-            let manifest = new Manifest(`<root></root>`);
-            let definition = parse(`
-                <Mask>
-                    <Annotations>
-                        <Annotation color='red'>Example Label</Annotation>
-                    </Annotations>
-                </Mask>
-            `).documentElement as Element;
+            let manifest = new Manifest(`
+                <root>
+                    <Record3>
+                        <Mask>
+                            <Annotations>
+                                <Annotation color="red">Example Label</Annotation>
+                            </Annotations>
+                        </Mask>
+                    </Record3>
+                </root>
+            `);
 
-            let mask = new Mask({ manifest, definition });
+            let mask = new Mask({ manifest });
             expect(mask.annotations.red).toBe("Example Label");
         });
     });
 
     describe("set annotations", () => {
         it("Should update an existing annotation", () => {
-            let manifest = new Manifest(`<root></root>`);
-            let definition = parse(`
-                <Mask>
-                    <Annotations>
-                        <Annotation color='red'>Example Label</Annotation>
-                    </Annotations>
-                </Mask>
-            `).documentElement as Element;
+            let manifest = new Manifest(`
+                <root>
+                    <Record3>
+                        <Mask>
+                            <Annotations>
+                                <Annotation color="red">Example Label</Annotation>
+                            </Annotations>
+                        </Mask>
+                    </Record3>
+                </root>
+            `);
 
-            let mask = new Mask({ manifest, definition });
+            let mask = new Mask({ manifest });
             
             mask.annotations.red = "Example 2";
             expect(mask.annotations.red).toBe("Example 2");
