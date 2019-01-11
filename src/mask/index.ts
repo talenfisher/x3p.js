@@ -2,6 +2,7 @@ import Manifest from "../manifest";
 import AnnotationHandler from "./annotation-handler";
 
 import { Canvas } from "@talenfisher/canvas";
+import createTexture from "gl-texture2d";
 
 export interface MaskOptions {
     manifest: Manifest;
@@ -32,6 +33,11 @@ export default class Mask {
         this.definition = options.definition as Element;
         this.annotations = new Proxy(this.definition, AnnotationHandler);
         this.setupCanvas();
+    }
+
+    public getTexture(gl: WebGLRenderingContext) {
+        if(!this.canvas) return;
+        return createTexture(gl, this.canvas.el);
     }
 
     private setupCanvas() {

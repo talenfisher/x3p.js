@@ -17,10 +17,10 @@ export default class X3P {
     public axes: { x: Axis, y: Axis, z: Axis };
     public manifest: Manifest;
     public pointBuffer?: ArrayBuffer;
+    public mask: Mask;
 
     private loader: X3PLoader;
     private options: X3POptions;
-    private mask: Mask;
     private name: string;
 
     constructor(options: X3POptions) {

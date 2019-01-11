@@ -23,6 +23,10 @@ declare module "gl-mat4" {
     export function multiply(...args: any[]): any;
 }
 
+declare module "gl-texture2d" {
+    export default function createTexture(...args: any[]): any;
+}
+
 declare module "*.glsl" {
     const value: string;
     export default value;

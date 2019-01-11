@@ -112,7 +112,7 @@ export default class X3PLoader extends Promisable<X3P> {
      * Load the X3P's mask
      */
     private async getMask() {
-        if(!this.manifest || this.zip) return;
+        if(!this.manifest || !this.zip) return;
 
         let definition = await this.getMaskDefinition();
         let data = await this.getMaskData();
@@ -150,12 +150,7 @@ export default class X3PLoader extends Promisable<X3P> {
      */
     private getMaskData(definition?: Element) {
         let link = definition ? definition.querySelector("Link") : null;
-        let filename = link !== null ? link.nodeValue : "bindata/texture.png";
-        
-        if(!this.hasFile(filename as string) && this.hasFile("bindata/texture.jpeg")) {
-            filename = "bindata/texture.jpeg";
-        }
-
+        let filename = link !== null ? link.nodeValue : "bindata/mask.png";
         return this.read(filename as string, "arraybuffer") as Promise<ArrayBuffer> | undefined;
     }
 }

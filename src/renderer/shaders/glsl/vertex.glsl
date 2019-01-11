@@ -6,6 +6,7 @@ attribute vec2 tCoord;
 
 uniform mat4 model, view, projection, inverseModel;
 uniform vec3 lightPosition, eyePosition;
+uniform sampler2D texture;
 
 varying vec3 worldCoordinate, eyeDirection, lightDirection, surfaceNormal;
 varying vec4 vColor;
@@ -14,7 +15,7 @@ void main() {
     worldCoordinate = vCoord.xyz;
     vec4 worldPosition = model * vec4(worldCoordinate, 1.0);
     gl_Position = projection * view * worldPosition;
-    vColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vColor = texture2D(texture, tCoord);
 
     vec4 cameraCoordinate = view * worldPosition;
     cameraCoordinate.xyz /= cameraCoordinate.w;

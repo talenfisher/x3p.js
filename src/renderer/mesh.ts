@@ -4,6 +4,7 @@ import Identity from "./identity";
 import createShader from "./shaders/index";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
+import createTexture from "gl-texture2d";
 import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
 import { invert, multiply } from "gl-mat4";
@@ -25,6 +26,7 @@ export default class Mesh {
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext; 
     private vao: GLVao;
+    private texture: any;
     private coordinateBuffer: GLBuffer;
     private vertexCount: number = 0;
     private shader: any;
@@ -50,6 +52,7 @@ export default class Mesh {
         this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
         this.shader = createShader(this.gl);
         this.coordinateBuffer = createBuffer(this.gl);
+        this.texture = this.x3p.mask.getTexture(this.gl);
         this.vao = createVAO(this.gl, [
             {
                 buffer: this.coordinateBuffer,
@@ -75,8 +78,10 @@ export default class Mesh {
     }
 
     public draw(options: any) {
-        this.gl.disable(this.gl.CULL_FACE);
         
+        this.gl.disable(this.gl.CULL_FACE);
+        this.texture.bind(0);
+
         let uniforms = this.uniforms;
         uniforms.model = options.model;
         uniforms.projection = options.projection;
@@ -104,7 +109,7 @@ export default class Mesh {
 
             uniforms.lightPosition[i] = s / w;
         }
- 
+        
         this.shader.bind();
         this.shader.uniforms = uniforms;
 
