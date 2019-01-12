@@ -6,12 +6,12 @@ export default function create(gl: WebGLRenderingContext) {
     let shader = createShader(gl, VertexShaderSrc, FragmentShaderSrc, undefined, [
         { name: "vCoord", type: "vec3" },
         { name: "normal", type: "vec3" },
-        { name: "tCoord", type: "vec2" },
+        { name: "uv", type: "vec2" },
     ]);
 
     shader.attributes.vCoord.location = 0;
     shader.attributes.normal.location = 1;
-    shader.attributes.tCoord.location = 2;
+    shader.attributes.uv.location = 2;
     
     return shader;
 }

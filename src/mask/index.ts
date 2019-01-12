@@ -10,6 +10,15 @@ export interface MaskOptions {
     data?: ArrayBuffer;
 }
 
+function loadImage(buffer: ArrayBuffer): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+        let url = URL.createObjectURL(new Blob([ buffer ]));
+        let img = new Image();
+        img.onload = () => resolve(img);
+        img.src = url;
+    });
+}
+
 export default class Mask {
     public annotations: { [name: string]: any };
     public color: string;
@@ -17,6 +26,7 @@ export default class Mask {
     private manifest: Manifest;
     private definition: Element;
     private dataBuffer?: ArrayBuffer;
+    private texture?: any;
 
     constructor(options: MaskOptions) {
         this.manifest = options.manifest;
@@ -30,18 +40,26 @@ export default class Mask {
 
     public getTexture(gl: WebGLRenderingContext) {
         if(!this.canvas) return;
-        return createTexture(gl, this.canvas.el);
+        
+        return this.texture ? this.texture : this.texture = createTexture(gl, this.canvas.el);
     }
 
-    private setupCanvas() {
+    private async setupCanvas() {
         if(this.width === 0 || this.height === 0) return;
 
         this.canvas = new Canvas({ height: this.height, width: this.width });
 
         if(this.dataBuffer) {
-            let data = new Uint8ClampedArray(this.dataBuffer);
-            let imageData = new ImageData(data, this.width, this.height);
-            this.canvas.putImageData(imageData, 0, 0);            
+            let img = await loadImage(this.dataBuffer);
+            let el = this.canvas.el;
+            let ctx = this.canvas.context;
+            
+            this.canvas.drawImage(img);
+
+            if(this.texture) {
+                this.texture.setPixels(el);
+            }
+
         } else {
             this.canvas.clear(this.color);
         }

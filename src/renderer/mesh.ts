@@ -9,6 +9,7 @@ import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
 import { invert, multiply } from "gl-mat4";
 import LightingOptions from "./lighting";
+import ndarray from "ndarray";
 import { TypedArray } from "../data-types";
 
 interface MeshOptions {
@@ -21,6 +22,12 @@ const STRIDE = 4 * (3 + 3 + 2);
 
 export default class Mesh {
     public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
+    public pickSlots: number = 1;
+    public pickId: number = 1;
+    public dirty: boolean = true;
+
+    private coords?: ndarray[];
+    private shape?: number[];
     private bounds?: number[][];
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
@@ -30,6 +37,7 @@ export default class Mesh {
     private coordinateBuffer: GLBuffer;
     private vertexCount: number = 0;
     private shader: any;
+    private pickShader: any;
 
     private uniforms = {
         model: Identity,
@@ -46,7 +54,10 @@ export default class Mesh {
         clipBounds: this.clipBounds,
     };
 
+    private pickUniforms = Object.assign({ pickId: this.pickId / 255.0 }, this.uniforms);
+
     constructor(options: MeshOptions) {
+
         this.x3p = options.x3p;
         this.canvas = options.canvas;
         this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
@@ -139,12 +150,77 @@ export default class Mesh {
 
         worker.onmessage = (e) => {
             this.vertexCount = e.data.vertexCount;
-            this.coordinateBuffer.update(e.data.coords.subarray(0, e.data.elementCount));
+            this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
+            this.shape = e.data.shape;
             this.bounds = e.data.bounds;
+            this.dirty = true;
 
-            freeFloat(e.data.coords);
+            this.coords = [];
+            for(let i = 0; i < 3; i++) {
+                this.coords[i] = ndarray(e.data.coords[i], this.shape);
+            }
+
+            freeFloat(e.data.buffer);
             worker.terminate();
         };
+    }
+
+    public pick(selection: any) {
+        if(!selection || selection.id !== this.pickId) return;
+
+        let shape = this.shape as number[];
+        let coords = this.coords as ndarray[];
+        
+        let result = {
+            position: [ 0, 0, 0],
+            index: [ 0, 0 ],
+            uv: [ 0, 0 ],
+            dataCoordinate: [ 0, 0, 0 ],
+        };
+
+        let x = shape[0] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
+        let ix = Math.floor(x);
+        let fx = x - ix;
+      
+        let y = shape[1] * (selection.value[1] + (selection.value[2] & 15) / 16.0) / 255.0;
+        let iy = Math.floor(y);
+        let fy = y - iy;
+
+        ix++;
+        iy++;
+
+        let pos = result.position;
+        for(let dx = 0; dx < 2; dx++) {
+            let s = dx ? fx : 1.0 - fx;
+            
+            for(let dy = 0; dy < 2; dy++) {
+                let t = dy ? fy : 1.0 - fy;
+            
+                let r = ix + dx;
+                let c = iy + dy;
+                let w = s * t;
+            
+                for(let i = 0; i < 3; i++) {
+                    pos[i] += coords[i].get(r, c) * w;
+                }
+            }
+        }
+
+        result.index[0] = fx < 0.5 ? ix : (ix + 1);
+        result.index[1] = fy < 0.5 ? iy : (iy + 1);
+
+        result.uv[0] = x / shape[0];
+        result.uv[1] = y / shape[0];
+
+        for(let i = 0; i < 3; i++) {
+            result.dataCoordinate[i] = coords[i].get(result.index[0], result.index[1]);
+        }
+
+        return result;
+    }
+
+    public setPickBase(base: number) {
+        this.pickId = base;
     }
 
     public isOpaque() {

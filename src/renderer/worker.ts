@@ -69,8 +69,8 @@ class WorkerUtil {
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[1] * iy, this.shape[0] * ix, -Infinity ];
         
-        fill(this.coords[0], (i: number, j: number) => j * iy);
-        fill(this.coords[1], (i: number, j: number) => i * ix);    
+        fill(this.coords[0], (i: number, j: number) => j * ix);
+        fill(this.coords[1], (i: number, j: number) => i * iy);    
         
         let z = this.coords[2].data;
         for(let i = 0; i < z.length; i++) {
@@ -162,8 +162,8 @@ class WorkerUtil {
                     }
                 }
 
-                let tu = i / this.shape[0];
-                let tv = j / this.shape[1];
+                let tu = (this.shape[1] - j) / this.shape[1];
+                let tv = i / this.shape[0];
 
                 for(let k = 0; k < 6; k++) {
                     let ix = i + Quad[k][0];
@@ -191,7 +191,9 @@ class WorkerUtil {
         return {
             vertexCount: this.vertexCount,
             elementCount: this.elementCount,
-            coords: this.coordBuffer,
+            buffer: this.coordBuffer,
+            coords: [ this.coords[0].data, this.coords[1].data, this.coords[2].data ],
+            shape: this.coords[2].shape,
             bounds: [ this.lo, this.hi ],
         };
     }
@@ -200,5 +202,5 @@ class WorkerUtil {
 self.onmessage = (e) => {
     let util = new WorkerUtil(e.data);
     // @ts-ignore
-    postMessage(util.result, [ util.coordBuffer.buffer ]);
+    postMessage(util.result, [ util.coordBuffer.buffer, util.coords[0].data.buffer, util.coords[1].data.buffer, util.coords[2].data.buffer ]);
 };
