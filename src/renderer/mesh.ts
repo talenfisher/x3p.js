@@ -26,7 +26,7 @@ export default class Mesh {
     public pickId: number = 1;
     public dirty: boolean = true;
 
-    private coords?: ndarray[];
+    private coords?: ndarray;
     private shape?: number[];
     private bounds?: number[][];
     private x3p: X3P;
@@ -62,6 +62,7 @@ export default class Mesh {
         this.canvas = options.canvas;
         this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
         this.shader = createShader(this.gl);
+        this.pickShader = createShader(this.gl, "pick");
         this.coordinateBuffer = createBuffer(this.gl);
         this.texture = this.x3p.mask.getTexture(this.gl);
         this.vao = createVAO(this.gl, [
@@ -129,6 +130,21 @@ export default class Mesh {
         this.vao.unbind();
     }
 
+    public drawPick(options: any) {
+        let uniforms = this.pickUniforms;
+        uniforms.model = options.model || Identity;
+        uniforms.view = options.view || Identity;
+        uniforms.projection = options.projection || Identity;
+        uniforms.pickId = this.pickId / 255.0;
+        
+        this.pickShader.bind();
+        this.pickShader.uniforms = uniforms;
+
+        this.vao.bind();
+        this.vao.draw(this.gl.TRIANGLES, this.vertexCount);
+        this.vao.unbind();
+    }
+
     public update(options?: MeshOptions) {
         let worker = new Worker("./worker.ts");
 
@@ -154,12 +170,8 @@ export default class Mesh {
             this.shape = e.data.shape;
             this.bounds = e.data.bounds;
             this.dirty = true;
-
-            this.coords = [];
-            for(let i = 0; i < 3; i++) {
-                this.coords[i] = ndarray(e.data.coords[i], this.shape);
-            }
-
+            this.coords = ndarray(e.data.coords, this.shape);
+            
             freeFloat(e.data.buffer);
             worker.terminate();
         };
@@ -169,7 +181,7 @@ export default class Mesh {
         if(!selection || selection.id !== this.pickId) return;
 
         let shape = this.shape as number[];
-        let coords = this.coords as ndarray[];
+        let coords = this.coords as ndarray;
         
         let result = {
             position: [ 0, 0, 0],
@@ -201,7 +213,7 @@ export default class Mesh {
                 let w = s * t;
             
                 for(let i = 0; i < 3; i++) {
-                    pos[i] += coords[i].get(r, c) * w;
+                    pos[i] += coords.get(r, c, i) * w;
                 }
             }
         }
@@ -210,10 +222,10 @@ export default class Mesh {
         result.index[1] = fy < 0.5 ? iy : (iy + 1);
 
         result.uv[0] = x / shape[0];
-        result.uv[1] = y / shape[0];
+        result.uv[1] = y / shape[1];
 
         for(let i = 0; i < 3; i++) {
-            result.dataCoordinate[i] = coords[i].get(result.index[0], result.index[1]);
+            result.dataCoordinate[i] = coords.get(result.index[0], result.index[1], i);
         }
 
         return result;
