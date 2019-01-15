@@ -1,6 +1,6 @@
 {
   "name": "x3p.js",
-  "version": "0.2.0",
+  "version": "0.2.4",
   "description": "JavaScript library for working with X3P files",
   "main": "dist/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test": "jest --colors",
     "test:render": "parcel serve tests/browser/index.html",
     "watch": "watch 'npm run test' src tests",
-    "build": "parcel build src/index.ts -d dist --global X3P",
+    "build": "parcel build src/index.ts -d dist --global X3P --no-content-hash",
     "postversion": "git push --follow-tags"
   },
   "keywords": [
