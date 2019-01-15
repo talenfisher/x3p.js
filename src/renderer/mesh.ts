@@ -4,13 +4,11 @@ import Identity from "./identity";
 import createShader from "./shaders/index";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
-import createTexture from "gl-texture2d";
 import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
 import { invert, multiply } from "gl-mat4";
 import LightingOptions from "./lighting";
 import ndarray from "ndarray";
-import { TypedArray } from "../data-types";
 
 interface MeshOptions {
     x3p: X3P;
@@ -152,7 +150,7 @@ export default class Mesh {
     }
 
     public update(options?: MeshOptions) {
-        let worker = new Worker("./worker.ts");
+        let worker = new Worker("worker.ts");
 
         // update lighting uniforms
         if(options && options.lighting) {
