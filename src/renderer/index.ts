@@ -34,7 +34,7 @@ export default class Renderer {
         this.scene = createScene({
             canvas: this.canvas,
             pixelRatio: 1,
-            // autoResize: false,
+            autoResize: false,
             camera: CameraOptions,
         });
 
