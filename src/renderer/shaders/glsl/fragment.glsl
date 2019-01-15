@@ -1,13 +1,18 @@
 precision mediump float;
 
+#pragma glslify: outOfRange = require(glsl-out-of-range)
 #pragma glslify: beckmann = require(glsl-specular-beckmann) 
 
 uniform float roughness, fresnel, ambient, diffuse, specular;
-
-varying vec3 lightDirection, eyeDirection, surfaceNormal;
+uniform vec3 clipBounds[2];
+varying vec3 worldCoordinate, lightDirection, eyeDirection, surfaceNormal;
 varying vec4 vColor;
 
 void main() {
+    // if(outOfRange(clipBounds[0], clipBounds[1], worldCoordinate)) {
+    //     discard;
+    // }
+
     vec3 N = normalize(surfaceNormal);
     vec3 V = normalize(eyeDirection);
     vec3 L = normalize(lightDirection);

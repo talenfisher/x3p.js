@@ -2,7 +2,7 @@
 
 export default {
     get: (target: Element, prop: string) => {
-        let el = target.querySelector(`Annotations Annotation[color='${prop}']`);
+        let el = target.querySelector(`Annotations Annotation[color="${prop}"]`);
         return el ? el.innerHTML : undefined;
     },
 
@@ -15,7 +15,7 @@ export default {
             target.appendChild(annotations);
         }
 
-        let el = annotations.querySelector(`Annotation[color='${prop}']`);
+        let el = annotations.querySelector(`Annotation[color="${prop}"]`);
         if(!el) {
             el = doc.createElement("Annotation");
             el.setAttribute("color", prop);

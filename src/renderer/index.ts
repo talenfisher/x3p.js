@@ -29,15 +29,16 @@ export default class Renderer {
         
         this.gl = context;
         this.gl.depthFunc(this.gl.ALWAYS);
+        this.gl.enable(this.gl.DEPTH_TEST);
 
         this.scene = createScene({
             canvas: this.canvas,
             pixelRatio: 1,
-            autoResize: false,
+            // autoResize: false,
             camera: CameraOptions,
         });
 
-        this.mesh = new Mesh(Object.assign({ gl: this.gl }, options));
+        this.mesh = new Mesh(options);
         this.scene.add(this.mesh);
     }
 }

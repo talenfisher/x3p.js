@@ -5,6 +5,7 @@ import { resolve } from "path";
 import Manifest from "../src/manifest";
 import X3P from "../src/x3p";
 import X3PLoader from "../src";
+import ndarray = require("ndarray");
 
 declare var window: any;
 

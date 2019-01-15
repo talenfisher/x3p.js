@@ -1,17 +1,30 @@
 import VertexShaderSrc from "./glsl/vertex.glsl";
 import FragmentShaderSrc from "./glsl/fragment.glsl";
+import PickShaderSrc from "./glsl/pick.glsl";
 import createShader from "gl-shader";
 
-export default function create(gl: WebGLRenderingContext) {
-    let shader = createShader(gl, VertexShaderSrc, FragmentShaderSrc, undefined, [
+const FRAG_TYPES = {
+    mesh: FragmentShaderSrc,
+    pick: PickShaderSrc,
+};
+
+export default function create(gl: WebGLRenderingContext, type: "pick" | "mesh" = "mesh") {
+    let vertShader = VertexShaderSrc;
+    let fragShader = FRAG_TYPES[type] || undefined;
+
+    if(!fragShader) {
+        throw new Error(`${type} is not a valid fragment shader`);
+    }
+
+    let shader = createShader(gl, vertShader, fragShader, undefined, [
         { name: "vCoord", type: "vec3" },
         { name: "normal", type: "vec3" },
-        { name: "tCoord", type: "vec2" },
+        { name: "uv", type: "vec2" },
     ]);
 
     shader.attributes.vCoord.location = 0;
     shader.attributes.normal.location = 1;
-    shader.attributes.tCoord.location = 2;
+    shader.attributes.uv.location = 2;
     
     return shader;
 }

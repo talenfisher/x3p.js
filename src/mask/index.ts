@@ -2,12 +2,21 @@ import Manifest from "../manifest";
 import AnnotationHandler from "./annotation-handler";
 
 import { Canvas } from "@talenfisher/canvas";
+import createTexture from "gl-texture2d";
 
 export interface MaskOptions {
     manifest: Manifest;
-    definition?: Element;
     color?: string;
     data?: ArrayBuffer;
+}
+
+function loadImage(buffer: ArrayBuffer): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+        let url = URL.createObjectURL(new Blob([ buffer ]));
+        let img = new Image();
+        img.onload = () => resolve(img);
+        img.src = url;
+    });
 }
 
 export default class Mask {
@@ -17,32 +26,40 @@ export default class Mask {
     private manifest: Manifest;
     private definition: Element;
     private dataBuffer?: ArrayBuffer;
+    private texture?: any;
 
     constructor(options: MaskOptions) {
         this.manifest = options.manifest;
         this.color = options.color || "#cd7f32";
         this.dataBuffer = options.data;
         
-        // create definition if it doesn't exist
-        if(!options.definition) {
-            this.manifest.set("Record3 Mask", "");
-            options.definition = this.manifest.getNode("Record3 Mask");
-        }
-        
-        this.definition = options.definition as Element;
+        this.definition = this.manifest.getNode("Record3 Mask");
         this.annotations = new Proxy(this.definition, AnnotationHandler);
         this.setupCanvas();
     }
 
-    private setupCanvas() {
+    public getTexture(gl: WebGLRenderingContext) {
+        if(!this.canvas) return;
+        
+        return this.texture ? this.texture : this.texture = createTexture(gl, this.canvas.el);
+    }
+
+    private async setupCanvas() {
         if(this.width === 0 || this.height === 0) return;
 
         this.canvas = new Canvas({ height: this.height, width: this.width });
 
         if(this.dataBuffer) {
-            let data = new Uint8ClampedArray(this.dataBuffer);
-            let imageData = new ImageData(data, this.width, this.height);
-            this.canvas.putImageData(imageData, 0, 0);            
+            let img = await loadImage(this.dataBuffer);
+            let el = this.canvas.el;
+            let ctx = this.canvas.context;
+            
+            this.canvas.drawImage(img);
+
+            if(this.texture) {
+                this.texture.setPixels(el);
+            }
+
         } else {
             this.canvas.clear(this.color);
         }

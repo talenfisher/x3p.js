@@ -4,51 +4,73 @@ import Identity from "./identity";
 import createShader from "./shaders/index";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
+import createTexture from "gl-texture2d";
 import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
 import { invert, multiply } from "gl-mat4";
 import LightingOptions from "./lighting";
+import ndarray from "ndarray";
+import { TypedArray } from "../data-types";
 
 interface MeshOptions {
     x3p: X3P;
-    gl: WebGLRenderingContext;
     canvas: HTMLCanvasElement;
     lighting?: LightingOptions;
 }
 
 const STRIDE = 4 * (3 + 3 + 2);
 
+/**
+ * This mesh is compatible with gl-plot3d, and is based off of
+ * gl-vis/gl-plot3d.  It has been modified to use less memory and
+ * not block the UI thread while building vertices.
+ */
+
 export default class Mesh {
+    public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
+    public pickSlots: number = 1;
+    public pickId: number = 1;
+    public dirty: boolean = true;
+
+    private coords?: ndarray;
+    private shape?: number[];
     private bounds?: number[][];
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext; 
     private vao: GLVao;
+    private texture: any;
     private coordinateBuffer: GLBuffer;
     private vertexCount: number = 0;
     private shader: any;
-    private camera: any;
+    private pickShader: any;
 
     private uniforms = {
         model: Identity,
         view: Identity,
-        projection: Identity,
+        projection: Identity.slice(),
         inverseModel: Identity.slice(),
         ambient: 1,
         diffuse: 1,
         specular: 1,
         roughness: 1,
-        fresnel: 1,
+        fresnel: 1.5,
         lightPosition: [0, 0, 0],
         eyePosition: [0, 0, 0],
+        clipBounds: this.clipBounds,
     };
 
+    private pickUniforms = Object.assign({ pickId: this.pickId / 255.0 }, this.uniforms);
+
     constructor(options: MeshOptions) {
+
         this.x3p = options.x3p;
         this.canvas = options.canvas;
-        this.gl = options.gl;
+        this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
         this.shader = createShader(this.gl);
+        this.pickShader = createShader(this.gl, "pick");
         this.coordinateBuffer = createBuffer(this.gl);
+        this.texture = this.x3p.mask.getTexture(this.gl);
         this.vao = createVAO(this.gl, [
             {
                 buffer: this.coordinateBuffer,
@@ -74,13 +96,16 @@ export default class Mesh {
     }
 
     public draw(options: any) {
-        // this.gl.disable(this.gl.CULL_FACE);
+        
+        this.gl.disable(this.gl.CULL_FACE);
+        this.texture.bind(0);
 
         let uniforms = this.uniforms;
-        uniforms.model = options.model || Identity;
-        uniforms.projection = options.projection || Identity;
-        uniforms.view = options.view || Identity;
+        uniforms.model = options.model;
+        uniforms.projection = options.projection;
+        uniforms.view = options.view;
         uniforms.inverseModel = invert(uniforms.inverseModel, uniforms.model);
+        uniforms.clipBounds = this.clipBounds as number[][]; // gl-plot3d adjusts this
 
         let invCameraMatrix = Identity.slice();
         multiply(invCameraMatrix, uniforms.view, uniforms.model);
@@ -102,12 +127,27 @@ export default class Mesh {
 
             uniforms.lightPosition[i] = s / w;
         }
- 
+        
         this.shader.bind();
         this.shader.uniforms = uniforms;
 
         this.vao.bind();
         this.vao.draw(this.gl.TRIANGLES, this.vertexCount); 
+        this.vao.unbind();
+    }
+
+    public drawPick(options: any) {
+        let uniforms = this.pickUniforms;
+        uniforms.model = options.model || Identity;
+        uniforms.view = options.view || Identity;
+        uniforms.projection = options.projection || Identity;
+        uniforms.pickId = this.pickId / 255.0;
+        
+        this.pickShader.bind();
+        this.pickShader.uniforms = uniforms;
+
+        this.vao.bind();
+        this.vao.draw(this.gl.TRIANGLES, this.vertexCount);
         this.vao.unbind();
     }
 
@@ -132,12 +172,73 @@ export default class Mesh {
 
         worker.onmessage = (e) => {
             this.vertexCount = e.data.vertexCount;
-            this.coordinateBuffer.update(e.data.coords.subarray(0, e.data.elementCount));
+            this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
+            this.shape = e.data.shape;
             this.bounds = e.data.bounds;
-
-            freeFloat(e.data.coords);
+            this.dirty = true;
+            this.coords = ndarray(e.data.coords, this.shape);
+            
+            freeFloat(e.data.buffer);
             worker.terminate();
         };
+    }
+
+    public pick(selection: any) {
+        if(!selection || selection.id !== this.pickId) return;
+
+        let shape = this.shape as number[];
+        let coords = this.coords as ndarray;
+        
+        let result = {
+            position: [ 0, 0, 0],
+            index: [ 0, 0 ],
+            uv: [ 0, 0 ],
+            dataCoordinate: [ 0, 0, 0 ],
+        };
+
+        let x = shape[0] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
+        let ix = Math.floor(x);
+        let fx = x - ix;
+      
+        let y = shape[1] * (selection.value[1] + (selection.value[2] & 15) / 16.0) / 255.0;
+        let iy = Math.floor(y);
+        let fy = y - iy;
+
+        ix++;
+        iy++;
+
+        let pos = result.position;
+        for(let dx = 0; dx < 2; dx++) {
+            let s = dx ? fx : 1.0 - fx;
+            
+            for(let dy = 0; dy < 2; dy++) {
+                let t = dy ? fy : 1.0 - fy;
+            
+                let r = ix + dx;
+                let c = iy + dy;
+                let w = s * t;
+            
+                for(let i = 0; i < 3; i++) {
+                    pos[i] += coords.get(r, c, i) * w;
+                }
+            }
+        }
+
+        result.index[0] = fx < 0.5 ? ix : (ix + 1);
+        result.index[1] = fy < 0.5 ? iy : (iy + 1);
+
+        result.uv[0] = x / shape[0];
+        result.uv[1] = y / shape[1];
+
+        for(let i = 0; i < 3; i++) {
+            result.dataCoordinate[i] = coords.get(result.index[0], result.index[1], i);
+        }
+
+        return result;
+    }
+
+    public setPickBase(base: number) {
+        this.pickId = base;
     }
 
     public isOpaque() {

@@ -120,8 +120,9 @@ export default class Manifest {
                     let selector = this.openNodes.slice(0, this.openNodes.length - 1).join(" ");
                     nextParent = this.tree.querySelector(selector);    
                 }
-                
+
                 let child = this.tree.createElement(parent.nodeName);
+                this.mergeAttributes(child, parent);
                 nextParent.appendChild(child);
             }
         }
@@ -131,10 +132,17 @@ export default class Manifest {
                 this.merge(child);       
             }
         } else if(this.activeNode) {           
+            this.mergeAttributes(this.activeNode, parent);
             this.activeNode.innerHTML = parent.innerHTML;
         }
 
         this.openNodes.pop();
+    }
+
+    private mergeAttributes(target: Element, source: Element) {
+        for(let attr of source.getAttributeNames()) {
+            target.setAttribute(attr, source.getAttribute(attr) as string);
+        }
     }
 
     private removeErrors() {
