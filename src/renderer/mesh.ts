@@ -20,6 +20,12 @@ interface MeshOptions {
 
 const STRIDE = 4 * (3 + 3 + 2);
 
+/**
+ * This mesh is compatible with gl-plot3d, and is based off of
+ * gl-vis/gl-plot3d.  It has been modified to use less memory and
+ * not block the UI thread while building vertices.
+ */
+
 export default class Mesh {
     public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
     public pickSlots: number = 1;
