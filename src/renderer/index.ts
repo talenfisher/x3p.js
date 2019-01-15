@@ -41,4 +41,10 @@ export default class Renderer {
         this.mesh = new Mesh(options);
         this.scene.add(this.mesh);
     }
+
+    public dispose() {
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
+        this.scene.dispose();
+        this.mesh.dispose();
+    }
 }
