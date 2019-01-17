@@ -1,9 +1,8 @@
-import { malloc, mallocFloat, free } from "typedarray-pool";
-import { DataTypeNameLower, TypedArray } from "../data-types";
+import { mallocFloat, free } from "typedarray-pool";
+import { TypedArray } from "../data-types";
 import Quad from "./quad";
 
 import ndarray from "ndarray";
-import fill from "ndarray-fill";
 import gradient from "ndarray-gradient";
 
 import Axis from "axis";
