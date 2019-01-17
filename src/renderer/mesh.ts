@@ -242,4 +242,11 @@ export default class Mesh {
     public isOpaque() {
         return true;
     }
+
+    public dispose() {
+        this.shader.dispose();
+        this.pickShader.dispose();
+        this.vao.dispose();
+        this.coordinateBuffer.dispose();
+    }
 }

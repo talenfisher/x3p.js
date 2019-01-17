@@ -5,6 +5,8 @@ import LightingOptions from "./lighting";
 
 import createScene from "@talenfisher/gl-plot3d";
 
+const $mode = Symbol();
+
 interface RendererOptions {
     canvas: HTMLCanvasElement;
     x3p: X3P;
@@ -16,6 +18,7 @@ export default class Renderer {
     private gl: WebGLRenderingContext;
     private mesh: Mesh;
     private scene: any;
+    private [$mode]: "normal" | "still" = "normal";
 
     constructor(options: RendererOptions) {
         this.canvas = options.canvas;
@@ -40,5 +43,37 @@ export default class Renderer {
 
         this.mesh = new Mesh(options);
         this.scene.add(this.mesh);
+    }
+
+    public dispose() {
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
+        this.scene.dispose();
+        this.mesh.dispose();
+    }
+
+    public get mode() {
+        return this[$mode];
+    }
+
+    public set mode(mode: "normal" | "still") {
+        if(!["normal", "still"].includes(mode)) {
+            throw new Error("Mode must be either normal or still");
+        }
+
+        this[$mode] = mode;
+        this.update();
+    }
+
+    public update() {
+        switch(this[$mode]) {
+            default:
+            case "normal":
+                this.scene.camera.rotateSpeed = 1;
+                break;
+            
+            case "still":
+                this.scene.camera.rotateSpeed = 0;
+                break;
+        }
     }
 }
