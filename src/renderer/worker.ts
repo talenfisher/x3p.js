@@ -2,6 +2,7 @@ import { mallocFloat, free } from "typedarray-pool";
 import { TypedArray } from "../data-types";
 import Quad from "./quad";
 
+import dtype from "@talenfisher/dtype";
 import ndarray from "ndarray";
 import gradient from "ndarray-gradient";
 
@@ -46,15 +47,14 @@ class WorkerUtil {
         this.dataLength = this.shape[0] * this.shape[1] * this.shape[2];
         this.coords = ndarray(mallocFloat(this.dataLength), this.shape);
 
-        let data;
-        switch(this.axes[2].name) {
-            default:
-            case "Float64": data = new Float64Array(this.pointBuffer); break;
-            case "Float32": data = new Float32Array(this.pointBuffer); break;
-            case "Int32":   data = new Int32Array(this.pointBuffer);   break;
-            case "Int16":   data = new Int16Array(this.pointBuffer);   break;
+        let name = this.axes[2].dataType.name || "d";
+        let type = dtype(name);
+        
+        if(!type) {
+            throw new Error(`Could not find data type '${type}'`);
         }
 
+        let data = new (type as any)(this.pointBuffer);
         const ix = this.axes[0].increment / EPSILON;
         const iy = this.axes[1].increment / EPSILON;
 
