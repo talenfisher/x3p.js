@@ -47,9 +47,15 @@ export default class X3P {
         }
     }
 
-    public save() {
+    public async save() {
         this.loader.write("main.xml", this.manifest.toString());
         this.loader.write("md5checksum.hex", `${this.manifest.checksum} *main.xml`);
+
+        let canvas = this.mask.canvas;
+        if(canvas) { // save mask
+            let blob = await canvas.toBlob();
+            this.loader.write("bindata/mask.png", blob);
+        }
     }
 
     public async download(filename = this.name) {
