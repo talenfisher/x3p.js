@@ -66,8 +66,8 @@ class WorkerUtil {
             let y = i % this.shape[1];
             let x = ((y === 0) ? ++cx : cx) % this.shape[0];
 
-            this.coords.set(x, y, 0, y * iy);
-            this.coords.set(x, y, 1, x * ix);
+            this.coords.set(x, y, 0, x * ix);
+            this.coords.set(x, y, 1, y * iy);
             this.coords.set(x, y, 2, (data[i] / EPSILON) * MULTIPLY);
 
             if(!isNaN(data[i]) && isFinite(data[i])) {
