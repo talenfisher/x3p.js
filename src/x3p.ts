@@ -21,6 +21,7 @@ export default class X3P {
     public pointBuffer?: ArrayBuffer;
     public mask: Mask;
     public matrix?: ndarray;
+    public saveMask: boolean = true; // use for testing/debugging
 
     private loader: X3PLoader;
     private options: X3POptions;
@@ -47,9 +48,15 @@ export default class X3P {
         }
     }
 
-    public save() {
+    public async save() {
         this.loader.write("main.xml", this.manifest.toString());
         this.loader.write("md5checksum.hex", `${this.manifest.checksum} *main.xml`);
+
+        if(this.saveMask && this.mask.canvas) { // save mask
+            let canvas = this.mask.canvas;
+            let blob = await canvas.toBlob();
+            this.loader.write("bindata/mask.png", blob);
+        }
     }
 
     public async download(filename = this.name) {

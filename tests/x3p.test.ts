@@ -8,11 +8,15 @@ import X3PLoader from "../src";
 import ndarray = require("ndarray");
 
 declare var window: any;
+declare var global: any;
 
 const Parser = new window.DOMParser();
 const parse = (value: string) => Parser.parseFromString(value, "application/xml");
 
 describe("X3P", () => {
+    global.URL = {};
+    global.URL.createObjectURL = jest.fn();
+
     describe("save", () => {
         it("Should update main.xml in the loader's zip container", async () => {
             let expected = read(resolve(__dirname, "expects/x3p.save.1.xml"), { encoding: "utf-8" });
@@ -38,6 +42,7 @@ describe("X3P", () => {
             }); 
 
             let x3p = await loader as unknown as X3P;
+            x3p.saveMask = false;
             x3p.manifest.set("Record1 Revision", "CSAFE-X3P");
             x3p.save();
 
