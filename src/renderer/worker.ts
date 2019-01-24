@@ -59,7 +59,7 @@ class WorkerUtil {
         const iy = this.axes[1].increment / EPSILON;
 
         this.lo = [ 0, 0, Infinity ];
-        this.hi = [ this.shape[1] * iy, this.shape[0] * ix, -Infinity ];
+        this.hi = [ this.shape[0] * ix, this.shape[1] * iy, -Infinity ];
         
         let cx = -1;
         for(let i = 0; i < data.length; i++) {
