@@ -194,11 +194,11 @@ export default class Mesh {
             dataCoordinate: [ 0, 0, 0 ],
         };
 
-        let x = shape[0] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
+        let x = shape[1] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
         let ix = Math.floor(x);
         let fx = x - ix;
       
-        let y = shape[1] * (selection.value[1] + (selection.value[2] & 15) / 16.0) / 255.0;
+        let y = shape[0] * (selection.value[1] + (selection.value[2] & 15) / 16.0) / 255.0;
         let iy = Math.floor(y);
         let fy = y - iy;
 
@@ -222,8 +222,8 @@ export default class Mesh {
             }
         }
 
-        result.index[0] = fx < 0.5 ? ix : (ix + 1);
-        result.index[1] = fy < 0.5 ? iy : (iy + 1);
+        result.index[0] = fy < 0.5 ? iy : (iy + 1);
+        result.index[1] = fx < 0.5 ? ix : (ix + 1);
 
         result.uv[0] = x / shape[0];
         result.uv[1] = y / shape[1];
