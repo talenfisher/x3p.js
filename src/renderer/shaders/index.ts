@@ -17,7 +17,7 @@ export default function create(gl: WebGLRenderingContext, type: "pick" | "mesh" 
     }
 
     let shader = createShader(gl, vertShader, fragShader, undefined, [
-        { name: "vCoord", type: "vec3" },
+        { name: "worldCoordinate", type: "vec3" },
         { name: "normal", type: "vec3" },
         { name: "uv", type: "vec2" },
     ]);

@@ -1,6 +1,5 @@
 precision mediump float;
 
-
 uniform float pickId;
 
 varying vec2 planeCoordinate;

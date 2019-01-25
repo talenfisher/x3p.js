@@ -115,7 +115,6 @@ export default class Mesh {
         let w = invCameraMatrix[15];
         for(let i = 0; i < 3; i++) {
             uniforms.eyePosition[i] = invCameraMatrix[12 + i] / w;
-            uniforms.lightPosition[i] = invCameraMatrix[12 + i] / w;
         }
         
         this.shader.bind();
@@ -169,6 +168,7 @@ export default class Mesh {
             
             freeFloat(e.data.buffer);
             worker.terminate();
+
             this.dirty = true;
             this.ready = true;
         };
