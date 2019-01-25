@@ -22,7 +22,7 @@ export default function create(gl: WebGLRenderingContext, type: "pick" | "mesh" 
         { name: "uv", type: "vec2" },
     ]);
 
-    shader.attributes.vCoord.location = 0;
+    shader.attributes.worldCoordinate.location = 0;
     shader.attributes.normal.location = 1;
     shader.attributes.uv.location = 2;
     

@@ -62,7 +62,6 @@ export default class Mesh {
     private pickUniforms = Object.assign({ pickId: this.pickId / 255.0 }, this.uniforms);
 
     constructor(options: MeshOptions) {
-
         this.x3p = options.x3p;
         this.canvas = options.canvas;
         this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
@@ -112,9 +111,8 @@ export default class Mesh {
         multiply(invCameraMatrix, uniforms.projection, invCameraMatrix);
         invert(invCameraMatrix, invCameraMatrix);
 
-        let w = invCameraMatrix[15];
         for(let i = 0; i < 3; i++) {
-            uniforms.eyePosition[i] = invCameraMatrix[12 + i] / w;
+            uniforms.eyePosition[i] = invCameraMatrix[12 + i] / invCameraMatrix[15];
         }
         
         this.shader.bind();
@@ -178,7 +176,6 @@ export default class Mesh {
         if(!selection || selection.id !== this.pickId) return;
 
         let shape = this.shape as number[];
-        
         let result = { index: [ 0, 0 ] };
 
         let x = shape[1] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
