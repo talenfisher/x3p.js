@@ -178,14 +178,8 @@ export default class Mesh {
         if(!selection || selection.id !== this.pickId) return;
 
         let shape = this.shape as number[];
-        let coords = this.coords as ndarray;
         
-        let result = {
-            position: [ 0, 0, 0],
-            index: [ 0, 0 ],
-            uv: [ 0, 0 ],
-            dataCoordinate: [ 0, 0, 0 ],
-        };
+        let result = { index: [ 0, 0 ] };
 
         let x = shape[1] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
         let ix = Math.floor(x);
@@ -198,32 +192,8 @@ export default class Mesh {
         ix++;
         iy++;
 
-        let pos = result.position;
-        for(let dx = 0; dx < 2; dx++) {
-            let s = dx ? fx : 1.0 - fx;
-            
-            for(let dy = 0; dy < 2; dy++) {
-                let t = dy ? fy : 1.0 - fy;
-            
-                let r = ix + dx;
-                let c = iy + dy;
-                let w = s * t;
-            
-                for(let i = 0; i < 3; i++) {
-                    pos[i] += coords.get(r, c, i) * w;
-                }
-            }
-        }
-
         result.index[0] = fy < 0.5 ? iy : (iy + 1);
         result.index[1] = fx < 0.5 ? ix : (ix + 1);
-
-        result.uv[0] = x / shape[0];
-        result.uv[1] = y / shape[1];
-
-        for(let i = 0; i < 3; i++) {
-            result.dataCoordinate[i] = coords.get(result.index[0], result.index[1], i);
-        }
 
         return result;
     }
