@@ -73,9 +73,9 @@ export default class X3P {
             x3p: this,
             canvas,
             lighting: {
-                ambient: 0.1,
+                ambient: 0.05,
                 diffuse: 0.4,
-                specular: 0.3,
+                specular: 0.2,
                 roughness: 0.5,
             },
         });

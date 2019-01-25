@@ -19,5 +19,5 @@ void main() {
     float cSpecular = max(beckmann(direction, direction, normal, roughness), 0.0);
     float cDiffuse = min(ambient + diffuse * max(dot(normal, direction), 0.0), 1.0);
 
-    gl_FragColor = vColor.a * vec4(cDiffuse * vColor.rgb + specular * vec3(1, 1, 1) * cSpecular, 1.0);
+    gl_FragColor = vec4(cDiffuse * vColor.rgb + specular * cSpecular, vColor.a);
 }

@@ -178,11 +178,11 @@ export default class Mesh {
         let shape = this.shape as number[];
         let result = { index: [ 0, 0 ] };
 
-        let x = shape[1] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
+        let x = shape[0] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
         let ix = Math.floor(x);
         let fx = x - ix;
       
-        let y = shape[0] * (selection.value[1] + (selection.value[2] & 15) / 16.0) / 255.0;
+        let y = shape[1] * (selection.value[1] + (selection.value[2] & 15) / 16.0) / 255.0;
         let iy = Math.floor(y);
         let fy = y - iy;
 

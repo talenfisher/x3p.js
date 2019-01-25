@@ -42,7 +42,7 @@ class WorkerUtil {
             options.axes.z,
         ];
 
-        this.shape = [ this.axes[1].size, this.axes[0].size, 3 ];
+        this.shape = [ this.axes[0].size, this.axes[1].size, 3 ];
         this.dataLength = this.shape[0] * this.shape[1] * this.shape[2];
         this.coords = ndarray(mallocFloat(this.dataLength), this.shape);
 
@@ -60,12 +60,12 @@ class WorkerUtil {
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[0] * ix, this.shape[1] * iy, -Infinity ];
         
-        let cx = -1;
+        let cy = -1;
         for(let i = 0; i < data.length; i++) {
-            let y = i % this.shape[1];
-            let x = ((y === 0) ? ++cx : cx) % this.shape[0];
+            let x = i % this.shape[0];
+            let y = ((x === 0) ? ++cy : cy) % this.shape[1];
 
-            this.coords.set(x, y, 0, x * ix);
+            this.coords.set(x, y, 0, (this.shape[0] - x) * ix);
             this.coords.set(x, y, 1, y * iy);
             this.coords.set(x, y, 2, (data[i] / EPSILON) * MULTIPLY);
 
@@ -152,8 +152,8 @@ class WorkerUtil {
                     }
                 }
 
-                let tu = (this.shape[1] - j) / this.shape[1];
-                let tv = i / this.shape[0];
+                let tu = i / this.shape[0];
+                let tv = j / this.shape[1];
 
                 for(let k = 0; k < 6; k++) {
                     let ix = i + Quad[k][0];
