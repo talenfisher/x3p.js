@@ -39,6 +39,7 @@ export default class Renderer {
             pixelRatio: 1,
             autoResize: false,
             camera: CameraOptions,
+            clipToBounds: false,
         });
 
         this.mesh = new Mesh(options);

@@ -28,7 +28,8 @@ export default class Mesh {
     public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
     public pickSlots: number = 1;
     public pickId: number = 1;
-    public dirty: boolean = true;
+    public dirty: boolean = false;
+    public ready: boolean = false;
 
     private coords?: ndarray;
     private shape?: number[];
@@ -94,7 +95,8 @@ export default class Mesh {
     }
 
     public draw(options: any) {
-        
+        if(!this.ready) return;
+
         this.gl.disable(this.gl.CULL_FACE);
         this.texture.bind(0);
 
@@ -112,18 +114,8 @@ export default class Mesh {
 
         let w = invCameraMatrix[15];
         for(let i = 0; i < 3; i++) {
-            uniforms.eyePosition[i] = invCameraMatrix[12 + i] / invCameraMatrix[15];
-            w += uniforms.lightPosition[i] * invCameraMatrix[4 * i + 3];
-        }
-
-        for(let i = 0; i < 3; i++) {
-            let s = invCameraMatrix[12 + i];
-            
-            for(let j = 0; j < 3; j++) {
-                s += invCameraMatrix[4 * j + i] * uniforms.lightPosition[j];
-            }
-
-            uniforms.lightPosition[i] = s / w;
+            uniforms.eyePosition[i] = invCameraMatrix[12 + i] / w;
+            uniforms.lightPosition[i] = invCameraMatrix[12 + i] / w;
         }
         
         this.shader.bind();
@@ -173,11 +165,12 @@ export default class Mesh {
             this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
             this.shape = e.data.shape;
             this.bounds = e.data.bounds;
-            this.dirty = true;
             this.coords = ndarray(e.data.coords, this.shape);
             
             freeFloat(e.data.buffer);
             worker.terminate();
+            this.dirty = true;
+            this.ready = true;
         };
     }
 

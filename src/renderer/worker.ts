@@ -24,7 +24,6 @@ class WorkerUtil {
     private coords: ndarray;
     private vertexCount: number = 0;
     private elementCount: number = 0;
-    
     private pointBuffer: ArrayBuffer;
     private axes: Axis[] = [];
     private dataLength: number;
