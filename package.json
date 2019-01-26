@@ -32,7 +32,6 @@
     "@types/sax": "^1.0.1",
     "@types/typedarray-pool": "^1.1.2",
     "canvas": "^2.3.0",
-    "express": "^4.16.4",
     "glslify-deps": "^1.3.1",
     "jest": "^23.6.0",
     "jest-environment-jsdom": "^23.4.0",
@@ -56,16 +55,10 @@
     "gl-shader": "^4.2.1",
     "gl-texture2d": "^2.1.0",
     "gl-vao": "^1.3.0",
-    "glsl-out-of-range": "^1.0.4",
     "glsl-specular-beckmann": "^1.1.2",
     "jszip": "^3.1.5",
     "ndarray": "^1.0.18",
-    "ndarray-fill": "^1.0.2",
     "ndarray-gradient": "^1.0.0",
-    "ndarray-scratch": "^1.2.0",
-    "ndarray-show": "^2.0.0",
-    "sax": "^1.2.4",
-    "typedarray-pool": "^1.1.0",
-    "zeros": "^1.0.0"
+    "typedarray-pool": "^1.1.0"
   }
 }

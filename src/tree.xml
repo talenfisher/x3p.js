@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ISO5436>
     <Record1>
-        <Revision disabled="true"></Revision>
+        <Revision disabled=""></Revision>
         <FeatureType disabled=""></FeatureType>
         <Axes>
             <CX>
@@ -23,6 +23,10 @@
                 <Offset disabled=""></Offset>
             </CZ>
         </Axes>
+        <Rotation>
+            <Top>N</Top>
+            <Left>W</Left>
+        </Rotation>
     </Record1>
     <Record2>
         <Date type="date"></Date>
@@ -50,7 +54,7 @@
             <PointDataLink disabled=""></PointDataLink>
             <MD5ChecksumPointData disabled=""></MD5ChecksumPointData>
         </DataLink>
-        <Mask></Mask>
+        <Mask disabled=""></Mask>
     </Record3>
     <Record4>
         <ChecksumFile disabled=""></ChecksumFile>

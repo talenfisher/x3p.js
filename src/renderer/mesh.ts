@@ -30,6 +30,7 @@ export default class Mesh {
     public pickId: number = 1;
     public dirty: boolean = false;
     public ready: boolean = false;
+    public highlightColor?: number[];
 
     private coords?: ndarray;
     private shape?: number[];
@@ -49,6 +50,8 @@ export default class Mesh {
         view: Identity,
         projection: Identity.slice(),
         inverseModel: Identity.slice(),
+        highlight: false,
+        highlightColor: [0, 0, 0],
         ambient: 1,
         diffuse: 1,
         specular: 1,
@@ -105,6 +108,8 @@ export default class Mesh {
         uniforms.view = options.view;
         uniforms.inverseModel = invert(uniforms.inverseModel, uniforms.model);
         uniforms.clipBounds = this.clipBounds as number[][]; // gl-plot3d adjusts this
+        uniforms.highlight = typeof this.highlightColor !== "undefined";
+        uniforms.highlightColor = this.highlightColor || [ 0, 0, 0 ];
 
         let invCameraMatrix = Identity.slice();
         multiply(invCameraMatrix, uniforms.view, uniforms.model);
@@ -129,6 +134,8 @@ export default class Mesh {
         uniforms.view = options.view || Identity;
         uniforms.projection = options.projection || Identity;
         uniforms.pickId = this.pickId / 255.0;
+        uniforms.highlight = false;
+        uniforms.highlightColor = [ 0, 0, 0 ];
         
         this.pickShader.bind();
         this.pickShader.uniforms = uniforms;
