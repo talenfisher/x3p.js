@@ -26,8 +26,6 @@ export default class Renderer {
     private fovy: number = Math.PI / 4;
     private near: number = 0.01;
     private far: number = 100;
-    private width: number;
-    private height: number;
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext;
     private mesh: Mesh;
@@ -46,10 +44,9 @@ export default class Renderer {
 
     constructor(options: RendererOptions) {
         this.canvas = options.canvas;
-        this.width = this.canvas.offsetWidth;
-        this.height = this.canvas.offsetHeight;
-        this.canvas.setAttribute("width", this.width.toString());
-        this.canvas.setAttribute("height", this.height.toString());
+        window.addEventListener("resize", this.resizeListener.bind(this));
+        this.resizeListener();
+
         this.gl = this.getContext(this.canvas);
         this.camera = createCamera(this.canvas, CameraOptions);
         this.select = createSelect(this.gl, this.shape);
@@ -75,10 +72,17 @@ export default class Renderer {
         }
     }
 
+    public resizeListener() {
+        this.canvas.setAttribute("width", this.canvas.offsetWidth.toString());
+        this.canvas.setAttribute("height", this.canvas.offsetHeight.toString());
+        this.dirty = true;
+    }
+
     public dispose() {
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
         this.camera.dispose();
         this.mesh.dispose();
+        window.removeEventListener("resize", this.resizeListener.bind(this));
     }
 
     public get mode() {
@@ -92,6 +96,14 @@ export default class Renderer {
 
         this[$mode] = mode;
         this.update();
+    }
+
+    public get width() {
+        return this.gl.drawingBufferWidth;
+    }
+
+    public get height() {
+        return this.gl.drawingBufferHeight;
     }
 
     public get shape() {
@@ -166,7 +178,6 @@ export default class Renderer {
     }
 
     private updateCameraParams() {
-        let gl = this.gl;
         perspective(this.cameraParams.projection, this.fovy, this.width / this.height, this.near, this.far);
         this.cameraParams.view = this.camera.matrix;
 

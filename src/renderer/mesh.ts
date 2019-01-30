@@ -27,7 +27,6 @@ const STRIDE = 4 * (3 + 3 + 2);
 
 export default class Mesh {
     public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
-    public pickSlots: number = 1;
     public pickId: number = 1;
     public dirty: boolean = false;
     public ready: boolean = false;
@@ -207,14 +206,6 @@ export default class Mesh {
         result.index[1] = fx < 0.5 ? ix : (ix + 1);
 
         return result;
-    }
-
-    public setPickBase(base: number) {
-        this.pickId = base;
-    }
-
-    public isOpaque() {
-        return true;
     }
 
     public dispose() {
