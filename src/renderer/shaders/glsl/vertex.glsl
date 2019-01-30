@@ -14,6 +14,13 @@ varying vec3 eyeDirection, surfaceNormal;
 varying vec2 planeCoordinate;
 varying vec4 vColor;
 
+bool approxEqual(vec3 first, vec3 second, float margin) {
+    vec3 diff = second - first;
+    return 
+        abs(diff.x) <= margin &&
+        abs(diff.y) <= margin &&
+        abs(diff.z) <= margin;
+}
 
 void main() {
     vec4 worldPosition = model * vec4(worldCoordinate, 1.0);
@@ -24,7 +31,7 @@ void main() {
     vec3 rgb = texture2D(texture, uv).xyz;
     float a = 1.0;
 
-    if(highlight && !highlightColor != rgb) {
+    if(highlight && !approxEqual(highlightColor, rgb, 1.0e-02)) {
         a = 0.7;
     }
 

@@ -21,7 +21,8 @@ const STRIDE = 4 * (3 + 3 + 2);
 /**
  * This mesh is compatible with gl-plot3d, and is based off of
  * gl-vis/gl-plot3d.  It has been modified to use less memory and
- * not block the UI thread while building vertices.
+ * not block the UI thread while building vertices.  Point picking
+ * now only occurs when the renderer is in "still" mode
  */
 
 export default class Mesh {
@@ -31,10 +32,11 @@ export default class Mesh {
     public dirty: boolean = false;
     public ready: boolean = false;
     public highlightColor?: number[];
+    public bounds?: number[][];
+    public onready?: any;
 
     private coords?: ndarray;
     private shape?: number[];
-    private bounds?: number[][];
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext; 
@@ -44,7 +46,6 @@ export default class Mesh {
     private vertexCount: number = 0;
     private shader: any;
     private pickShader: any;
-
     private uniforms = {
         model: Identity,
         view: Identity,
@@ -147,6 +148,7 @@ export default class Mesh {
 
     public update(options?: MeshOptions) {
         let worker = new Worker("worker.ts");
+        let { x, y, z } = this.x3p.axes;
 
         // update lighting uniforms
         if(options && options.lighting) {
@@ -158,9 +160,9 @@ export default class Mesh {
         worker.postMessage({ 
             pointBuffer: this.x3p.pointBuffer,
             axes: {
-                x: this.x3p.axes.x.cache(),
-                y: this.x3p.axes.y.cache(),
-                z: this.x3p.axes.z.cache(),
+                x: x.values,
+                y: y.values,
+                z: z.values,
             },
         }, [ this.x3p.pointBuffer as ArrayBuffer ]);
 
@@ -176,6 +178,8 @@ export default class Mesh {
 
             this.dirty = true;
             this.ready = true;
+
+            if(this.onready) this.onready();
         };
     }
 
@@ -183,7 +187,10 @@ export default class Mesh {
         if(!selection || selection.id !== this.pickId) return;
 
         let shape = this.shape as number[];
-        let result = { index: [ 0, 0 ] };
+        let result = { 
+            index: [ 0, 0 ],
+            color: [ 0, 0, 0 ],
+        };
 
         let x = shape[0] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
         let ix = Math.floor(x);
