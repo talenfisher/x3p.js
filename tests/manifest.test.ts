@@ -143,7 +143,7 @@ describe("Manifest", () => {
     describe("get checksum", () => {
         it("Should return the md5 checksum of the manifest", () => {
             let manifest = new Manifest(`<root></root>`);
-            expect(manifest.checksum).toBe("b51cd5ded47f5b48df84632e38076dd0");
+            expect(manifest.checksum).toBe("fafc9c5a8a18dfafa58b3769b9b6c82a");
         });
     });
 });
