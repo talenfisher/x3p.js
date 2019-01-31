@@ -1,5 +1,6 @@
 import Mesh from "./mesh";
 import X3P from "../x3p";
+import MultiTouch from "./multi-touch";
 import CameraOptions from "./camera";
 import LightingOptions from "./lighting";
 
@@ -32,7 +33,8 @@ export default class Renderer {
     private scene: any;
     private camera: any;
     private select: any;
-    private listener: any;
+    private mouseListener: any;
+    private multiTouch: any;
     
     private cameraParams = {
         model: new Array(16),
@@ -50,26 +52,29 @@ export default class Renderer {
         this.gl = this.getContext(this.canvas);
         this.camera = createCamera(this.canvas, CameraOptions);
         this.select = createSelect(this.gl, this.shape);
-        this.listener = mouseChange(this.canvas, this.mouseHandler.bind(this));
+        this.mouseListener = mouseChange(this.canvas, this.mouseHandler.bind(this));
         this.mesh = new Mesh(options);
         this.mesh.onready = () => {
             this.dirty = true;
             this.updateBounds();
             this.render();
         };
+
+        this.multiTouch = new MultiTouch({
+            el: this.canvas,
+            camera: this.camera,
+        });
     }
 
     public render() {
         requestAnimationFrame(this.render.bind(this));
 
-        if(!(this.dirty || this.camera.tick())) return;
+        let cameraMoved = this.camera.tick();
+        if(!(this.dirty || cameraMoved)) return;
         this.updateCameraParams();
 
-        switch(this.mode) {
-            default:
-            case "normal": this.drawMesh(); break;
-            case "still": this.drawPick(); break;
-        }
+        if(cameraMoved) this.drawMesh();
+        if(this.mode === "still") this.drawPick();
     }
 
     public resizeListener() {
