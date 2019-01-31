@@ -29,11 +29,9 @@ export default class Renderer {
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext;
     private mesh: Mesh;
-    private scene: any;
     private camera: any;
     private select: any;
     private mouseListener: any;
-    private multiTouch: any;
     
     private cameraParams = {
         model: new Array(16),
@@ -80,6 +78,9 @@ export default class Renderer {
     public dispose() {
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
         this.mesh.dispose();
+        this.select.dispose();
+
+        this.mouseListener.enabled = false;
         window.removeEventListener("resize", this.resizeListener.bind(this));
     }
 
