@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@talenfisher/dtype": "^0.1.2",
+    "@talenfisher/gl-plot3d": "^0.1.9",
     "@talenfisher/multitouch-camera": "^0.2.0",
     "blueimp-md5": "^2.10.0",
     "file-saver": "^2.0.0",
