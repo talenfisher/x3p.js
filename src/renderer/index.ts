@@ -79,7 +79,6 @@ export default class Renderer {
 
     public dispose() {
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
-        this.camera.dispose();
         this.mesh.dispose();
         window.removeEventListener("resize", this.resizeListener.bind(this));
     }
