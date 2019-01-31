@@ -34,7 +34,7 @@ export default class Manifest {
     private tree = Parser.parseFromString(Tree, "text/xml");
     private openNodes: string[] = [];
     private error?: Element;
-    private elementCounts: { [name: string]: number } = {};
+    private nodeCounts: { [name: string]: number } = {};
     
     // cache helpers
     private [$string]?: string;
@@ -114,7 +114,7 @@ export default class Manifest {
         if(!isRoot) {
             this.openNodes.push(parent.nodeName);
             
-            if(!this.activeNode || this.elementCount > 0) {
+            if(!this.activeNode || this.currentNodeCount > 0) {
                 let nextParent = this.openNodes.length === 1 ? this.tree.documentElement : undefined;
                 
                 if(!nextParent) {
@@ -135,7 +135,7 @@ export default class Manifest {
         } else if(this.activeNode) {        
             this.mergeAttributes(this.activeNode, parent);
             this.activeNode.innerHTML = parent.innerHTML;
-            this.elementCount = this.elementCount + 1;
+            this.currentNodeCount = this.currentNodeCount + 1;
         }
 
         this.openNodes.pop();
@@ -164,16 +164,16 @@ export default class Manifest {
         return this.openNodes.join(" ");
     }
 
-    private get elementCount() {
-        return this.pathName in this.elementCounts ? this.elementCounts[this.pathName] : 0;
+    private get currentNodeCount() {
+        return this.pathName in this.nodeCounts ? this.nodeCounts[this.pathName] : 0;
     }
 
-    private set elementCount(value: number) {
-        this.elementCounts[this.pathName] = value;
+    private set currentNodeCount(value: number) {
+        this.nodeCounts[this.pathName] = value;
     }
 
     private get activeNode() {
-        return this.pathName ? this.tree.querySelector(this.pathName + `:nth-of-type(${this.elementCount + 1})`) : undefined;
+        return this.pathName ? this.tree.querySelector(this.pathName + `:nth-of-type(${this.currentNodeCount + 1})`) : undefined;
     }
 
     public get checksum() {
