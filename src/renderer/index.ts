@@ -1,10 +1,9 @@
 import Mesh from "./mesh";
 import X3P from "../x3p";
-import MultiTouch from "./multi-touch";
 import CameraOptions from "./camera";
 import LightingOptions from "./lighting";
 
-import createCamera from "3d-view-controls";
+import createCamera from "@talenfisher/multitouch-camera";
 import createSelect from "gl-select-static";
 import mouseChange from "mouse-change";
 import { perspective } from "gl-mat4";
@@ -59,11 +58,6 @@ export default class Renderer {
             this.updateBounds();
             this.render();
         };
-
-        this.multiTouch = new MultiTouch({
-            el: this.canvas,
-            camera: this.camera,
-        });
     }
 
     public render() {

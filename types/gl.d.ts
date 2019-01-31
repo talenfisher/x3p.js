@@ -24,7 +24,7 @@ declare module "gl-mat4" {
     export function perspective(...args: any[]): any;
 }
 
-declare module "3d-view-controls" {
+declare module "@talenfisher/multitouch-camera" {
     export default function createCamera(canvas: HTMLCanvasElement, options: any): any;
 }
 
