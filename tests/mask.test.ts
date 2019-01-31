@@ -106,5 +106,23 @@ describe("Mask", () => {
             mask.annotations.red = "Example Label";
             expect(mask.annotations.red).toBe("Example Label");
         });
+
+        it("Should retain older annotations", () => {
+            let manifest = new Manifest(`
+                <root>
+                    <Record3>
+                        <Mask>
+                            <Annotations>
+                                <Annotation color="red">Red Annotation</Annotation>
+                            </Annotations>
+                        </Mask>
+                    </Record3>
+                </root>
+            `);
+
+            let mask = new Mask({ manifest });
+            mask.annotations.blue = "Blue Annotation";
+            expect(mask.annotations.red).toBe("Red Annotation");
+        });
     });
 });

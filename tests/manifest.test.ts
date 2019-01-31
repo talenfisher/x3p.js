@@ -45,6 +45,25 @@ describe("Manifest", () => {
     
             expect(manifest.get("Record5 FunElement")).toBe("Party");
         });
+
+        it("Should not overwrite previous nodes if there are multiple with the same name", () => {
+            let source = DOCTYPE + `
+                <root>
+                    <Record3>
+                        <Mask>
+                            <Annotations>
+                                <Annotation color="red">Red Annotation</Annotation>
+                                <Annotation color="blue">Blue Annotation</Annotation>
+                            </Annotations>
+                        </Mask>
+                    </Record3>
+                </root>
+            `;
+
+            let manifest = new Manifest(source);
+            expect(manifest.get(`Annotation[color="red"]`)).toBe("Red Annotation");
+            expect(manifest.get(`Annotation[color="blue"]`)).toBe("Blue Annotation");
+        });
     });
 
     describe("get", () => {
