@@ -20,6 +20,7 @@ export default class Renderer {
     public onpick?: any;
     public selection?: any;
 
+    private stopped = false;
     private dirty = false;
     private bounds: number[][] = [ [ 0, 0, 0 ], [ 0, 0, 0 ] ];
     private scale: number = 0;
@@ -59,6 +60,7 @@ export default class Renderer {
     }
 
     public render() {
+        if(this.stopped) return;
         requestAnimationFrame(this.render.bind(this));
 
         let cameraMoved = this.camera.tick();
@@ -76,6 +78,7 @@ export default class Renderer {
     }
 
     public dispose() {
+        this.stopped = true;
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
         this.mesh.dispose();
         this.select.dispose();

@@ -54,7 +54,7 @@
             <PointDataLink disabled=""></PointDataLink>
             <MD5ChecksumPointData disabled=""></MD5ChecksumPointData>
         </DataLink>
-        <Mask disabled=""></Mask>
+        <Mask type="section"></Mask>
     </Record3>
     <Record4>
         <ChecksumFile disabled=""></ChecksumFile>
