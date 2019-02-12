@@ -1,7 +1,5 @@
 precision mediump float;
 
-uniform float pickId;
-
 varying vec2 planeCoordinate;
 
 vec2 splitFloat(float v) {
@@ -16,5 +14,5 @@ void main() {
     vec2 ux = splitFloat(planeCoordinate.x);
     vec2 uy = splitFloat(planeCoordinate.y);
 
-    gl_FragColor = vec4(pickId, ux.x, uy.x, ux.y * (uy.y / 16.0));
+    gl_FragColor = vec4(1.0 / 255.0, ux.x, uy.x, ux.y * (uy.y / 16.0));
 }

@@ -34,7 +34,6 @@ export default class Mesh {
     public bounds?: number[][];
     public onready?: any;
 
-    private coords?: ndarray;
     private shape?: number[];
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
@@ -62,7 +61,7 @@ export default class Mesh {
         clipBounds: this.clipBounds,
     };
 
-    private pickUniforms = Object.assign({ pickId: this.pickId / 255.0 }, this.uniforms);
+    private pickUniforms = Object.assign({}, this.uniforms);
 
     constructor(options: MeshOptions) {
         this.x3p = options.x3p;
@@ -133,7 +132,6 @@ export default class Mesh {
         uniforms.model = options.model || Identity;
         uniforms.view = options.view || Identity;
         uniforms.projection = options.projection || Identity;
-        uniforms.pickId = this.pickId / 255.0;
         uniforms.highlight = false;
         uniforms.highlightColor = [ 0, 0, 0 ];
         
@@ -170,7 +168,6 @@ export default class Mesh {
             this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
             this.shape = e.data.shape;
             this.bounds = e.data.bounds;
-            this.coords = ndarray(e.data.coords, this.shape);
             
             freeFloat(e.data.buffer);
             worker.terminate();
