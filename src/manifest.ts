@@ -34,6 +34,7 @@ export default class Manifest {
     private tree = Parser.parseFromString(Tree, "text/xml");
     private openNodes: string[] = [];
     private error?: Element;
+    private nodeCounts: { [name: string]: number } = {};
     
     // cache helpers
     private [$string]?: string;
@@ -113,7 +114,7 @@ export default class Manifest {
         if(!isRoot) {
             this.openNodes.push(parent.nodeName);
             
-            if(!this.activeNode) {
+            if(!this.activeNode || this.currentNodeCount > 0) {
                 let nextParent = this.openNodes.length === 1 ? this.tree.documentElement : undefined;
                 
                 if(!nextParent) {
@@ -131,9 +132,10 @@ export default class Manifest {
             for(let child of Array.from(parent.children)) {
                 this.merge(child);       
             }
-        } else if(this.activeNode) {           
+        } else if(this.activeNode) {        
             this.mergeAttributes(this.activeNode, parent);
             this.activeNode.innerHTML = parent.innerHTML;
+            this.currentNodeCount = this.currentNodeCount + 1;
         }
 
         this.openNodes.pop();
@@ -162,8 +164,16 @@ export default class Manifest {
         return this.openNodes.join(" ");
     }
 
+    private get currentNodeCount() {
+        return this.pathName in this.nodeCounts ? this.nodeCounts[this.pathName] : 0;
+    }
+
+    private set currentNodeCount(value: number) {
+        this.nodeCounts[this.pathName] = value;
+    }
+
     private get activeNode() {
-        return this.pathName ? this.tree.querySelector(this.pathName) : undefined;
+        return this.pathName ? this.tree.querySelector(this.pathName + `:nth-of-type(${this.currentNodeCount + 1})`) : undefined;
     }
 
     public get checksum() {

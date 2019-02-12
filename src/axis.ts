@@ -44,7 +44,7 @@ export default class Axis {
         return value || 0;
     }
 
-    public cache() {
+    get values() {
         return {
             increment: this.increment,
             dataType: this.dataType,
