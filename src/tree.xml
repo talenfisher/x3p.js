@@ -22,6 +22,7 @@
                 <Increment disabled=""></Increment>
                 <Offset disabled=""></Offset>
             </CZ>
+            <Origin>NW</Origin>
         </Axes>
     </Record1>
     <Record2>

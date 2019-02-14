@@ -148,6 +148,7 @@ export default class Mesh {
     public update(options?: MeshOptions) {
         let worker = new Worker("worker.ts");
         let { x, y, z } = this.x3p.axes;
+        let origin = this.x3p.manifest.get("Record1 Axes Origin");
 
         // update lighting uniforms
         if(options && options.lighting) {
@@ -163,6 +164,7 @@ export default class Mesh {
                 y: y.values,
                 z: z.values,
             },
+            origin,
         }, [ this.x3p.pointBuffer as ArrayBuffer ]);
 
         worker.onmessage = (e) => {

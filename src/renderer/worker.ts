@@ -14,6 +14,7 @@ const MULTIPLY = 5;
 interface WorkerOptions {
     pointBuffer: ArrayBuffer;
     axes: { x: Axis, y: Axis, z: Axis };
+    origin: string;
 }
 
 function nextPow2(value: number) {
@@ -22,6 +23,7 @@ function nextPow2(value: number) {
 
 class WorkerUtil {
     private coords: ndarray;
+    private origin: string;
     private vertexCount: number = 0;
     private elementCount: number = 0;
     private pointBuffer: ArrayBuffer;
@@ -36,6 +38,7 @@ class WorkerUtil {
 
     constructor(options: WorkerOptions) {
         this.pointBuffer = options.pointBuffer;
+        this.origin = options.origin;
         this.axes = [
             options.axes.x,
             options.axes.y,
@@ -56,18 +59,28 @@ class WorkerUtil {
         let data = new (type as any)(this.pointBuffer);
         const ix = this.axes[0].increment / EPSILON;
         const iy = this.axes[1].increment / EPSILON;
+        
+        const pox = this.origin[0].toLowerCase();
+        const poy = this.origin[1].toLowerCase();
+
+        const ox = pox === "s" ?  0 : this.shape[0];
+        const oy = poy === "e" ? this.shape[1] : 0;
 
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[0] * ix, this.shape[1] * iy, -Infinity ];
         
-        let cy = -1;
+        let cv = -1;
         for(let i = 0; i < data.length; i++) {
-            let x = i % this.shape[0];
-            let y = ((x === 0) ? ++cy : cy) % this.shape[1];
+            let u = i % this.shape[0];
+            let v = ((u === 0) ? ++cv : cv) % this.shape[1];
+            
+            let x = Math.abs(ox - u) * ix;
+            let y = Math.abs(oy - v) * iy;
+            let z = (data[i] / EPSILON) * MULTIPLY;
 
-            this.coords.set(x, y, 0, (this.shape[0] - x) * ix);
-            this.coords.set(x, y, 1, y * iy);
-            this.coords.set(x, y, 2, (data[i] / EPSILON) * MULTIPLY);
+            this.coords.set(u, v, 0, x);
+            this.coords.set(u, v, 1, y);
+            this.coords.set(u, v, 2, z);
 
             if(!isNaN(data[i]) && isFinite(data[i])) {
                 this.lo[2] = Math.min(this.lo[2], data[i]);
