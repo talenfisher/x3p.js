@@ -176,8 +176,7 @@ export default class Mesh {
                 this.bounds = e.data.bounds;
                 
                 freeFloat(e.data.buffer);
-                worker.terminate();
-
+                
                 this.dirty = true;
                 this.ready = true;
 
