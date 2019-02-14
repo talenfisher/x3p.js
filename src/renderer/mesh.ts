@@ -1,17 +1,17 @@
 import X3P from "../x3p";
-import Quad from "./quad";
 import Identity from "./identity";
 import createShader from "./shaders/index";
+import Renderer from "./index";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
 import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
 import { invert, multiply } from "gl-mat4";
 import LightingOptions from "./lighting";
-import ndarray from "ndarray";
 
 interface MeshOptions {
     x3p: X3P;
+    renderer: Renderer;
     canvas: HTMLCanvasElement;
     lighting?: LightingOptions;
 }
@@ -34,6 +34,7 @@ export default class Mesh {
     public bounds?: number[][];
     public onready?: any;
 
+    private renderer: Renderer;
     private shape?: number[];
     private x3p: X3P;
     private canvas: HTMLCanvasElement;
@@ -65,6 +66,7 @@ export default class Mesh {
 
     constructor(options: MeshOptions) {
         this.x3p = options.x3p;
+        this.renderer = options.renderer;
         this.canvas = options.canvas;
         this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
         this.shader = createShader(this.gl);
@@ -164,18 +166,22 @@ export default class Mesh {
         }, [ this.x3p.pointBuffer as ArrayBuffer ]);
 
         worker.onmessage = (e) => {
-            this.vertexCount = e.data.vertexCount;
-            this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
-            this.shape = e.data.shape;
-            this.bounds = e.data.bounds;
-            
-            freeFloat(e.data.buffer);
-            worker.terminate();
+            this.renderer.setProgressValue(e.data.progress);
 
-            this.dirty = true;
-            this.ready = true;
+            if(e.data.progress === 1) {
+                this.vertexCount = e.data.vertexCount;
+                this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
+                this.shape = e.data.shape;
+                this.bounds = e.data.bounds;
+                
+                freeFloat(e.data.buffer);
+                worker.terminate();
 
-            if(this.onready) this.onready();
+                this.dirty = true;
+                this.ready = true;
+
+                if(this.onready) this.onready();
+            }
         };
     }
 

@@ -23,10 +23,6 @@
                 <Offset disabled=""></Offset>
             </CZ>
         </Axes>
-        <Rotation>
-            <Top>N</Top>
-            <Left>W</Left>
-        </Rotation>
     </Record1>
     <Record2>
         <Date type="date"></Date>

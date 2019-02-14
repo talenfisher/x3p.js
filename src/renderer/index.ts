@@ -2,6 +2,7 @@ import Mesh from "./mesh";
 import X3P from "../x3p";
 import CameraOptions from "./camera";
 import LightingOptions from "./lighting";
+import { readFileSync as read } from "fs";
 
 import createCamera from "@talenfisher/multitouch-camera";
 import createSelect from "gl-select-static";
@@ -9,6 +10,7 @@ import mouseChange from "mouse-change";
 import { perspective } from "gl-mat4";
 
 const $mode = Symbol();
+const STYLES = read(__dirname + "/style.css", { encoding: "utf-8" });
 
 interface RendererOptions {
     canvas: HTMLCanvasElement;
@@ -20,6 +22,8 @@ export default class Renderer {
     public onpick?: any;
     public selection?: any;
 
+    private canvasContainer?: HTMLElement;
+    private progress: { bar?: HTMLElement, screen?: HTMLElement } = {};
     private stopped = false;
     private dirty = false;
     private bounds: number[][] = [ [ 0, 0, 0 ], [ 0, 0, 0 ] ];
@@ -44,14 +48,19 @@ export default class Renderer {
 
     constructor(options: RendererOptions) {
         this.canvas = options.canvas;
+
         window.addEventListener("resize", this.resizeListener.bind(this));
         this.resizeListener();
+        this.containerize();
+        this.addProgressBar();
 
         this.gl = this.getContext(this.canvas);
         this.camera = createCamera(this.canvas, CameraOptions);
         this.select = createSelect(this.gl, this.shape);
         this.mouseListener = mouseChange(this.canvas, this.mouseHandler.bind(this));
-        this.mesh = new Mesh(options);
+        
+        let meshOptions = Object.assign({ renderer: this }, options);
+        this.mesh = new Mesh(meshOptions);
         this.mesh.onready = () => {
             this.dirty = true;
             this.updateBounds();
@@ -85,6 +94,14 @@ export default class Renderer {
 
         this.mouseListener.enabled = false;
         window.removeEventListener("resize", this.resizeListener.bind(this));
+    }
+
+    private get canvasIsAttached() {
+        return this.doc !== null;
+    }
+
+    private get doc() {
+        return this.canvas.ownerDocument;
     }
 
     public get mode() {
@@ -158,6 +175,19 @@ export default class Renderer {
         this.dirty = false;
     }
 
+    public setProgressValue(value: number) {
+        if(this.progress.screen && this.progress.bar) {
+            const { screen, bar } = this.progress;
+            bar.style.width = (value * 100) + "%";
+
+            if(value === 1) {
+                setTimeout(() => {
+                    screen.classList.remove("active");
+                }, 500);
+            }
+        }
+    }
+
     private mouseHandler(buttons: number, x: number, y: number) {
         if(this.mode !== "still") return;
         this.dirty = true;
@@ -220,5 +250,52 @@ export default class Renderer {
         }
 
         return context;
+    }
+
+    private containerize() {
+        if(!this.canvasIsAttached) return;
+
+        let doc = this.doc as Document;
+        let style = doc.createElement("style");
+        style.innerHTML = STYLES;
+        doc.head.appendChild(style);
+
+        let parent = this.canvas.parentElement as HTMLElement;
+        let container = doc.createElement("div");
+        container.classList.add("x3pjs-render");
+        
+        parent.removeChild(this.canvas);
+        container.appendChild(this.canvas);
+        parent.appendChild(container);
+
+        this.canvasContainer = container;
+    }
+
+    private createScreen(id: string) {
+        if(!this.canvasIsAttached || !this.canvasContainer) return;
+
+        let doc = this.doc as Document;
+        let screen = doc.createElement("div");
+        screen.classList.add("x3pjs-render-screen");
+        screen.id = id;
+        
+        this.canvasContainer.appendChild(screen);
+        return screen;
+    }
+
+    private addProgressBar() {
+        if(!this.canvasIsAttached || !this.canvasContainer) return;
+
+        let doc = this.doc as Document;
+        let barContainer = doc.createElement("div");
+        let bar = doc.createElement("div"); // create empty div for the progress value
+        barContainer.classList.add("x3pjs-progress-bar");
+        barContainer.appendChild(bar); 
+        
+        let screen = this.createScreen("x3pjs-progress-screen") as HTMLElement;
+        screen.appendChild(barContainer);
+        screen.classList.add("active");
+        
+        this.progress = { bar, screen };
     }
 }

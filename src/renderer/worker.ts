@@ -74,9 +74,16 @@ class WorkerUtil {
                 this.hi[2] = Math.max(this.hi[2], data[i]);
             }
         }
+        
+        // @ts-ignore
+        postMessage({ progress: 0.33 });
 
         data = null;
         this.computeNormals();
+
+        // @ts-ignore
+        postMessage({ progress: 0.66 });
+        
         this.buffer();
     }
 
@@ -191,6 +198,14 @@ class WorkerUtil {
 
 self.onmessage = (e) => {
     let util = new WorkerUtil(e.data);
+    
+    let result = util.result;
+    let message = Object.assign({ progress: 1 }, result);
+    let transferables = [
+        (result.buffer as TypedArray).buffer,
+    ];
+
     // @ts-ignore
-    postMessage(util.result, [ util.coordBuffer.buffer, util.coords.data.buffer ]);
+    postMessage(message, transferables);
+    close();
 };
