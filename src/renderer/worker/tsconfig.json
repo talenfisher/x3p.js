@@ -1,12 +1,7 @@
 {
+    "extends": "../../../tsconfig",
     "compilerOptions": {
-        "target": "es2015",
+        "baseUrl": ".",
         "lib": [ "es2015", "webworker" ],
-        "typeRoots": ["../../../node_modules/@types", "../../../types"], 
-        "moduleResolution": "node",
-        "esModuleInterop": true,
-    },
-    "include": [
-        "./", "../../../types/**/*"
-    ]
+    }
 }

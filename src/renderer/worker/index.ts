@@ -1,6 +1,6 @@
 import { mallocFloat, free } from "typedarray-pool";
 import { TypedArray } from "../../data-types";
-import Quad from "../quad";
+import Quad from "./quad";
 
 import dtype from "@talenfisher/dtype";
 import ndarray from "ndarray";
@@ -31,7 +31,6 @@ class WorkerUtil {
     private dataLength: number;
     private coordBuffer?: TypedArray;
     private gradient?: ndarray;
-    private normals?: ndarray;
 
     private shape: number[];
     private lo = [ Infinity, Infinity, Infinity ];

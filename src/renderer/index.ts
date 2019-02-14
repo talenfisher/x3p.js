@@ -255,6 +255,13 @@ export default class Renderer {
     private containerize() {
         if(!this.canvasIsAttached) return;
 
+        let canvasParent = this.canvas.parentElement as HTMLElement;
+        if(canvasParent.classList.contains("x3pjs-render")) {
+            this.canvasContainer = canvasParent;
+            this.removeScreens();
+            return;
+        }
+
         let doc = this.doc as Document;
         let style = doc.createElement("style");
         style.innerHTML = STYLES;
@@ -281,6 +288,16 @@ export default class Renderer {
         
         this.canvasContainer.appendChild(screen);
         return screen;
+    }
+
+    private removeScreens() {
+        if(!this.canvasContainer) return;
+
+        for(let child of Array.from(this.canvasContainer.children)) {
+            if(child.classList.contains("x3pjs-render-screen")) {
+                this.canvasContainer.removeChild(child);
+            }
+        }
     }
 
     private addProgressBar() {
