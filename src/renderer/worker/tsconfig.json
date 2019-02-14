@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        "lib": [ "es2015", "webworker" ],
+        "typeRoots": ["../../../node_modules/@types", "../../../types"], 
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+    },
+    "include": [
+        "./", "../../../types/**/*"
+    ]
+}

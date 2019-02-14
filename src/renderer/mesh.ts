@@ -108,7 +108,6 @@ export default class Mesh {
         uniforms.projection = options.projection;
         uniforms.view = options.view;
         uniforms.inverseModel = invert(uniforms.inverseModel, uniforms.model);
-        uniforms.clipBounds = this.clipBounds as number[][]; // gl-plot3d adjusts this
         uniforms.highlight = typeof this.highlightColor !== "undefined";
         uniforms.highlightColor = this.highlightColor || [ 0, 0, 0 ];
 
@@ -146,7 +145,7 @@ export default class Mesh {
     }
 
     public update(options?: MeshOptions) {
-        let worker = new Worker("worker.ts");
+        let worker = new Worker("./worker/index.ts");
         let { x, y, z } = this.x3p.axes;
         let origin = this.x3p.manifest.get("Record1 Axes Origin");
 
