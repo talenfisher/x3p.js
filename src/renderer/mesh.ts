@@ -27,7 +27,6 @@ const STRIDE = 4 * (3 + 3 + 2);
 
 export default class Mesh {
     public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
-    public pickId: number = 1;
     public dirty: boolean = false;
     public ready: boolean = false;
     public highlightColor?: number[];
@@ -176,7 +175,7 @@ export default class Mesh {
                 this.bounds = e.data.bounds;
                 
                 freeFloat(e.data.buffer);
-                
+
                 this.dirty = true;
                 this.ready = true;
 
@@ -186,7 +185,7 @@ export default class Mesh {
     }
 
     public pick(selection: any) {
-        if(!selection || selection.id !== this.pickId) return;
+        if(!selection) return;
 
         let shape = this.shape as number[];
         let result = { 
