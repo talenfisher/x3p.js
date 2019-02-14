@@ -63,8 +63,8 @@ class WorkerUtil {
         const pox = this.origin[0].toLowerCase();
         const poy = this.origin[1].toLowerCase();
 
-        const ox = pox === "s" ?  0 : this.shape[0];
-        const oy = poy === "e" ? this.shape[1] : 0;
+        const ox = pox === "s" ? 0 : this.shape[0];
+        const oy = poy === "w" ? 0 : this.shape[1];
 
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[0] * ix, this.shape[1] * iy, -Infinity ];
