@@ -6,11 +6,6 @@ import X3P from "./x3p";
 
 import jszip from "jszip";
 
-declare var window: any;
-
-const ZipLoader = jszip();
-const Parser = new window.DOMParser();
-
 export interface X3PLoaderOptions {
     file: any;
     name?: string;
@@ -71,6 +66,8 @@ export default class X3PLoader extends Promisable<X3P> {
     }
 
     private async load(resolve: any, reject: any) {
+        let ZipLoader: jszip = jszip();
+
         try {
             this.zip = await ZipLoader.loadAsync(this.options.file);
         } catch(e) {

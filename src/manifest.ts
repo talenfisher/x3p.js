@@ -3,7 +3,6 @@ import Tree from "./tree.xml";
 import md5 from "blueimp-md5";
 
 declare var window: any;
-declare var jsdom: any;
 
 const ATTRIBUTES = [
     "disabled",
