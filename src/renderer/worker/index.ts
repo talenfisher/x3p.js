@@ -60,11 +60,11 @@ class WorkerUtil {
         const ix = this.axes[0].increment / EPSILON;
         const iy = this.axes[1].increment / EPSILON;
         
-        const pox = this.origin[0].toLowerCase();
-        const poy = this.origin[1].toLowerCase();
+        const pox = this.origin[1].toLowerCase();
+        const poy = this.origin[0].toLowerCase();
 
-        const ox = pox === "s" ? 0 : this.shape[0];
-        const oy = poy === "w" ? 0 : this.shape[1];
+        const ox = pox === "e" ? 0 : this.shape[0];
+        const oy = poy === "n" ? 0 : this.shape[1];
 
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[0] * ix, this.shape[1] * iy, -Infinity ];
