@@ -6,7 +6,6 @@ import createTexture from "gl-texture2d";
 
 export interface MaskOptions {
     manifest: Manifest;
-    color?: string;
     data?: ArrayBuffer;
 }
 
@@ -30,7 +29,7 @@ export default class Mask {
 
     constructor(options: MaskOptions) {
         this.manifest = options.manifest;
-        this.color = options.color || "#cd7f32";
+        this.color = this.manifest.get("Record3 Mask Background");
         this.dataBuffer = options.data;
         
         this.definition = this.manifest.getNode("Record3 Mask");

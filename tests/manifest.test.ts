@@ -65,6 +65,19 @@ describe("Manifest", () => {
             expect(manifest.get(`Annotation[color="red"]`)).toBe("Red Annotation");
             expect(manifest.get(`Annotation[color="blue"]`)).toBe("Blue Annotation");
         });
+
+        it("Should not overwrite nodes if the provided node's value is empty", () => {
+            let source = DOCTYPE + `
+                <root>
+                    <Record3>
+                        <Mask/>
+                    </Record3>
+                </root>
+            `;
+
+            let manifest = new Manifest(source);
+            expect(manifest.get(`Record3 Mask Background`)).toBe("#cd7f32");
+        });
     });
 
     describe("get", () => {

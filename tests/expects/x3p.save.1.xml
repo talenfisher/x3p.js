@@ -51,7 +51,9 @@
             <PointDataLink>bindata/data.bin</PointDataLink>
             <MD5ChecksumPointData>8ba8e183fa6d29503acbb9cba92bc511</MD5ChecksumPointData>
         </DataLink>
-        <Mask/>
+        <Mask>
+            <Background>#cd7f32</Background>
+        </Mask>
     </Record3>
     <Record4>
         <ChecksumFile>md5checksum.hex</ChecksumFile>

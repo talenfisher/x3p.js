@@ -41,9 +41,12 @@ export default class Manifest {
 
     constructor(source: string) {
         this.data = Parser.parseFromString(source, "text/xml");
-
+        
         this.removeErrors();
         this.merge();
+
+        // @ts-ignore
+        this.data = null;
     }
 
     public get(selector: string) {
@@ -131,9 +134,11 @@ export default class Manifest {
             for(let child of Array.from(parent.children)) {
                 this.merge(child);       
             }
+            
         } else if(this.activeNode) {        
             this.mergeAttributes(this.activeNode, parent);
-            this.activeNode.innerHTML = parent.innerHTML;
+            if(parent.innerHTML) this.activeNode.innerHTML = parent.innerHTML;
+            
             this.currentNodeCount = this.currentNodeCount + 1;
         }
 
