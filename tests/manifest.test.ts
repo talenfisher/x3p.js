@@ -1,5 +1,6 @@
 import { readFileSync as read } from "fs";
 import { resolve } from "path";
+import md5 from "blueimp-md5";
 
 import Manifest from "../src/manifest";
 
@@ -63,6 +64,19 @@ describe("Manifest", () => {
             let manifest = new Manifest(source);
             expect(manifest.get(`Annotation[color="red"]`)).toBe("Red Annotation");
             expect(manifest.get(`Annotation[color="blue"]`)).toBe("Blue Annotation");
+        });
+
+        it("Should not overwrite nodes if the provided node's value is empty", () => {
+            let source = DOCTYPE + `
+                <root>
+                    <Record3>
+                        <Mask/>
+                    </Record3>
+                </root>
+            `;
+
+            let manifest = new Manifest(source);
+            expect(manifest.get(`Record3 Mask Background`)).toBe("#cd7f32");
         });
     });
 
@@ -156,13 +170,6 @@ describe("Manifest", () => {
             let manifest = new Manifest(source);
 
             expect(manifest.toString()).toBe(expects);
-        });
-    });
-
-    describe("get checksum", () => {
-        it("Should return the md5 checksum of the manifest", () => {
-            let manifest = new Manifest(`<root></root>`);
-            expect(manifest.checksum).toBe("fafc9c5a8a18dfafa58b3769b9b6c82a");
         });
     });
 });

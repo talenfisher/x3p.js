@@ -1,0 +1,55 @@
+:root {
+    --x3pjs-primary-color: #1f376c;
+    --x3pjs-error-color: red;
+    --x3pjs-progress-background: #ccc;
+}
+
+.x3pjs-render {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.x3pjs-render canvas {
+    min-height: 100%;
+    min-width: 100%;
+}
+
+.x3pjs-render-screen {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    padding: 30px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .5s;
+}
+
+.x3pjs-render-screen.active {
+    opacity: 1;
+}
+
+.x3pjs-progress-bar {
+    top: calc(50% - 30px);
+    background: var(--x3pjs-progress-background);
+    display: inline-block;
+    width: 80%;
+    height: 30px;
+    border-radius: 25px;
+    position: relative;
+}
+
+.x3pjs-progress-bar > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    border-radius: 25px;
+
+    background: var(--x3pjs-primary-color);
+}

@@ -22,11 +22,8 @@
                 <Increment>1</Increment>
                 <Offset>0</Offset>
             </CZ>
+            <Origin>NW</Origin>
         </Axes>
-        <Rotation>
-            <Top>N</Top>
-            <Left>W</Left>
-        </Rotation>
     </Record1>
     <Record2>
         <Date>2013-12-26T16:06:00</Date>
@@ -54,7 +51,9 @@
             <PointDataLink>bindata/data.bin</PointDataLink>
             <MD5ChecksumPointData>8ba8e183fa6d29503acbb9cba92bc511</MD5ChecksumPointData>
         </DataLink>
-        <Mask/>
+        <Mask>
+            <Background>#cd7f32</Background>
+        </Mask>
     </Record3>
     <Record4>
         <ChecksumFile>md5checksum.hex</ChecksumFile>

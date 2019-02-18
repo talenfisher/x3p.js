@@ -3,7 +3,6 @@ precision mediump float;
 #pragma glslify: beckmann = require(glsl-specular-beckmann) 
 
 uniform float roughness, fresnel, ambient, diffuse, specular;
-uniform vec3 clipBounds[2];
 
 varying vec3 eyeDirection, surfaceNormal;
 varying vec4 vColor;

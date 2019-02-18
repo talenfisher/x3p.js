@@ -22,11 +22,8 @@
                 <Increment/>
                 <Offset/>
             </CZ>
+            <Origin>NW</Origin>
         </Axes>
-        <Rotation>
-            <Top>N</Top>
-            <Left>W</Left>
-        </Rotation>
     </Record1>
     <Record2>
         <Date/>
@@ -54,7 +51,9 @@
             <PointDataLink/>
             <MD5ChecksumPointData/>
         </DataLink>
-        <Mask/>
+        <Mask>
+            <Background>#cd7f32</Background>
+        </Mask>
     </Record3>
     <Record4>
         <ChecksumFile/>

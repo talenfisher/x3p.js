@@ -1,12 +1,12 @@
 import { mallocFloat, free } from "typedarray-pool";
-import { TypedArray } from "../data-types";
+import { TypedArray } from "../../data-types";
 import Quad from "./quad";
 
 import dtype from "@talenfisher/dtype";
 import ndarray from "ndarray";
 import gradient from "ndarray-gradient";
 
-import Axis from "axis";
+import Axis from "../../axis";
 
 const EPSILON = 0.0001;
 const MULTIPLY = 5;
@@ -14,6 +14,7 @@ const MULTIPLY = 5;
 interface WorkerOptions {
     pointBuffer: ArrayBuffer;
     axes: { x: Axis, y: Axis, z: Axis };
+    origin: string;
 }
 
 function nextPow2(value: number) {
@@ -22,13 +23,14 @@ function nextPow2(value: number) {
 
 class WorkerUtil {
     private coords: ndarray;
+    private origin: string;
     private vertexCount: number = 0;
     private elementCount: number = 0;
     private pointBuffer: ArrayBuffer;
     private axes: Axis[] = [];
     private dataLength: number;
     private coordBuffer?: TypedArray;
-    private normals?: ndarray;
+    private gradient?: ndarray;
 
     private shape: number[];
     private lo = [ Infinity, Infinity, Infinity ];
@@ -36,6 +38,7 @@ class WorkerUtil {
 
     constructor(options: WorkerOptions) {
         this.pointBuffer = options.pointBuffer;
+        this.origin = options.origin;
         this.axes = [
             options.axes.x,
             options.axes.y,
@@ -56,27 +59,35 @@ class WorkerUtil {
         let data = new (type as any)(this.pointBuffer);
         const ix = this.axes[0].increment / EPSILON;
         const iy = this.axes[1].increment / EPSILON;
+        
+        const pox = this.origin[1].toLowerCase();
+        const poy = this.origin[0].toLowerCase();
+
+        const ox = pox === "e" ? 0 : this.shape[0];
+        const oy = poy === "n" ? 0 : this.shape[1];
 
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[0] * ix, this.shape[1] * iy, -Infinity ];
         
-        let cy = -1;
+        let cv = -1;
         for(let i = 0; i < data.length; i++) {
-            let x = i % this.shape[0];
-            let y = ((x === 0) ? ++cy : cy) % this.shape[1];
+            const u = i % this.shape[0];
+            const v = ((u === 0) ? ++cv : cv) % this.shape[1];
+            
+            const x = Math.abs(ox - u) * ix;
+            const y = Math.abs(oy - v) * iy;
+            const z = (data[i] / EPSILON) * MULTIPLY;
 
-            this.coords.set(x, y, 0, (this.shape[0] - x) * ix);
-            this.coords.set(x, y, 1, y * iy);
-            this.coords.set(x, y, 2, (data[i] / EPSILON) * MULTIPLY);
+            this.coords.set(u, v, 0, x);
+            this.coords.set(u, v, 1, y);
+            this.coords.set(u, v, 2, z);
 
             if(!isNaN(data[i]) && isFinite(data[i])) {
                 this.lo[2] = Math.min(this.lo[2], data[i]);
                 this.hi[2] = Math.max(this.hi[2], data[i]);
             }
         }
-
-        data = null;
-        this.computeNormals();
+        
         this.buffer();
     }
 
@@ -85,55 +96,54 @@ class WorkerUtil {
         free(this.coords.data);
     }
 
-    private computeNormals() {
+    private setupGradient() {
         let shape = [ 3, this.shape[0], this.shape[1], 2 ];
-        let dfields = ndarray(mallocFloat(this.dataLength * 2), shape);
+        this.gradient = ndarray(mallocFloat(this.dataLength * 2), shape);
 
         for(let i = 0; i < 3; i++) {
-            gradient(dfields.pick(i), this.coords.pick(null, null, i));
-        } 
+            gradient(this.gradient.pick(i), this.coords.pick(null, null, i));
+        }
+    }
 
-        let normals = ndarray(mallocFloat(this.dataLength * 3), this.shape);
+    private getNormal(x: number, y: number) {
+        if(!this.gradient) return;
 
-        for(let i = 0; i < this.shape[0]; i++) {
-            for(let j = 0; j < this.shape[1]; j++) {
-                let dxdu = dfields.get(0, i, j, 0);
-                let dxdv = dfields.get(0, i, j, 1);
-                let dydu = dfields.get(1, i, j, 0);
-                let dydv = dfields.get(1, i, j, 1);
-                let dzdu = dfields.get(2, i, j, 0);
-                let dzdv = dfields.get(2, i, j, 1);
+        let dxdu = this.gradient.get(0, x, y, 0);
+        let dxdv = this.gradient.get(0, x, y, 1);
+        let dydu = this.gradient.get(1, x, y, 0);
+        let dydv = this.gradient.get(1, x, y, 1);
+        let dzdu = this.gradient.get(2, x, y, 0);
+        let dzdv = this.gradient.get(2, x, y, 1);
 
-                let nx = dydu * dzdv - dydv * dzdu;
-                let ny = dzdu * dxdv - dzdv * dxdu;
-                let nz = dxdu * dydv - dxdv * dydu;
+        let nx = dydu * dzdv - dydv * dzdu;
+        let ny = dzdu * dxdv - dzdv * dxdu;
+        let nz = dxdu * dydv - dxdv * dydu;
 
-                let nl = Math.sqrt(Math.pow(nx, 2) + Math.pow(ny, 2) + Math.pow(nz, 2));
-                if(nl < 1e-8) {
-                    nl = Math.max(Math.abs(nx), Math.abs(ny), Math.abs(nz));
-                    
-                    if(nl < 1e-8) {
-                        nz = 1.0;
-                        ny = nx = 0.0;
-                        nl = 1.0;
-                    } else {
-                        nl = 1.0 / nl;
-                    }
-                } else {
-                    nl = 1.0 / Math.sqrt(nl);
-                }
-
-                normals.set(i, j, 0, nx * nl);
-                normals.set(i, j, 1, ny * nl);
-                normals.set(i, j, 2, nz * nl);
+        let nl = Math.sqrt(Math.pow(nx, 2) + Math.pow(ny, 2) + Math.pow(nz, 2));
+        if(nl < 1e-8) {
+            nl = Math.max(Math.abs(nx), Math.abs(ny), Math.abs(nz));
+            
+            if(nl < 1e-8) {
+                nz = 1.0;
+                ny = nx = 0.0;
+                nl = 1.0;
+            } else {
+                nl = 1.0 / nl;
             }
+        } else {
+            nl = 1.0 / Math.sqrt(nl);
         }
 
-        this.normals = normals;
-        free(dfields.data);
+        return [ 
+            nx * nl, 
+            ny * nl, 
+            nz * nl,
+        ];
     }
 
     private buffer() {
+        this.setupGradient();
+
         this.elementCount = 0;
         this.vertexCount = 0;
 
@@ -154,7 +164,7 @@ class WorkerUtil {
 
                 let tu = i / this.shape[0];
                 let tv = j / this.shape[1];
-
+                
                 for(let k = 0; k < 6; k++) {
                     let ix = i + Quad[k][0];
                     let iy = j + Quad[k][1];
@@ -163,18 +173,24 @@ class WorkerUtil {
                     this.coordBuffer[ptr++] = this.coords.get(ix, iy, 1);
                     this.coordBuffer[ptr++] = this.coords.get(ix, iy, 2);
 
-                    let normals = this.normals as ndarray;
-                    this.coordBuffer[ptr++] = normals.get(ix, iy, 0);
-                    this.coordBuffer[ptr++] = normals.get(ix, iy, 1);
-                    this.coordBuffer[ptr++] = normals.get(ix, iy, 2);
+                    let normal = this.getNormal(ix, iy) as number[];
+                    this.coordBuffer[ptr++] = normal[0];
+                    this.coordBuffer[ptr++] = normal[1];
+                    this.coordBuffer[ptr++] = normal[2];
 
                     this.coordBuffer[ptr++] = tu;
                     this.coordBuffer[ptr++] = tv;
                     this.vertexCount++;
                 }
             }
+
+            postMessage({ progress: i / this.shape[0] });
         }
+
         this.elementCount = ptr;
+        
+        let grad = this.gradient as ndarray;
+        free(grad.data);
     }
 
     public get result() {
@@ -182,15 +198,21 @@ class WorkerUtil {
             vertexCount: this.vertexCount,
             elementCount: this.elementCount,
             buffer: this.coordBuffer,
-            coords: [ this.coords.data ],
             shape: [ this.coords.shape[0], this.coords.shape[1] ],
             bounds: [ this.lo, this.hi ],
         };
     }
 }
 
-self.onmessage = (e) => {
+onmessage = (e) => {
     let util = new WorkerUtil(e.data);
-    // @ts-ignore
-    postMessage(util.result, [ util.coordBuffer.buffer, util.coords.data.buffer ]);
+    
+    let result = util.result;
+    let message = Object.assign({ progress: 1 }, result);
+    let transferables = [
+        (result.buffer as TypedArray).buffer,
+    ];
+    
+    postMessage(message, transferables);
+    close();
 };
