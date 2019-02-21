@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es2015",                          
     "module": "commonjs",                     
-    "lib": ["es7", "dom", "es2017.sharedmemory"],                             
+    "lib": ["es7", "dom", "es2017.sharedmemory"],
+    "allowJs": true,                        
     "outDir": "./dist",                        
     "rootDir": "./src",                       
     "removeComments": true,                    

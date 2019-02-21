@@ -10,7 +10,7 @@
     "test:render": "parcel serve tests/browser/index.html",
     "watch": "watch 'npm run test' src tests",
     "build": "parcel build src/index.ts -d dist --global X3P --no-content-hash",
-    "types": "tsc -d --emitDeclarationOnly --outDir types",
+    "types": "tsc -d --emitDeclarationOnly --allowJs false --outDir types",
     "postversion": "git push --follow-tags"
   },
   "keywords": [
