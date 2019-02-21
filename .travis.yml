@@ -13,6 +13,7 @@ before_script:
 
 script:
   - npm run build
+  - npm run types
   - npm run lint
   - npm run test
 

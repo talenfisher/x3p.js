@@ -2,6 +2,7 @@
   "name": "x3p.js",
   "version": "0.4.0",
   "description": "JavaScript library for working with X3P files",
+  "types": "types/index.d.ts",
   "main": "dist/index.js",
   "scripts": {
     "lint": "tslint --project .",
@@ -9,6 +10,7 @@
     "test:render": "parcel serve tests/browser/index.html",
     "watch": "watch 'npm run test' src tests",
     "build": "parcel build src/index.ts -d dist --global X3P --no-content-hash",
+    "types": "tsc -d --emitDeclarationOnly --outDir types",
     "postversion": "git push --follow-tags"
   },
   "keywords": [
