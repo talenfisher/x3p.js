@@ -204,8 +204,8 @@ export default class Mesh {
         ix++;
         iy++;
 
-        result.index[0] = fy < 0.5 ? iy : (iy + 1);
-        result.index[1] = fx < 0.5 ? ix : (ix + 1);
+        result.index[0] = fx < 0.5 ? ix : (ix + 1);
+        result.index[1] = fy < 0.5 ? iy : (iy + 1);
 
         return result;
     }
