@@ -1,6 +1,6 @@
 {
   "name": "x3p.js",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "JavaScript library for working with X3P files",
   "types": "types/index.d.ts",
   "main": "dist/index.js",
