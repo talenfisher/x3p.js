@@ -131,3 +131,9 @@ export default class X3PLoader extends Promisable<X3P> {
         return this.read(filename as string, "arraybuffer") as Promise<ArrayBuffer> | undefined;
     }
 }
+
+export { default as X3P } from "./x3p";
+export { default as Axis } from "./axis";
+export { default as Mask } from "./mask";
+export { default as Manifest } from "./manifest";
+export { default as Renderer } from "./renderer";
