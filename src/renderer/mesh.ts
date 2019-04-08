@@ -70,7 +70,7 @@ export default class Mesh {
         this.gl = this.canvas.getContext("webgl") as WebGLRenderingContext;
         this.shader = createShader(this.gl);
         this.pickShader = createShader(this.gl, "pick");
-        this.coordinateBuffer = createBuffer(this.gl);
+        this.coordinateBuffer = createBuffer(this.gl, undefined, this.gl.ARRAY_BUFFER, this.gl.STATIC_DRAW);
         this.texture = this.x3p.mask.getTexture(this.gl);
         this.vao = createVAO(this.gl, [
             {
