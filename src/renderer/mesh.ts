@@ -4,34 +4,36 @@ import createShader from "./shaders/index";
 import Renderer from "./index";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
-import { freeFloat } from "typedarray-pool";
 import createVAO, { GLVao } from "gl-vao";
 import { invert, multiply } from "gl-mat4";
 import LightingOptions from "./lighting";
+import { EventEmitter } from "events";
 
-interface MeshOptions {
+export interface MeshOptions {
     x3p: X3P;
     renderer: Renderer;
     canvas: HTMLCanvasElement;
     lighting?: LightingOptions;
+    decimationFactor?: number;
 }
 
 const STRIDE = 4 * (3 + 3 + 2);
 
 /**
  * This mesh is compatible with gl-plot3d, and is based off of
- * gl-vis/gl-plot3d.  It has been modified to use less memory and
+ * gl-vis/gl-surface3d.  It has been modified to use less memory and
  * not block the UI thread while building vertices.  Point picking
  * now only occurs when the renderer is in "still" mode
  */
 
-export default class Mesh {
+export default class Mesh extends EventEmitter {
     public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
     public dirty: boolean = false;
     public ready: boolean = false;
     public highlightColor?: number[];
     public bounds?: number[][];
     public onready?: any;
+    public decimationFactor: number;
 
     private renderer: Renderer;
     private shape?: number[];
@@ -64,6 +66,7 @@ export default class Mesh {
     private pickUniforms = Object.assign({}, this.uniforms);
 
     constructor(options: MeshOptions) {
+        super();
         this.x3p = options.x3p;
         this.renderer = options.renderer;
         this.canvas = options.canvas;
@@ -72,6 +75,7 @@ export default class Mesh {
         this.pickShader = createShader(this.gl, "pick");
         this.coordinateBuffer = createBuffer(this.gl, undefined, this.gl.ARRAY_BUFFER, this.gl.STATIC_DRAW);
         this.texture = this.x3p.mask.getTexture(this.gl);
+        this.decimationFactor = options.decimationFactor || 0;
         this.vao = createVAO(this.gl, [
             {
                 buffer: this.coordinateBuffer,
@@ -154,15 +158,15 @@ export default class Mesh {
             Object.assign(this.uniforms, lighting);
         } 
 
-        // @ts-ignore
         worker.postMessage({ 
+            origin,
             pointBuffer: this.x3p.pointBuffer,
+            decimationFactor: this.decimationFactor,
             axes: {
                 x: x.values,
                 y: y.values,
                 z: z.values,
             },
-            origin,
         }, [ this.x3p.pointBuffer as ArrayBuffer ]);
 
         worker.onmessage = (e) => {
@@ -173,14 +177,17 @@ export default class Mesh {
                 this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
                 this.shape = e.data.shape;
                 this.bounds = e.data.bounds;
-                
-                freeFloat(e.data.buffer);
 
                 this.dirty = true;
                 this.ready = true;
 
                 if(this.onready) this.onready();
+                this.emit("ready");
             }
+        };
+
+        worker.onerror = (error) => {
+            this.emit("error", error);
         };
     }
 

@@ -2,18 +2,19 @@ import Axis from "./axis";
 import X3PLoader from "./index";
 import Manifest from "./manifest";
 import Mask from "./mask";
-import Renderer from "./renderer";
+import Renderer, { RendererOptions } from "./renderer";
 
 import { saveAs } from "file-saver";
 import ndarray = require("ndarray");
 
-interface X3POptions {
+export interface X3POptions {
     name: string;
     loader: X3PLoader;
     manifest: Manifest;
     mask: Mask;
     pointBuffer?: ArrayBuffer;
 }
+
 export default class X3P {
     public axes: { x: Axis, y: Axis, z: Axis };
     public manifest: Manifest;
@@ -57,10 +58,10 @@ export default class X3P {
         saveAs(blob, filename);
     }
 
-    public render(canvas: HTMLCanvasElement) {
+    public render(canvas: HTMLCanvasElement, options?: RendererOptions) {
         if(!this.pointBuffer) return;
 
-        let renderer = new Renderer({
+        let defaults = {
             x3p: this,
             canvas,
             lighting: {
@@ -69,8 +70,8 @@ export default class X3P {
                 specular: 0.2,
                 roughness: 0.5,
             },
-        });
-
-        return renderer;
+        };
+        
+        return new Renderer(Object.assign(defaults, options));
     }
 }
