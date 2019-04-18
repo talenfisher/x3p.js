@@ -14,5 +14,7 @@ declare var window: any;
     
     let canvas = document.querySelector("canvas");
     document.body.appendChild(canvas);
-    window.renderer = window.x3p.render(canvas);
+    window.renderer = window.x3p.render(canvas, {
+        decimationFactor: 1,
+    });
 })();

@@ -1,8 +1,10 @@
-export default [
-    [0, 0],
-    [0, 1],
-    [1, 0],
-    [1, 1],
-    [1, 0],
-    [0, 1],
-];
+export default function createQuad(stride: number = 1) {
+    return [
+        [0,         0],
+        [0,         stride],
+        [stride,    0],
+        [stride,    stride],
+        [stride,    0],
+        [0,         stride],
+    ];
+}

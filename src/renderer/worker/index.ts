@@ -1,6 +1,5 @@
-import { mallocFloat, free } from "typedarray-pool";
 import { TypedArray } from "../../data-types";
-import Quad from "./quad";
+import createQuad from "./quad";
 
 import dtype from "@talenfisher/dtype";
 import ndarray from "ndarray";
@@ -15,14 +14,11 @@ interface WorkerOptions {
     pointBuffer: ArrayBuffer;
     axes: { x: Axis, y: Axis, z: Axis };
     origin: string;
-}
-
-function nextPow2(value: number) {
-    return Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
+    decimationFactor?: number;
 }
 
 class WorkerUtil {
-    private coords: ndarray;
+    private coords?: ndarray;
     private origin: string;
     private vertexCount: number = 0;
     private elementCount: number = 0;
@@ -31,6 +27,7 @@ class WorkerUtil {
     private dataLength: number;
     private coordBuffer?: TypedArray;
     private gradient?: ndarray;
+    private decimationFactor: number;
 
     private shape: number[];
     private lo = [ Infinity, Infinity, Infinity ];
@@ -39,6 +36,7 @@ class WorkerUtil {
     constructor(options: WorkerOptions) {
         this.pointBuffer = options.pointBuffer;
         this.origin = options.origin;
+        this.decimationFactor = options.decimationFactor || 0;
         this.axes = [
             options.axes.x,
             options.axes.y,
@@ -47,7 +45,7 @@ class WorkerUtil {
 
         this.shape = [ this.axes[0].size, this.axes[1].size, 3 ];
         this.dataLength = this.shape[0] * this.shape[1] * this.shape[2];
-        this.coords = ndarray(mallocFloat(this.dataLength), this.shape);
+        this.coords = ndarray(new Float32Array(this.dataLength), this.shape);
 
         let name = this.axes[2].dataType.name || "d";
         let type = dtype(name);
@@ -91,17 +89,13 @@ class WorkerUtil {
         this.buffer();
     }
 
-    public dispose() {
-        free(this.coordBuffer);
-        free(this.coords.data);
-    }
-
     private setupGradient() {
         let shape = [ 3, this.shape[0], this.shape[1], 2 ];
-        this.gradient = ndarray(mallocFloat(this.dataLength * 2), shape);
+        let coords = this.coords as ndarray;
+        this.gradient = ndarray(new Float32Array(this.dataLength * 2), shape);
 
         for(let i = 0; i < 3; i++) {
-            gradient(this.gradient.pick(i), this.coords.pick(null, null, i));
+            gradient(this.gradient.pick(i), coords.pick(null, null, i));
         }
     }
 
@@ -142,22 +136,28 @@ class WorkerUtil {
     }
 
     private buffer() {
-        this.setupGradient();
+        let stride = this.stride;
+        let coords = this.coords as ndarray;
+        let quad = createQuad(stride);
+        let ptr = 0;
+        let iUpperBound = this.shape[0] - stride;
+        let jUpperBound = this.shape[1] - stride;
+        let verticesPerQuad = quad.length;
+        let count = iUpperBound * jUpperBound * verticesPerQuad;
+        let bufferSize = 8 * count;
 
+        this.setupGradient();
         this.elementCount = 0;
         this.vertexCount = 0;
+        this.coordBuffer = new Float32Array(bufferSize);        
 
-        let ptr = 0;
-        let count = (this.shape[0] - 1) * (this.shape[1] - 1) * 6;
-        this.coordBuffer = mallocFloat(nextPow2(8 * count));
-
-        i_loop: for(let i = 0; i < this.shape[0] - 1; i++) {
-            j_loop: for(let j = 0; j < this.shape[1] - 1; j++) {
-                
+        i_loop: for(let i = 0; i < iUpperBound; i += stride) {
+            j_loop: for(let j = 0; j < jUpperBound; j += stride) {
+                 
                 // skip if any vertices in the quadrilateral are undefined
-                for(let dx = 0; dx < 2; dx++) {
-                    for(let dy = 0; dy < 2; dy++) {
-                        let val = this.coords.get(1 + i + dx, 1 + j + dy, 2);
+                for(let dx = 0; dx <= stride; dx++) {
+                    for(let dy = 0; dy <= stride; dy++) {
+                        let val = coords.get(1 + i + dx, 1 + j + dy, 2);
                         if(isNaN(val) || !isFinite(val)) continue j_loop;
                     }
                 }
@@ -165,13 +165,13 @@ class WorkerUtil {
                 let tu = i / this.shape[0];
                 let tv = j / this.shape[1];
                 
-                for(let k = 0; k < 6; k++) {
-                    let ix = i + Quad[k][0];
-                    let iy = j + Quad[k][1];
+                for(let k = 0; k < verticesPerQuad; k++) {
+                    let ix = i + quad[k][0];
+                    let iy = j + quad[k][1];
                     
-                    this.coordBuffer[ptr++] = this.coords.get(ix, iy, 0);
-                    this.coordBuffer[ptr++] = this.coords.get(ix, iy, 1);
-                    this.coordBuffer[ptr++] = this.coords.get(ix, iy, 2);
+                    this.coordBuffer[ptr++] = coords.get(ix, iy, 0);
+                    this.coordBuffer[ptr++] = coords.get(ix, iy, 1);
+                    this.coordBuffer[ptr++] = coords.get(ix, iy, 2);
 
                     let normal = this.getNormal(ix, iy) as number[];
                     this.coordBuffer[ptr++] = normal[0];
@@ -184,29 +184,48 @@ class WorkerUtil {
                 }
             }
 
-            postMessage({ progress: i / this.shape[0] });
+            postMessage({ 
+                progress: i / this.shape[0],
+            });
         }
 
         this.elementCount = ptr;
-        
-        let grad = this.gradient as ndarray;
-        free(grad.data);
     }
 
     public get result() {
+        let coords = this.coords as ndarray;
+
         return {
             vertexCount: this.vertexCount,
             elementCount: this.elementCount,
             buffer: this.coordBuffer,
-            shape: [ this.coords.shape[0], this.coords.shape[1] ],
+            shape: [ coords.shape[0], coords.shape[1] ],
             bounds: [ this.lo, this.hi ],
         };
+    }
+
+    private get stride() {
+        let decimationFactor = this.decimationFactor;
+        decimationFactor = Math.max(0, decimationFactor);
+        decimationFactor = Math.min(decimationFactor, 1);
+
+        let coords = this.coords as ndarray;
+        let shape = coords.shape;
+        let sx = shape[0];
+        let sy = shape[1];
+        let avg = (sx + sy) / 2;
+        let max = Math.floor(avg / 200);
+
+        return 1 + Math.floor(decimationFactor * max);
+    }
+
+    private nextPow2(value: number) {
+        return Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
     }
 }
 
 onmessage = (e) => {
     let util = new WorkerUtil(e.data);
-    
     let result = util.result;
     let message = Object.assign({ progress: 1 }, result);
     let transferables = [

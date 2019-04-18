@@ -1,4 +1,4 @@
-import Mesh from "./mesh";
+import Mesh, { MeshOptions } from "./mesh";
 import X3P from "../x3p";
 import CameraOptions from "./camera";
 import LightingOptions from "./lighting";
@@ -7,18 +7,20 @@ import { readFileSync as read } from "fs";
 import createCamera from "@talenfisher/multitouch-camera";
 import createSelect from "gl-select-static";
 import mouseChange from "mouse-change";
+import { EventEmitter } from "events";
 import { perspective } from "gl-mat4";
 
 const $mode = Symbol();
 const STYLES = read(__dirname + "/style.css", { encoding: "utf-8" });
 
-interface RendererOptions {
+export interface RendererOptions {
     canvas: HTMLCanvasElement;
     x3p: X3P;
     lighting?: LightingOptions;
+    decimationFactor?: number;
 }
 
-export default class Renderer {
+export default class Renderer extends EventEmitter {
     public onpick?: any;
     public selection?: any;
 
@@ -47,6 +49,7 @@ export default class Renderer {
     private [$mode]: "normal" | "still" = "normal";
 
     constructor(options: RendererOptions) {
+        super();
         this.canvas = options.canvas;
 
         window.addEventListener("resize", this.resizeListener.bind(this));
@@ -58,14 +61,24 @@ export default class Renderer {
         this.camera = createCamera(this.canvas, CameraOptions);
         this.select = createSelect(this.gl, this.shape);
         this.mouseListener = mouseChange(this.canvas, this.mouseHandler.bind(this));
+
+        let meshDefaults = { renderer: this };
+        this.mesh = new Mesh(Object.assign(meshDefaults, options));
         
-        let meshOptions = Object.assign({ renderer: this }, options);
-        this.mesh = new Mesh(meshOptions);
-        this.mesh.onready = () => {
+        this.mesh.on("ready", () => {
             this.dirty = true;
             this.updateBounds();
+            this.emit("start");
             this.render();
+        });
+
+        let onerror = (error: any) => {
+            this.emit("error", error);
+            this.dispose();
         };
+
+        this.mesh.on("error", onerror);
+        this.canvas.addEventListener("webglcontextlost", () => onerror("Lost the WebGL context"));
     }
 
     public render() {
@@ -94,6 +107,7 @@ export default class Renderer {
 
         this.mouseListener.enabled = false;
         window.removeEventListener("resize", this.resizeListener.bind(this));
+        this.emit("end");
     }
 
     private get canvasIsAttached() {
@@ -191,6 +205,7 @@ export default class Renderer {
     private mouseHandler(buttons: number, x: number, y: number) {
         if(this.mode !== "still") return;
         this.dirty = true;
+        
         let queryResult = this.select.query(x, this.shape[1] - y - 1, 10);
         let pickResult = this.mesh.pick(queryResult);
         
