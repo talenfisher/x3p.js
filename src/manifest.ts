@@ -1,5 +1,5 @@
 import Tree from "./tree.xml";
-import Mask from "./mask.xml";
+import DefaultMask from "./mask.xml";
 
 import md5 from "blueimp-md5";
 
@@ -31,7 +31,7 @@ const $checksum = Symbol();
 const $defaultMask = Symbol();
 
 export default class Manifest {
-    private static [$defaultMask]: string = Mask;
+    private static [$defaultMask]: string = DefaultMask;
 
     private data: Document;
     private tree: Document;
@@ -59,7 +59,7 @@ export default class Manifest {
     }
 
     public static set defaultMask(mask) {
-        this[$defaultMask] = mask;
+        this[$defaultMask] = mask.trim() === "" ? DefaultMask : mask;
     }
 
     public get(selector: string) {

@@ -6,6 +6,8 @@ import Manifest from "../src/manifest";
 
 declare var window: any;
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
+const DEFAULT_MASK_LOCATION = resolve(__dirname, "../src/mask.xml");
+const DEFAULT_MASK = read(DEFAULT_MASK_LOCATION, { encoding: "utf-8" });
 const Parser = new window.DOMParser();
 const parse = (value: string) => Parser.parseFromString(value, "text/xml");
 
@@ -177,8 +179,7 @@ describe("Manifest", () => {
 
     describe("get defaultMask", () => {
         it("Should initially return the contents of mask.xml", () => {
-            let expects = read(resolve(__dirname, "../src/mask.xml"), { encoding: "utf-8" });
-            expect(Manifest.defaultMask).toBe(expects);
+            expect(Manifest.defaultMask).toBe(DEFAULT_MASK);
         });
     });
 
@@ -197,6 +198,24 @@ describe("Manifest", () => {
             let manifest = new Manifest(source);
             let background = manifest.get("Record3 Mask Background");
             expect(background).toBe("#000000");
+        });
+
+        it("Setting it to an empty value should reset the defaultMask to its original state", () => {
+            let updated = `<Mask><Background>#000000</Background></Mask>`;
+            Manifest.defaultMask = updated;
+            expect(Manifest.defaultMask).toBe(updated);
+
+            Manifest.defaultMask = "";
+            expect(Manifest.defaultMask).toBe(DEFAULT_MASK);
+        });
+
+        it("Setting it to a string with only spaces should reset the defaultMask to its original state", () => {
+            let updated = `<Mask><Background>#000000</Background></Mask>`;
+            Manifest.defaultMask = updated;
+            expect(Manifest.defaultMask).toBe(updated);
+
+            Manifest.defaultMask = "      ";
+            expect(Manifest.defaultMask).toBe(DEFAULT_MASK);
         });
     });
 });
