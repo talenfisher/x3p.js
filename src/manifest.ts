@@ -1,4 +1,5 @@
 import Tree from "./tree.xml";
+import Mask from "./mask.xml";
 
 import md5 from "blueimp-md5";
 
@@ -27,10 +28,13 @@ const serialize = (value: any): string => {
 
 const $string = Symbol();
 const $checksum = Symbol();
+const $defaultMask = Symbol();
 
 export default class Manifest {
+    private static [$defaultMask]: string = Mask;
+
     private data: Document;
-    private tree = Parser.parseFromString(Tree, "text/xml");
+    private tree: Document;
     private openNodes: string[] = [];
     private error?: Element;
     private nodeCounts: { [name: string]: number } = {};
@@ -40,6 +44,7 @@ export default class Manifest {
     private [$checksum]?: string;
 
     constructor(source: string) {
+        this.tree = this.prepareTree();
         this.data = Parser.parseFromString(source, "text/xml");
         
         this.removeErrors();
@@ -49,12 +54,20 @@ export default class Manifest {
         this.data = null;
     }
 
+    public static get defaultMask() {
+        return this[$defaultMask];
+    }
+
+    public static set defaultMask(mask) {
+        this[$defaultMask] = mask;
+    }
+
     public get(selector: string) {
         let element = this.tree.querySelector(selector);
         if(!element) return undefined;
         
-        let value = element.innerHTML;
-        return (!Number.isNaN(parseFloat(value)) && isFinite(value)) ? Number(value) : value;
+        let value = element.innerHTML as unknown;
+        return (!Number.isNaN(parseFloat(value as string)) && isFinite(value as number)) ? Number(value) : value;
     }
 
     public set(selector: string, value: any) {
@@ -68,10 +81,9 @@ export default class Manifest {
                 let node = this.tree.querySelector(nodeSelector);
 
                 if(!node) {
-                    let parent = i === 0 ? this.tree.documentElement : undefined;
-                    parent = parent || this.tree.querySelector(nodes.slice(0, i).join(" "));                    
-                    
+                    let parent = i === 0 ? this.tree.documentElement : this.tree.querySelector(nodes.slice(0, i).join(" ")) as Element;                 
                     node = this.tree.createElement(nodes[i]);
+
                     parent.appendChild(node);
                 }
 
@@ -79,8 +91,10 @@ export default class Manifest {
             }
         }
 
-        element.innerHTML = value;
-        
+        if(element) {
+            element.innerHTML = value;
+        }
+
         this[$string] = undefined;
         this[$checksum] = undefined;
     }
@@ -91,9 +105,15 @@ export default class Manifest {
 
     public remove(selector: string) {
         if(!this.has(selector)) return;
+
         let node = this.getNode(selector);
-        node.parentNode.removeChild(node);
-        
+        if(!node) return;
+
+        let parent = node.parentNode;
+        if(!parent) return;
+
+        parent.removeChild(node);
+
         this[$string] = undefined;
         this[$checksum] = undefined;
     }
@@ -110,6 +130,11 @@ export default class Manifest {
         return (this[$string] ? this[$string] : this[$string] = serialize(this.tree)) as string;
     }
 
+    private prepareTree() {
+        let src = Tree.replace("<Mask/>", Manifest.defaultMask);
+        return Parser.parseFromString(src, "text/xml");
+    }
+
     private merge(parent: Element = this.data.documentElement as Element) {
         let isRoot = parent === this.data.documentElement;
         
@@ -117,7 +142,7 @@ export default class Manifest {
             this.openNodes.push(parent.nodeName);
             
             if(!this.activeNode || this.currentNodeCount > 0) {
-                let nextParent = this.openNodes.length === 1 ? this.tree.documentElement : undefined;
+                let nextParent = this.openNodes.length === 1 ? this.tree.documentElement as Element : null;
                 
                 if(!nextParent) {
                     let selector = this.openNodes.slice(0, this.openNodes.length - 1).join(" ");
@@ -126,7 +151,10 @@ export default class Manifest {
 
                 let child = this.tree.createElement(parent.nodeName);
                 this.mergeAttributes(child, parent);
-                nextParent.appendChild(child);
+
+                if(nextParent) {
+                    nextParent.appendChild(child);
+                }
             }
         }
         

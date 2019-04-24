@@ -101,8 +101,8 @@ export default class X3PLoader extends Promisable<X3P> {
 
     private async getPointBuffer() {
         if(!this.manifest) return;
-        let pointFile = this.manifest.get("Record3 DataLink PointDataLink");
-        return pointFile ? await this.read(pointFile, "arraybuffer") as ArrayBuffer : undefined;
+        let pointFile = this.manifest.get("Record3 DataLink PointDataLink") as string | undefined;
+        return typeof pointFile !== "undefined" ? await this.read(pointFile, "arraybuffer") as ArrayBuffer : undefined;
     }
 
     /**

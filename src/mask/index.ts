@@ -28,11 +28,20 @@ export default class Mask {
     private texture?: any;
 
     constructor(options: MaskOptions) {
+        let definition = options.manifest.getNode("Record3 Mask");
+        if(!definition) {
+            throw new Error("Record3 Mask is not defined in the manifest");
+        }
+
+        let color = options.manifest.get("Record3 Mask Background") as string | undefined;
+        if(!color) {
+            throw new Error("Record3 Mask Background is not defined");
+        }
+
         this.manifest = options.manifest;
-        this.color = this.manifest.get("Record3 Mask Background");
         this.dataBuffer = options.data;
-        
-        this.definition = this.manifest.getNode("Record3 Mask");
+        this.definition = definition;
+        this.color = color;
         this.annotations = new Proxy(this.definition, AnnotationHandler);
         this.setupCanvas();
     }
@@ -64,11 +73,13 @@ export default class Mask {
         }
     }
 
-    get height() {
-        return this.manifest.get("Record3 MatrixDimension SizeY") || 0;
+    get height(): number {
+        let size = this.manifest.get("Record3 MatrixDimension SizeY");
+        return typeof size !== "undefined" ? Number(size) : 0;
     }
 
     get width() {
-        return this.manifest.get("Record3 MatrixDimension SizeX") || 0;
+        let size = this.manifest.get("Record3 MatrixDimension SizeX");
+        return typeof size !== "undefined" ? Number(size) : 0;
     }
 }
