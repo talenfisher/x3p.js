@@ -191,13 +191,13 @@ export default class Mesh extends EventEmitter {
         };
     }
 
-    public pick(selection: any) {
+    public pick(selection: any, includeColor: boolean = false) {
         if(!selection) return;
 
         let shape = this.shape as number[];
         let result = { 
             index: [ 0, 0 ],
-            color: [ 0, 0, 0 ],
+            color: null,
         };
 
         let x = shape[0] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
@@ -213,6 +213,10 @@ export default class Mesh extends EventEmitter {
 
         result.index[0] = fx < 0.5 ? ix : (ix + 1);
         result.index[1] = fy < 0.5 ? iy : (iy + 1);
+        
+        if(includeColor) {
+            result.color = this.x3p.mask.canvas.getColorAt(result.index[0], result.index[1]);
+        }
 
         return result;
     }

@@ -207,7 +207,8 @@ export default class Renderer extends EventEmitter {
         this.dirty = true;
         
         let queryResult = this.select.query(x, this.shape[1] - y - 1, 10);
-        let pickResult = this.mesh.pick(queryResult);
+        let includeColor = !!(buttons & 2); // right click
+        let pickResult = this.mesh.pick(queryResult, includeColor);
         
         if(pickResult) {
             this.selection = pickResult;
