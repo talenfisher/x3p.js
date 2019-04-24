@@ -17,6 +17,11 @@ export interface MeshOptions {
     decimationFactor?: number;
 }
 
+interface PickResult {
+    index: number[];
+    color?: string;
+}
+
 const STRIDE = 4 * (3 + 3 + 2);
 
 /**
@@ -195,9 +200,9 @@ export default class Mesh extends EventEmitter {
         if(!selection) return;
 
         let shape = this.shape as number[];
-        let result = { 
+        let result: PickResult = { 
             index: [ 0, 0 ],
-            color: null,
+            color: undefined,
         };
 
         let x = shape[0] * (selection.value[0] + (selection.value[2] >> 4) / 16.0) / 255.0;
@@ -214,7 +219,7 @@ export default class Mesh extends EventEmitter {
         result.index[0] = fx < 0.5 ? ix : (ix + 1);
         result.index[1] = fy < 0.5 ? iy : (iy + 1);
         
-        if(includeColor) {
+        if(includeColor && this.x3p.mask.canvas) {
             result.color = this.x3p.mask.canvas.getColorAt(result.index[0], result.index[1]);
         }
 
