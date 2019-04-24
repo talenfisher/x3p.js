@@ -1,6 +1,7 @@
 import Manifest from "../manifest";
 import AnnotationHandler from "./annotation-handler";
 
+import { EventEmitter } from "events";
 import { Canvas } from "@talenfisher/canvas";
 import createTexture from "gl-texture2d";
 
@@ -18,7 +19,7 @@ function loadImage(buffer: ArrayBuffer): Promise<HTMLImageElement> {
     });
 }
 
-export default class Mask {
+export default class Mask extends EventEmitter {
     public annotations: { [name: string]: any };
     public color: string;
     public canvas?: Canvas;
@@ -28,6 +29,7 @@ export default class Mask {
     private texture?: any;
 
     constructor(options: MaskOptions) {
+        super();
         let definition = options.manifest.getNode("Record3 Mask");
         if(!definition) {
             throw new Error("Record3 Mask is not defined in the manifest");
@@ -60,12 +62,12 @@ export default class Mask {
         if(this.dataBuffer) {
             let img = await loadImage(this.dataBuffer);
             let el = this.canvas.el;
-            let ctx = this.canvas.context;
             
             this.canvas.drawImage(img);
 
             if(this.texture) {
                 this.texture.setPixels(el);
+                this.emit("loaded");
             }
 
         } else {
