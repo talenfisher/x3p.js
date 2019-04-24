@@ -6,6 +6,8 @@ import Manifest from "../src/manifest";
 
 declare var window: any;
 const DOCTYPE = '<?xml version="1.0" encoding="UTF-8"?>';
+const DEFAULT_MASK_LOCATION = resolve(__dirname, "../src/mask.xml");
+const DEFAULT_MASK = read(DEFAULT_MASK_LOCATION, { encoding: "utf-8" });
 const Parser = new window.DOMParser();
 const parse = (value: string) => Parser.parseFromString(value, "text/xml");
 
@@ -107,15 +109,17 @@ describe("Manifest", () => {
         it("Should retain attributes", () => {
             let source = DOCTYPE + `<root><Record1><Revision>CSAFE-X3P</Revision></Record1></root>`;
             let manifest = new Manifest(source);
+            let node = manifest.getNode("Record1 Revision") as Element;
 
-            expect(manifest.getNode("Record1 Revision").hasAttribute("disabled")).toBe(true);
+            expect(node.hasAttribute("disabled")).toBe(true);
         });
 
         it("Should return a node with a corresponding value from the manifest", () => {
             let source = DOCTYPE + `<root><Record1><Revision>CSAFE-X3P</Revision></Record1></root>`;
             let manifest = new Manifest(source);
+            let node = manifest.getNode("Record1 Revision") as Element;
 
-            expect(manifest.getNode("Record1 Revision").innerHTML).toBe("CSAFE-X3P");
+            expect(node.innerHTML).toBe("CSAFE-X3P");
         });
     });
 
@@ -170,6 +174,48 @@ describe("Manifest", () => {
             let manifest = new Manifest(source);
 
             expect(manifest.toString()).toBe(expects);
+        });
+    });
+
+    describe("get defaultMask", () => {
+        it("Should initially return the contents of mask.xml", () => {
+            expect(Manifest.defaultMask).toBe(DEFAULT_MASK);
+        });
+    });
+
+    describe("set defaultMask", () => {
+        it("Should update the defaultMask", () => {
+            let updated = `<Mask><Background>#000000</Background></Mask>`;
+            Manifest.defaultMask = updated;
+            expect(Manifest.defaultMask).toBe(updated);
+        });
+
+        it("Updated default masks should be present in new Manifest objects", () => {
+            let updated = `<Mask><Background>#000000</Background></Mask>`;
+            Manifest.defaultMask = updated;
+
+            let source = `<root></root>`;
+            let manifest = new Manifest(source);
+            let background = manifest.get("Record3 Mask Background");
+            expect(background).toBe("#000000");
+        });
+
+        it("Setting it to an empty value should reset the defaultMask to its original state", () => {
+            let updated = `<Mask><Background>#000000</Background></Mask>`;
+            Manifest.defaultMask = updated;
+            expect(Manifest.defaultMask).toBe(updated);
+
+            Manifest.defaultMask = "";
+            expect(Manifest.defaultMask).toBe(DEFAULT_MASK);
+        });
+
+        it("Setting it to a string with only spaces should reset the defaultMask to its original state", () => {
+            let updated = `<Mask><Background>#000000</Background></Mask>`;
+            Manifest.defaultMask = updated;
+            expect(Manifest.defaultMask).toBe(updated);
+
+            Manifest.defaultMask = "      ";
+            expect(Manifest.defaultMask).toBe(DEFAULT_MASK);
         });
     });
 });

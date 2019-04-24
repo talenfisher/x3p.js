@@ -5,7 +5,6 @@ import Mask from "./mask";
 import Renderer, { RendererOptions } from "./renderer";
 
 import { saveAs } from "file-saver";
-import ndarray = require("ndarray");
 
 export interface X3POptions {
     name: string;

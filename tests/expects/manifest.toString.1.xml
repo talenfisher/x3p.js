@@ -52,8 +52,8 @@
             <MD5ChecksumPointData/>
         </DataLink>
         <Mask>
-            <Background>#cd7f32</Background>
-        </Mask>
+    <Background>#cd7f32</Background>
+</Mask>
     </Record3>
     <Record4>
         <ChecksumFile/>

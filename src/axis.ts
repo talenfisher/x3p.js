@@ -14,12 +14,13 @@ export default class Axis {
     private manifest: Manifest;
 
     constructor({ name, manifest }: AxisOptions) {
-        if(!manifest.has(`Record1 Axes C${name}`)) {
+        let node = manifest.getNode(`Record1 Axes C${name}`);
+        if(!node) {
             throw new Error(`Axis '${name}' is not defined in the manifest`);
         }
 
         this.name = name;
-        this.definition = manifest.getNode(`Record1 Axes C${name}`);
+        this.definition = node;
         this.manifest = manifest;
     }
 
