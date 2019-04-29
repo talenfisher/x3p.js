@@ -43,7 +43,7 @@ class WorkerUtil {
             options.axes.z,
         ];
 
-        this.shape = [ this.axes[0].size, this.axes[1].size, 3 ];
+        this.shape = [ this.axes[0].size as number, this.axes[1].size as number, 3 ];
         this.dataLength = this.shape[0] * this.shape[1] * this.shape[2];
         this.coords = ndarray(new Float32Array(this.dataLength), this.shape);
 
@@ -217,10 +217,6 @@ class WorkerUtil {
         let max = Math.floor(avg / 200);
 
         return 1 + Math.floor(decimationFactor * max);
-    }
-
-    private nextPow2(value: number) {
-        return Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
     }
 }
 
