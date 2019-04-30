@@ -17,6 +17,7 @@
       "src/**/*"
   ],
   "exclude": [
-      "./src/renderer/worker/**/*"
+      "./src/renderer/worker/**/*",
+      "./src/mask/worker/**/*",
   ]
 }
