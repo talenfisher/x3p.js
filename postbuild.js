@@ -9,14 +9,23 @@ const BUILD_DIR = __dirname + "/dist";
 const BUILD_FILE_NAME = BUILD_DIR + "/index.js";
 const BUILD_FILE_CONTENTS = fs.readFileSync(BUILD_FILE_NAME, { encoding: "utf-8" });
 
-function getWorkerName() {
+function getWorkerNames() {
+    let results = [];
+
     for(let file of fs.readdirSync(BUILD_DIR)) {
-        if(file.match(/^worker.(.*)\.js$/)) return file;
+        if(file.match(/^worker.(.*)\.js$/)) results.push(file);
     }   
+
+    return results;
 }
 
 void async function main() {
-    let workerName = getWorkerName();
-    let newContent = BUILD_FILE_CONTENTS.replace(`/${workerName}`, workerName);
+    let workerNames = getWorkerNames();
+    let newContent = BUILD_FILE_CONTENTS;
+
+    for(let workerName of workerNames) {
+        newContent = newContent.replace(`/${workerName}`, workerName);
+    }
+
     fs.writeFileSync(BUILD_FILE_NAME, newContent);
 }();

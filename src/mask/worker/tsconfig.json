@@ -1,0 +1,11 @@
+{
+    "extends": "../../../tsconfig",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "lib": [ "es2015", "es7", "es2017.object", "webworker" ],
+    },
+    "include": [
+        "./**/*", "../../@types/**/*"
+    ],
+    "exclude": []
+}

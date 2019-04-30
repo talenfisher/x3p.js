@@ -25,8 +25,8 @@
     "chrome>=60"
   ],
   "devDependencies": {
-    "@babel/core": "^7.4.3",
-    "@babel/plugin-transform-runtime": "^7.4.3",
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-transform-runtime": "^7.4.4",
     "@types/blueimp-md5": "^2.7.0",
     "@types/file-saver": "^2.0.0",
     "@types/gl-shader": "^4.2.0",
@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@talenfisher/canvas": "^0.3.2",
+    "@talenfisher/color": "^0.1.6",
     "@talenfisher/dtype": "^0.1.2",
     "@talenfisher/multitouch-camera": "^0.2.0",
     "blueimp-md5": "^2.10.0",

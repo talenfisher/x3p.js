@@ -25,4 +25,15 @@ export default {
         el.innerHTML = value;
         return true;
     },
+
+    ownKeys: (target: Element) => {
+        let results: Array<string | number | symbol> = [];
+
+        target.querySelectorAll("Annotation").forEach((el: Element) => {
+            results.push(el.getAttribute("color") as string);
+        });
+
+        return results;
+    },
+
 };
