@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "lint": "tslint --project .",
-    "test": "jest --colors",
+    "test": "ENV=testing jest --colors",
     "test:render": "parcel serve tests/browser/index.html",
     "watch": "watch 'npm run test' src tests",
     "build": "parcel build src/index.ts -d dist --global X3P --no-content-hash",
