@@ -66,4 +66,5 @@ onmessage = (e) => {
 
     // @ts-ignore
     postMessage({ imageData, colors: Object.keys(colors) }, [ imageData.buffer ]);
+    close();
 };
