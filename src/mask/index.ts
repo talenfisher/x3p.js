@@ -60,9 +60,23 @@ export default class Mask extends EventEmitter {
         return this.texture ? this.texture : this.texture = createTexture(gl, this.canvas.el);
     }
 
+    public getAnnotationColors() {
+        let colors: string[] = [];
+
+        this.definition.querySelectorAll(`Annotation[color]`).forEach((element: Element) => {
+            let attr = element.getAttribute("color");
+
+            if(typeof attr !== "undefined" && attr !== null) {
+                colors.push(attr);
+            }
+        });
+
+        return colors;
+    }
+
     private async bootstrap() {
         if(process.env.ENV === "testing") return;
-        
+
         await this.setupCanvas();
         await this.getColors();
 
@@ -99,7 +113,7 @@ export default class Mask extends EventEmitter {
 
             worker.postMessage({
                 imageData: imageData.data,
-                annotations: Object.keys(this.annotations),
+                annotations: this.getAnnotationColors(),
                 background: this.color,
                 version: this.version,
             }, [ imageData.data.buffer ]);

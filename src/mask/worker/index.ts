@@ -33,6 +33,8 @@ onmessage = (e) => {
         .map((key: string) => new Color(key))
         .sort((a: Color, b: Color) => b.value - a.value);
 
+    console.log(annotations);
+
     let colors: { [name: string]: Color } = {};
     for(let i = 0; i < imageData.length - 4; i += 4) {
         let color = new Color();
