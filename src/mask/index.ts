@@ -61,6 +61,8 @@ export default class Mask extends EventEmitter {
     }
 
     private async bootstrap() {
+        if(typeof process !== "undefined") return;
+
         await this.setupCanvas();
         await this.getColors();
 

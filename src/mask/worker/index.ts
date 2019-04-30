@@ -10,11 +10,11 @@ interface WorkerOptions {
 function nearestColor(needle: Color, haystack: Color[]) {
     if(haystack.length === 0) return needle;
 
-    let least = needle.distanceTo(haystack[0]);
+    let least = Math.abs(needle.distanceTo(haystack[0]));
     let i = 0;
 
     for(let j = 1; j < haystack.length; j++) {
-        let distance = needle.distanceTo(haystack[j]);
+        let distance = Math.abs(needle.distanceTo(haystack[j]));
 
         if(distance < least) {
             least = distance;
@@ -26,6 +26,7 @@ function nearestColor(needle: Color, haystack: Color[]) {
 }
 
 onmessage = (e) => {
+    let version = e.data.version;
     let imageData = e.data.imageData;
     let background: Color = new Color(e.data.background);
     let annotations: Color[] = e.data.annotations
@@ -42,21 +43,23 @@ onmessage = (e) => {
         let j = (0xfffffff / color.value) % (annotations.length - 1);
         let newColor: Color = color;
 
-        if(color.distanceTo(background) <= 150) {
-            newColor = background;
-        } else {
-            let prevColors = annotations.concat(Object.values(colors));
-            for(let prevColor of prevColors) {
-                if(color.distanceTo(prevColor) <= 150) {
-                    newColor = prevColor;
-                    break;
+        if(version === 1) {
+            if(color.distanceTo(background) <= 150) {
+                newColor = background;
+            } else {
+                let prevColors = annotations.concat(Object.values(colors));
+                let nearest = nearestColor(color, prevColors);
+
+                if(Math.abs(color.distanceTo(nearest)) <= 150) {
+                    newColor = nearest;
                 }
             }
-        }
 
-        imageData[i + 0] = newColor.r;
-        imageData[i + 1] = newColor.g;
-        imageData[i + 2] = newColor.b;
+            imageData[i + 0] = newColor.r;
+            imageData[i + 1] = newColor.g;
+            imageData[i + 2] = newColor.b;
+        }
+        
         colors[newColor.hex6] = newColor;
     }
 
