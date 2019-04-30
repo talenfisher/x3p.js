@@ -33,8 +33,6 @@ onmessage = (e) => {
         .map((key: string) => new Color(key))
         .sort((a: Color, b: Color) => b.value - a.value);
 
-    console.log(annotations);
-
     let colors: { [name: string]: Color } = {};
     for(let i = 0; i < imageData.length - 4; i += 4) {
         let color = new Color();
@@ -42,7 +40,6 @@ onmessage = (e) => {
         color.g = imageData[i + 1];
         color.b = imageData[i + 2];
 
-        let j = (0xfffffff / color.value) % (annotations.length - 1);
         let newColor: Color = color;
 
         if(version === 1) {
@@ -52,7 +49,7 @@ onmessage = (e) => {
                 let prevColors = annotations.concat(Object.values(colors));
                 let nearest = nearestColor(color, prevColors);
 
-                if(Math.abs(color.distanceTo(nearest)) <= 150) {
+                if(Math.abs(color.distanceTo(nearest)) <= 255) {
                     newColor = nearest;
                 }
             }
@@ -62,7 +59,9 @@ onmessage = (e) => {
             imageData[i + 2] = newColor.b;
         }
         
-        colors[newColor.hex6] = newColor;
+        if(newColor.hex6 !== background.hex6) {
+            colors[newColor.hex6] = newColor;
+        }
     }
 
     // @ts-ignore

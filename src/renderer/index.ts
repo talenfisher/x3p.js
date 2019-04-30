@@ -60,7 +60,9 @@ export default class Renderer extends EventEmitter {
         this.gl = this.getContext(this.canvas);
         this.camera = createCamera(this.canvas, CameraOptions);
         this.select = createSelect(this.gl, this.shape);
+        
         this.mouseListener = mouseChange(this.canvas, this.mouseHandler.bind(this));
+        this.mouseListener.enabled = true;
 
         let meshDefaults = { renderer: this };
         this.mesh = new Mesh(Object.assign(meshDefaults, options));
