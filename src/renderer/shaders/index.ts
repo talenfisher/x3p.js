@@ -8,6 +8,12 @@ const FRAG_TYPES = {
     pick: PickShaderSrc,
 };
 
+/**
+ * Create a shader for a WebGL rendering context.
+ * 
+ * @param gl the rendering context to create a shader for
+ * @param type the type of shader to create
+ */
 export default function create(gl: WebGLRenderingContext, type: "pick" | "mesh" = "mesh") {
     let vertShader = VertexShaderSrc;
     let fragShader = FRAG_TYPES[type] || undefined;

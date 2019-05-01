@@ -17,22 +17,83 @@ interface WorkerOptions {
     decimationFactor?: number;
 }
 
+/**
+ * Worker utility for building a mesh from X3P point data
+ * 
+ * @author Talen Fisher
+ */
 class WorkerUtil {
+
+    /**
+     * X3P coordinates read from the point buffer
+     */
     private coords?: ndarray;
-    private origin: string;
-    private vertexCount: number = 0;
-    private elementCount: number = 0;
-    private pointBuffer: ArrayBuffer;
-    private axes: Axis[] = [];
-    private dataLength: number;
+
+    /**
+     * Coordinate buffer, containing vertex coordinates, normals and texture coordinates
+     */
     private coordBuffer?: TypedArray;
+
+    /**
+     * The origin point to start reading from
+     */
+    private origin: string;
+
+    /**
+     * Number of vertices in the mesh
+     */
+    private vertexCount: number = 0;
+
+    /**
+     * Number of elements in the coordinate buffer
+     */
+    private elementCount: number = 0;
+
+    /**
+     * The source point buffer to read data from
+     */
+    private pointBuffer: ArrayBuffer;
+
+    /**
+     * Axes information for the X3P
+     */
+    private axes: Axis[] = [];
+
+    /**
+     * Total number of coordinates
+     */
+    private dataLength: number;
+    
+    /**
+     * Gradient of the mesh using central differences, used for computing normals
+     */
     private gradient?: ndarray;
+
+    /**
+     * Decimation factor, ends up controlling how many vertices are skipped
+     */
     private decimationFactor: number;
 
+    /**
+     * The shape of the mesh in terms of x, y, z
+     */
     private shape: number[];
+
+    /**
+     * Lower bounds in terms of x, y, z
+     */
     private lo = [ Infinity, Infinity, Infinity ];
+
+    /**
+     * Upper bounds in terms of x, y, z
+     */
     private hi = [ -Infinity, -Infinity, -Infinity ];
 
+    /**
+     * Constructs a new Worker Util
+     * 
+     * @param options options to use for the workerutil
+     */
     constructor(options: WorkerOptions) {
         this.pointBuffer = options.pointBuffer;
         this.origin = options.origin;
@@ -89,6 +150,9 @@ class WorkerUtil {
         this.buffer();
     }
 
+    /**
+     * Setup the gradient to use for computing normals
+     */
     private setupGradient() {
         let shape = [ 3, this.shape[0], this.shape[1], 2 ];
         let coords = this.coords as ndarray;
@@ -99,6 +163,12 @@ class WorkerUtil {
         }
     }
 
+    /**
+     * Get the normal for a coordinate
+     * 
+     * @param x x-component of the coordinate to get a normal for
+     * @param y y-component of the coordinate to get a normal for
+     */
     private getNormal(x: number, y: number) {
         if(!this.gradient) return;
 
@@ -134,7 +204,10 @@ class WorkerUtil {
             nz * nl,
         ];
     }
-
+ 
+    /**
+     * Compute coordinates, normals and texture coordinates, store in the coordBuffer
+     */
     private buffer() {
         let stride = this.stride;
         let coords = this.coords as ndarray;
@@ -192,6 +265,9 @@ class WorkerUtil {
         this.elementCount = ptr;
     }
 
+    /**
+     * Get the result from buffer()
+     */
     public get result() {
         let coords = this.coords as ndarray;
 
@@ -204,6 +280,9 @@ class WorkerUtil {
         };
     }
 
+    /**
+     * Compute the stride from the decimation factor
+     */
     private get stride() {
         let decimationFactor = this.decimationFactor;
         decimationFactor = Math.max(0, decimationFactor);
