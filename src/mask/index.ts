@@ -15,6 +15,11 @@ export interface MaskOptions {
     data?: ArrayBuffer;
 }
 
+/**
+ * Asynchronously load an array buffer onto an image
+ * 
+ * @param buffer the buffer to load
+ */
 function loadImage(buffer: ArrayBuffer): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
         let url = URL.createObjectURL(new Blob([ buffer ]));
@@ -24,6 +29,11 @@ function loadImage(buffer: ArrayBuffer): Promise<HTMLImageElement> {
     });
 }
 
+/**
+ * Class for accessing and manipulating mask data
+ * 
+ * @author Talen Fisher
+ */
 export default class Mask extends EventEmitter {
     public annotations: { [name: string]: any };
     public color: string;
@@ -34,6 +44,11 @@ export default class Mask extends EventEmitter {
     private dataBuffer?: ArrayBuffer;
     private texture?: any;
 
+    /**
+     * Constructs a new mask
+     * 
+     * @param options options to use for the mask
+     */
     constructor(options: MaskOptions) {
         super();
         let definition = options.manifest.getNode("Record3 Mask");
@@ -54,12 +69,20 @@ export default class Mask extends EventEmitter {
         this.bootstrap();
     }
 
+    /**
+     * Convert the mask into a texturemap for WebGL
+     * 
+     * @param gl the webgl rendering context to create a texture for
+     */
     public getTexture(gl: WebGLRenderingContext) {
         if(!this.canvas) return;
         
         return this.texture ? this.texture : this.texture = createTexture(gl, this.canvas.el);
     }
 
+    /**
+     * Get all annotation colors present in the manifest
+     */
     public getAnnotationColors() {
         let colors: string[] = [];
 
@@ -74,6 +97,9 @@ export default class Mask extends EventEmitter {
         return colors;
     }
 
+    /**
+     * Bootstraps the Mask
+     */
     private async bootstrap() {
         if(process.env.ENV === "testing") return;
 
@@ -84,6 +110,9 @@ export default class Mask extends EventEmitter {
         this.emit("loaded");
     }
 
+    /**
+     * Sets up a canvas to use for the mask
+     */
     private async setupCanvas() {
         if(this.width === 0 || this.height === 0) return;
 
@@ -103,6 +132,10 @@ export default class Mask extends EventEmitter {
         }
     }
 
+    /**
+     * Gets all the colors present in the mask.  Applies a fix
+     * to version 1 masks that had extra colors from antialiasing
+     */
     private getColors() {
         return new Promise((resolve, reject) => {
             let canvas = this.canvas as Canvas;
@@ -130,21 +163,33 @@ export default class Mask extends EventEmitter {
         });
     }
 
+    /**
+     * Gets the height of the mask
+     */
     get height(): number {
         let size = this.manifest.get("Record3 MatrixDimension SizeY");
         return typeof size !== "undefined" ? Number(size) : 0;
     }
 
+    /**
+     * Gets the width of the mask
+     */
     get width() {
         let size = this.manifest.get("Record3 MatrixDimension SizeX");
         return typeof size !== "undefined" ? Number(size) : 0;
     }
 
+    /**
+     * Gets the mask version.  Defaults to 1 if not present in the manifest.
+     */
     get version() {
         let version = this.manifest.get("Record3 Mask Version");
         return typeof version !== "undefined" ? Number(version) : MASK_VERSION_DEFAULT;
     }
 
+    /**
+     * Sets the mask version.
+     */
     set version(version: number) {
         this.manifest.set("Record3 Mask Version", version);
     }
