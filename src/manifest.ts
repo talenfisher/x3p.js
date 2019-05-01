@@ -28,7 +28,7 @@ function serialize(value: Document | Element): string {
     
     let result = Serializer.serializeToString(value);
     return result.match(/<\?xml/g) ? result : DOCTYPE + "\n" + result;
-};
+}
 
 const $serialization = Symbol();
 const $checksum = Symbol();

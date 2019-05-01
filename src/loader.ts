@@ -188,4 +188,3 @@ export default class Loader extends EventEmitter {
 }
 
 export { default as X3P } from "./index";
-
