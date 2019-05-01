@@ -1,10 +1,23 @@
 import DataTypes, { DataType } from "./data-types";
 import Manifest from "./manifest";
 
+/**
+ * @ignore
+ */
 const DataTypeKeys = Object.keys(DataTypes);
 
+/**
+ * Constructor options for the Axis class
+ */
 export interface AxisOptions {
+    /**
+     * The Axis name
+     */
     name: "X" | "Y" | "Z";
+
+    /**
+     * Manifest where the axis data is located
+     */
     manifest: Manifest;
 }
 
@@ -32,10 +45,9 @@ export default class Axis {
 
     /**
      * Construct a new Axis
-     * 
-     * @param param0 axis options - must contain the name of the axis and manifest where its data can be found.
      */
-    constructor({ name, manifest }: AxisOptions) {
+    constructor(options: AxisOptions) {
+        let { name, manifest } = options; 
         let node = manifest.getNode(`Record1 Axes C${name}`);
         if(!node) {
             throw new Error(`Axis '${name}' is not defined in the manifest`);
