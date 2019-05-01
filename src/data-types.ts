@@ -1,10 +1,20 @@
-export type DataTypeName = "Float64" | "Float32" | "Int32" | "Int16";
-
-export type DataTypeNameLower = "float64" | "float32" | "int32" | "int16";
-
+/**
+ * Any typed array
+ */
 export type TypedArray = Float64Array | Float32Array | Int32Array | Int16Array;
+
+/**
+ * An Axis data type 
+ */
 export interface DataType {
-    name: DataTypeName;
+    /**
+     * Name of the data type
+     */
+    name: "Float64" | "Float32" | "Int32" | "Int16";
+
+    /**
+     * Number of bytes in the data type
+     */
     bytes: number;
 }
 
@@ -18,12 +28,11 @@ export default {
         name: "Float32", 
         bytes: 4,
     } as DataType,
-
+    
     L: { 
         name: "Int32", 
         bytes: 4,
     } as DataType,
-    
     I: { 
         name: "Int16", 
         bytes: 2,
