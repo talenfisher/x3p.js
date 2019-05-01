@@ -9,26 +9,60 @@ import { invert, multiply } from "gl-mat4";
 import LightingOptions from "./lighting";
 import { EventEmitter } from "events";
 
+/**
+ * Options passed to the mesh constructor
+ */
 export interface MeshOptions {
+
+    /**
+     * The X3P file to create a mesh for
+     */
     x3p: X3P;
+
+    /**
+     * The renderer to attach the mesh to
+     */
     renderer: Renderer;
+
+    /**
+     * The canvas to render the mesh on
+     */
     canvas: HTMLCanvasElement;
+
+    /**
+     * lighting options to use for the mesh
+     */
     lighting?: LightingOptions;
+
+    /**
+     * Polygon decimation factor, controls how many vertices to skip
+     * 0 = high quality, no vertices are skipped
+     * 1 = low quality, many vertices are skipped
+     */
     decimationFactor?: number;
 }
 
+/**
+ * The result of point picking (clicking on the canvas to select a point)
+ */
 export interface PickResult {
+    /**
+     * Where on the mesh was clicked in terms of x and y
+     */
     index: number[];
+
+    /**
+     * Color on the texture at the pick result index
+     */
     color?: string;
 }
 
 const STRIDE = 4 * (3 + 3 + 2);
 
 /**
- * This mesh is compatible with gl-plot3d, and is based off of
- * gl-vis/gl-surface3d (https://github.com/gl-vis/gl-surface3d).  
+ * This class was originally based off of gl-vis/gl-surface3d (https://github.com/gl-vis/gl-surface3d).  
  * It has been modified to use less memory and
- * not block the UI thread while building vertices.  Point picking
+ * not block the UI thread while building vertices.  Furthermore, point picking
  * now only occurs when the renderer is in "still" mode
  */
 

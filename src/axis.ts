@@ -1,9 +1,6 @@
 import DataTypes, { DataType } from "./data-types";
 import Manifest from "./manifest";
 
-/**
- * @ignore
- */
 const DataTypeKeys = Object.keys(DataTypes);
 
 /**
