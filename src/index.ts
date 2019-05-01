@@ -1,139 +1,151 @@
-
+import Axis from "./axis";
 import Manifest from "./manifest";
 import Mask from "./mask/index";
-import Promisable from "./promisable";
-import X3P from "./x3p";
+import Renderer, { RendererOptions } from "./renderer/index";
+import Loader, { X3PLoaderOptions } from "./loader";
+import { saveAs } from "file-saver";
 
-import jszip from "jszip";
-
-export interface X3PLoaderOptions {
-    file: any;
-    name?: string;
-    color?: string;
+export interface X3POptions {
+    name: string;
+    loader: Loader;
+    manifest: Manifest;
+    mask: Mask;
+    pointBuffer?: ArrayBuffer;
 }
 
-export type Encoding = 
-    "base64" |
-    "text" |
-    "binarystring" |
-    "array" |
-    "uint8array" |
-    "arraybuffer" |
-    "blob" |
-    "nodebuffer";
-
-export default class X3PLoader extends Promisable<X3P> {
-    public name?: string;
-    private options: X3PLoaderOptions;
-    private zip?: jszip;
-    private manifest?: Manifest;
-    private root?: string = "";
-
-    constructor(options: X3PLoaderOptions) {
-        super();
-        this.options = options;
-        this.name = options.file.name || options.name || "file.x3p";
-        this.promise = new Promise(this.load.bind(this));
-    }
-
-    public hasFile(filename: string) {
-        return this.zip && this.zip.file(filename) !== null;
-    }
-
-    public read(filename: string, encoding: Encoding = "text") {
-        if(!this.zip) return;
-
-        let file = this.zip.file(this.root+filename);
-        return file !== null ? file.async(encoding) : undefined;
-    }
-
-    public write(filename: string, data: any) {
-        if(!this.zip) return;
-
-        this.zip.file(this.root+filename, data);
-    }
-
-    public toBlob() {
-        if(!this.zip) return;
-
-        return this.zip.generateAsync({
-            type: "blob",
-            compression: "DEFLATE",
-            compressionOptions: {
-                level: 9,
-            },
-        });
-    }
-
-    private async load(resolve: any, reject: any) {
-        let ZipLoader: jszip = jszip();
-
-        try {
-            this.zip = await ZipLoader.loadAsync(this.options.file);
-        } catch(e) {
-            return reject("Invalid X3P File Specified");
-        }
-
-        // check for manifest
-        const search = this.zip.file(/main\.xml$/g);
-        if(search.length === 0) {
-            return reject("X3P files must contain a main.xml file");
-        }
-
-        // check for nesting inside another folder
-        let file = search[0];
-        if(search.length > 0 && search[0].name !== "main.xml") {    
-            this.root = file.name.replace("main.xml", "");
-        }
-
-        this.manifest = new Manifest(await file.async("text"));
-        let pointBuffer = await this.getPointBuffer();
-        let mask = await this.getMask() as Mask;
-
-        return resolve(new X3P({
-            loader: this,
-            manifest: this.manifest,
-            mask,
-            name: this.name as string,
-            pointBuffer,
-        }));
-    }
-
-    private async getPointBuffer() {
-        if(!this.manifest) return;
-        let pointFile = this.manifest.get("Record3 DataLink PointDataLink") as string | undefined;
-        return typeof pointFile !== "undefined" ? await this.read(pointFile, "arraybuffer") as ArrayBuffer : undefined;
-    }
-
+/**
+ * This class provides primary X3P file interactions.  Includes
+ * interfaces for interacting with the manifest (main.xml), axes, 
+ * point buffer and mask. 
+ * 
+ * @author Talen Fisher
+ */
+export default class X3P {
     /**
-     * Load the X3P's mask
+     * x, y and z axes data
      */
-    private async getMask() {
-        if(!this.manifest || !this.zip) return;
-        let data = await this.getMaskData();
-        
-        return new Mask({
-            manifest: this.manifest,
-            data,
-        });
-    }
+    public readonly axes: { x: Axis, y: Axis, z: Axis };
 
     /**
-     * Extract the mask's image file using the mask definition.  If the definition or
-     * link doesn't exist, it looks for the mask data at bindata/texture.png, and then 
-     * at bindata/texture.jpeg.
+     * The X3P's manifest/main.xml data
+     */
+    public readonly manifest: Manifest;
+
+    /**
+     * Buffer for 3D point data (this usually comes from bindata/data.bin)
+     */
+    public readonly pointBuffer?: ArrayBuffer;
+
+    /**
+     * The X3P's mask data (this usually comes from bindata/mask.png)
+     */
+    public readonly mask: Mask;
+
+    /**
+     * FOR TESTING AND DEBUG PURPOSES
+     * Whether or not to save the mask data
+     */
+    public saveMask: boolean = true; // use for testing/debugging
+
+    /**
+     * The loader used to load this X3P file
+     */
+    public readonly loader: Loader;
+
+    /**
+     * Options that were used to construct this X3P object
+     */
+    private options: X3POptions;
+
+    /**
+     * The X3P's filename
+     */
+    private name: string;
+
+    /**
+     * Constructs a new X3P object.  Don't instantiate this directly, use X3P.load or X3PLoader instead.
      * 
-     * @param definition definition for an X3P mask
+     * @param options options to use for the new X3P object
      */
-    private getMaskData(definition?: Element) {
-        let link = definition ? definition.querySelector("Link") : null;
-        let filename = link !== null ? link.nodeValue : "bindata/mask.png";
-        return this.read(filename as string, "arraybuffer") as Promise<ArrayBuffer> | undefined;
+    constructor(options: X3POptions) {
+        this.options = options;
+        this.loader = options.loader;
+        this.manifest = options.manifest;
+        this.pointBuffer = options.pointBuffer;
+        this.mask = options.mask;
+        this.name = options.name;
+        this.axes = {
+            x: new Axis({ name: "X", manifest: this.manifest }),
+            y: new Axis({ name: "Y", manifest: this.manifest }),
+            z: new Axis({ name: "Z", manifest: this.manifest }),
+        };
+    }
+
+    /**
+     * Saves all changes made to X3P assets
+     */
+    public async save() {
+        this.loader.write("main.xml", this.manifest.toString());
+        this.loader.write("md5checksum.hex", `${this.manifest.checksum} *main.xml`);
+
+        if(this.saveMask && this.mask.canvas) { // save mask
+            let canvas = this.mask.canvas;
+            let blob = await canvas.toBlob();
+            this.loader.write("bindata/mask.png", blob);
+        }
+    }
+
+    /**
+     * Downloads the X3P file
+     * 
+     * @param filename filename to use for the downloaded file
+     */
+    public async download(filename = this.name) {
+        let blob = await this.loader.toBlob();
+        if(!blob) return;
+
+        saveAs(blob, filename);
+    }
+
+    /**
+     * Renders the X3P file onto a canvas.
+     * 
+     * @param canvas the canvas to render the X3P file onto
+     * @param options options to be passed to the Renderer
+     */
+    public render(canvas: HTMLCanvasElement, options?: RendererOptions) {
+        if(!this.pointBuffer) return;
+
+        let defaults = {
+            x3p: this,
+            canvas,
+            lighting: {
+                ambient: 0.05,
+                diffuse: 0.4,
+                specular: 0.2,
+                roughness: 0.5,
+            },
+        };
+        
+        return new Renderer(Object.assign(defaults, options));
+    }
+    
+    /**
+     * Loads an X3P file.
+     * 
+     * @param options options to be passed to the X3PLoader
+     */
+    public static load(options: X3PLoaderOptions): Promise<X3P> {
+        return new Promise((resolve, reject) => {
+            let loader = new Loader(options);
+            loader.on("error", (error: string) => reject(error));
+            loader.on("load", (x3p: X3P) => resolve(x3p));
+        });
     }
 }
 
-export { default as X3P } from "./x3p";
 export { default as Axis } from "./axis";
-export { default as Mask } from "./mask";
+export { default as Mask } from "./mask/index";
 export { default as Manifest } from "./manifest";
-export { default as Renderer } from "./renderer";
+export { default as Renderer } from "./renderer/index";
+export { default as Loader } from "./loader";

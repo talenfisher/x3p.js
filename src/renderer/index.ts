@@ -1,5 +1,5 @@
 import Mesh, { MeshOptions } from "./mesh";
-import X3P from "../x3p";
+import X3P from "../index";
 import CameraOptions from "./camera";
 import LightingOptions from "./lighting";
 import { readFileSync as read } from "fs";
