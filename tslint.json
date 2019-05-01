@@ -18,7 +18,7 @@
         "max-line-length": [true, 200],
         "one-variable-per-declaration": [false],
         "no-bitwise": [false],
-        "member-ordering": [false],
+        "member-ordering": [false]
     },
     "rulesDirectory": []
 }
