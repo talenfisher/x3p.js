@@ -144,6 +144,7 @@ export default class X3P {
     }
 }
 
+export let load = X3P.load;
 export { default as Axis } from "./axis";
 export { default as Mask } from "./mask/index";
 export { default as Manifest } from "./manifest";
