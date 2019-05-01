@@ -2,7 +2,7 @@ import Axis from "./axis";
 import Manifest from "./manifest";
 import Mask from "./mask/index";
 import Renderer, { RendererOptions } from "./renderer/index";
-import Loader, { X3PLoaderOptions } from "./loader";
+import Loader, { LoaderOptions } from "./loader";
 import { saveAs } from "file-saver";
 
 export interface X3POptions {
@@ -135,7 +135,7 @@ export default class X3P {
      * 
      * @param options options to be passed to the X3PLoader
      */
-    public static load(options: X3PLoaderOptions): Promise<X3P> {
+    public static load(options: LoaderOptions): Promise<X3P> {
         return new Promise((resolve, reject) => {
             let loader = new Loader(options);
             loader.on("error", (error: string) => reject(error));
