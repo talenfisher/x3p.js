@@ -1,25 +1,21 @@
-export type DataTypeName = "Float64" | "Float32" | "Int32" | "Int16";
-
-export type DataTypeNameLower = "float64" | "float32" | "int32" | "int16";
-
+/**
+ * Any typed array
+ */
 export type TypedArray = Float64Array | Float32Array | Int32Array | Int16Array;
+
+/**
+ * An Axis data type 
+ */
 export interface DataType {
-    name: DataTypeName;
+    /**
+     * Name of the data type
+     */
+    name: "Float64" | "Float32" | "Int32" | "Int16";
+
+    /**
+     * Number of bytes in the data type
+     */
     bytes: number;
-}
-
-export function bufferToTypedArray(buffer: ArrayBuffer, type: DataTypeName): TypedArray {
-    let result;
-    
-    switch(type) {
-        default:
-        case "Float64": result = new Float64Array(buffer); break;
-        case "Float32": result = new Float32Array(buffer); break;
-        case "Int32": result = new Int32Array(buffer); break;
-        case "Int16": result = new Int16Array(buffer); break;
-    }
-
-    return result;
 }
 
 export default {
@@ -27,10 +23,12 @@ export default {
         name: "Float64", 
         bytes: 8,
     } as DataType,
+
     F: { 
         name: "Float32", 
         bytes: 4,
     } as DataType,
+    
     L: { 
         name: "Int32", 
         bytes: 4,

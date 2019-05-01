@@ -1,4 +1,4 @@
-import X3P from "../x3p";
+import X3P from "../index";
 import Identity from "./identity";
 import createShader from "./shaders/index";
 import Renderer from "./index";
@@ -9,48 +9,149 @@ import { invert, multiply } from "gl-mat4";
 import LightingOptions from "./lighting";
 import { EventEmitter } from "events";
 
+/**
+ * Options passed to the mesh constructor
+ */
 export interface MeshOptions {
+
+    /**
+     * The X3P file to create a mesh for
+     */
     x3p: X3P;
+
+    /**
+     * The renderer to attach the mesh to
+     */
     renderer: Renderer;
+
+    /**
+     * The canvas to render the mesh on
+     */
     canvas: HTMLCanvasElement;
+
+    /**
+     * lighting options to use for the mesh
+     */
     lighting?: LightingOptions;
+
+    /**
+     * Polygon decimation factor, controls how many vertices to skip
+     * 0 = high quality, no vertices are skipped
+     * 1 = low quality, many vertices are skipped
+     */
     decimationFactor?: number;
 }
 
-interface PickResult {
+/**
+ * The result of point picking (clicking on the canvas to select a point)
+ */
+export interface PickResult {
+    /**
+     * Where on the mesh was clicked in terms of x and y
+     */
     index: number[];
+
+    /**
+     * Color on the texture at the pick result index
+     */
     color?: string;
 }
 
 const STRIDE = 4 * (3 + 3 + 2);
 
 /**
- * This mesh is compatible with gl-plot3d, and is based off of
- * gl-vis/gl-surface3d.  It has been modified to use less memory and
- * not block the UI thread while building vertices.  Point picking
+ * This class was originally based off of gl-vis/gl-surface3d (https://github.com/gl-vis/gl-surface3d).  
+ * It has been modified to use less memory and
+ * not block the UI thread while building vertices.  Furthermore, point picking
  * now only occurs when the renderer is in "still" mode
  */
 
 export default class Mesh extends EventEmitter {
-    public clipBounds?: number[][] = [[0, 0, 0], [0, 0, 0]];
-    public dirty: boolean = false;
+
+    /**
+     * Whether or not the mesh is ready to be rendered
+     */
     public ready: boolean = false;
+
+    /**
+     * Which color to highlight, if any
+     */
     public highlightColor?: number[];
+
+    /**
+     * The bounds of the mesh.  indice 0 is the lower bound, while indice 1 is the upper bound
+     */
     public bounds?: number[][];
+
+    /**
+     * functional onready listener.
+     * @deprecated use .on("ready") instead
+     */
     public onready?: any;
+
+    /**
+     * The decimation factor to use when building vertices
+     */
     public decimationFactor: number;
 
+    /**
+     * The renderer that this mesh belongs to.
+     */
     private renderer: Renderer;
+
+    /**
+     * The shape of this mesh in terms of x, y, z
+     */
     private shape?: number[];
+
+    /**
+     * The X3P this mesh is built around
+     */
     private x3p: X3P;
+
+    /**
+     * The canvas this mesh is being rendered on
+     */
     private canvas: HTMLCanvasElement;
+    
+    /**
+     * The webgl rendering context being used to render this mesh
+     */
     private gl: WebGLRenderingContext; 
+
+    /**
+     * The vertex array object used to translate coordinates to the GPU
+     */
     private vao: GLVao;
+
+    /**
+     * The texture to use for this mesh, generated using gl-texture2d
+     */
     private texture: any;
+
+    /**
+     * The coordinate buffer to use
+     */
     private coordinateBuffer: GLBuffer;
+
+    /**
+     * The number of vertices in this mesh
+     */
     private vertexCount: number = 0;
+
+    /**
+     * The shader to use for this mesh
+     */
     private shader: any;
+    
+    /**
+     * The pick shader to use for this mesh
+     */
     private pickShader: any;
+
+    /**
+     * The shader uniforms to use during rendering
+     */
     private uniforms = {
         model: Identity,
         view: Identity,
@@ -65,11 +166,18 @@ export default class Mesh extends EventEmitter {
         fresnel: 1.5,
         lightPosition: [0, 0, 0],
         eyePosition: [0, 0, 0],
-        clipBounds: this.clipBounds,
     };
 
+    /**
+     * The pick uniforms to use during rendering
+     */
     private pickUniforms = Object.assign({}, this.uniforms);
 
+    /**
+     * Constructs a new Mesh
+     * 
+     * @param options options to use for the mesh
+     */
     constructor(options: MeshOptions) {
         super();
         this.x3p = options.x3p;
@@ -105,6 +213,11 @@ export default class Mesh extends EventEmitter {
         this.update(options);
     }
 
+    /**
+     * Draws the mesh onto the canvas
+     * 
+     * @param options drawing options
+     */
     public draw(options: any) {
         if(!this.ready) return;
 
@@ -136,6 +249,11 @@ export default class Mesh extends EventEmitter {
         this.vao.unbind();
     }
 
+    /**
+     * Draw the pick onto the canvas.  This isn't seen by the user.
+     * 
+     * @param options drawing options for the pick
+     */
     public drawPick(options: any) {
         let uniforms = this.pickUniforms;
         uniforms.model = options.model || Identity;
@@ -152,6 +270,11 @@ export default class Mesh extends EventEmitter {
         this.vao.unbind();
     }
 
+    /**
+     * Updates the mesh coordinate buffer
+     * 
+     * @param options options to use 
+     */
     public update(options?: MeshOptions) {
         let worker = new Worker("./worker/index.ts");
         let { x, y, z } = this.x3p.axes;
@@ -183,7 +306,6 @@ export default class Mesh extends EventEmitter {
                 this.shape = e.data.shape;
                 this.bounds = e.data.bounds;
 
-                this.dirty = true;
                 this.ready = true;
 
                 if(this.onready) this.onready();
@@ -196,6 +318,12 @@ export default class Mesh extends EventEmitter {
         };
     }
 
+    /**
+     * Pick a coordinate and optionally, the color at that coordinate
+     * 
+     * @param selection selection created from gl-select-static
+     * @param includeColor whether or not to include color in the pick result
+     */
     public pick(selection: any, includeColor: boolean = false) {
         if(!selection) return;
 
@@ -226,6 +354,9 @@ export default class Mesh extends EventEmitter {
         return result;
     }
 
+    /**
+     * Disposes all webgl assets for the mesh
+     */
     public dispose() {
         this.shader.dispose();
         this.pickShader.dispose();

@@ -3,17 +3,48 @@ import Manifest from "./manifest";
 
 const DataTypeKeys = Object.keys(DataTypes);
 
+/**
+ * Constructor options for the Axis class
+ */
 export interface AxisOptions {
+    /**
+     * The Axis name
+     */
     name: "X" | "Y" | "Z";
+
+    /**
+     * Manifest where the axis data is located
+     */
     manifest: Manifest;
 }
 
-export default class Axis {    
-    public name: string;
+/**
+ * Class for accessing axis information in the X3P
+ * 
+ * @author Talen Fisher
+ */
+export default class Axis {  
+    
+    /**
+     * The Axis name
+     */
+    public readonly name: string;
+
+    /**
+     * The Axis definition in the manifest
+     */
     private definition: Element;
+
+    /**
+     * Manifest to read axis information from
+     */
     private manifest: Manifest;
 
-    constructor({ name, manifest }: AxisOptions) {
+    /**
+     * Construct a new Axis
+     */
+    constructor(options: AxisOptions) {
+        let { name, manifest } = options; 
         let node = manifest.getNode(`Record1 Axes C${name}`);
         if(!node) {
             throw new Error(`Axis '${name}' is not defined in the manifest`);
@@ -24,11 +55,17 @@ export default class Axis {
         this.manifest = manifest;
     }
 
-    get increment() {
+    /**
+     * Get the axis increment
+     */
+    get increment(): number {
         let el = this.definition.querySelector(`Increment`);
         return el !== null ? Number(el.innerHTML) : 0;
     }
 
+    /**
+     * Get the axis' data type
+     */
     get dataType(): DataType {
         let el = this.definition.querySelector(`DataType`);
         
@@ -40,11 +77,17 @@ export default class Axis {
         return DataTypes[(el.innerHTML as string).toUpperCase() as "D" | "F" | "L" | "I"];
     }
 
+    /**
+     * Get the axis' size
+     */
     get size() {
         let value = this.manifest.get(`Record3 MatrixDimension Size${this.name}`);
         return value || 0;
     }
 
+    /**
+     * Get an object with static axis values
+     */
     get values() {
         return {
             increment: this.increment,

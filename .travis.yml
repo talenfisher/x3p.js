@@ -8,7 +8,7 @@ before_script:
   - npm install
   - git config user.email "travis@example.com"
   - git config user.name "Travis CI"
-  - cd tests && git clone https://${GH_AUTH}@github.com/talenfisher/fix3p-testfiles.git data
+  - cd tests && git clone https://${GH_TOKEN}@github.com/talenfisher/fix3p-testfiles.git data
   - cd ../
 
 script:
@@ -16,11 +16,20 @@ script:
   - npm run types
   - npm run lint
   - npm run test
+  - npm run docs
 
 deploy:
-  skip_cleanup: true
-  provider: npm
-  email: tqfisher@iastate.edu
-  api_key: $NPM_TOKEN
-  on:
-    tags: true
+  - provider: npm
+    skip_cleanup: true
+    email: tqfisher@iastate.edu
+    api_key: $NPM_TOKEN
+    on:
+      tags: true
+
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GH_TOKEN
+    keep_history: true
+    local_dir: docs
+    on:
+      branch: master
