@@ -10,6 +10,5 @@ npm i --save x3p.js
 # Documentation
 See the [documentation website](https://talenfisher.github.io/x3p.js)
 
-
 # License
 [MIT License](LICENSE.md)

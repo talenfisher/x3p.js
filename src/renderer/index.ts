@@ -13,6 +13,8 @@ import { perspective } from "gl-mat4";
 const $mode = Symbol();
 const STYLES = read(__dirname + "/style.css", { encoding: "utf-8" });
 
+export const CONTEXT_LOST_ERROR = "Lost the WebGL context";
+
 export interface RendererOptions {
     canvas: HTMLCanvasElement;
     x3p: X3P;
@@ -37,6 +39,11 @@ export default class Renderer extends EventEmitter {
      * Pick selection object
      */
     public selection?: PickResult;
+
+    /**
+     * Whether or not the WebGL context was lost
+     */
+    public contextLost = false;
 
     /**
      * The container around the canvas element
@@ -160,12 +167,16 @@ export default class Renderer extends EventEmitter {
         });
 
         let onerror = (error: any) => {
+            if(error === CONTEXT_LOST_ERROR) {
+                this.contextLost = true;
+            }
+
             this.emit("error", error);
             this.dispose();
         };
 
         this.mesh.on("error", onerror);
-        this.canvas.addEventListener("webglcontextlost", () => onerror("Lost the WebGL context"));
+        this.canvas.addEventListener("webglcontextlost", () => onerror(CONTEXT_LOST_ERROR));
     }
 
     /**
@@ -188,9 +199,13 @@ export default class Renderer extends EventEmitter {
      */
     public dispose() {
         this.stopped = true;
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
+
+        if(!this.contextLost) { // don't try to manipulate WebGL objects if the context was lost
+            this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
+            this.select.dispose();
+        }
+
         this.mesh.dispose();
-        this.select.dispose();
 
         this.mouseListener.enabled = false;
         window.removeEventListener("resize", this.resizeHandler.bind(this));

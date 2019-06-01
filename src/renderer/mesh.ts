@@ -300,7 +300,7 @@ export default class Mesh extends EventEmitter {
         worker.onmessage = (e) => {
             this.renderer.setProgressValue(e.data.progress);
 
-            if(e.data.progress === 1) {
+            if(e.data.progress === 1 && !this.renderer.contextLost) {
                 this.vertexCount = e.data.vertexCount;
                 this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
                 this.shape = e.data.shape;
@@ -316,6 +316,10 @@ export default class Mesh extends EventEmitter {
         worker.onerror = (error) => {
             this.emit("error", error);
         };
+
+        this.renderer.on("end", () => {
+            worker.terminate();
+        });
     }
 
     /**
