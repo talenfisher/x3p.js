@@ -1,35 +1,34 @@
 language: node_js
-
 node_js:
-  - '10'
-  - '11'
-
+- '10'
+- '11'
 before_script:
-  - npm install
-  - git config user.email "travis@example.com"
-  - git config user.name "Travis CI"
-  - cd tests && git clone https://${GH_TOKEN}@github.com/talenfisher/fix3p-testfiles.git data
-  - cd ../
-
+- npm install
+- git config user.email "travis@example.com"
+- git config user.name "Travis CI"
+- cd tests && git clone https://${GH_TOKEN}@github.com/talenfisher/fix3p-testfiles.git
+  data
+- cd ../
 script:
-  - npm run build
-  - npm run types
-  - npm run lint
-  - npm run test
-  - npm run docs
-
+- npm run build
+- npm run types
+- npm run lint
+- npm run test
+- npm run docs
 deploy:
-  - provider: npm
-    skip_cleanup: true
-    email: tqfisher@iastate.edu
-    api_key: $NPM_TOKEN
-    on:
-      tags: true
-
-  - provider: pages
-    skip_cleanup: true
-    github_token: $GH_TOKEN
-    keep_history: true
-    local_dir: docs
-    on:
-      branch: master
+- provider: npm
+  skip_cleanup: true
+  email: tqfisher@iastate.edu
+  api_key: "$NPM_TOKEN"
+  on:
+    tags: true
+- provider: pages
+  skip_cleanup: true
+  github_token: "$GH_TOKEN"
+  keep_history: true
+  local_dir: docs
+  on:
+    branch: master
+notifications:
+  slack:
+    secure: OIH+vy3FJR6Js3Qu53ZHrZmna4jDaMdIQR1gcPdjN4sD8s3Ji+q49LxddlLe0ZdRBtgcNx/gSdI6gAH4qe1pIGPhIrs3dBtuZ9oMisEK52sguREyYCwxhqNn6+L0LGg+bncctyrBy8vX4HeiQv5PXMtkpUmBvQh0p8dHa8FfVOBAq6uu0QKPeOS3NvLZESw710rZn7h7Wp6GJgitR+9/YrZgtdAGJ0nkOubTgPYmNTW9KJwc1oIimkTGpuTJ5H7vLmNII0dMmzQZIuqcAcPOiVWrLr+etT1CKn2L4XivEw/KCpfZVpAT55bewmCtJFr9XqOTiQjrZnTHw5fU9KKHH3xhzny3sHQoAxTNRo5Xme70o4uymQ5CIL/Hilbvu+xFhDwhmrWPB97WPnUoEjT7FBBYxtUazodoJRkM0G9VAVEQMWfZ9heLfbK3EXSnuyZ1rkKBDe6BDmeIJNSPpObrmMGem4PG7CjZvKR+gkl5JdPubMUdYW1Q6J1epAL16XFWQat7t/rmpjbI/W1GsBAbYfxg36YwPG92bn12twGHgSDCgtdsaWWT68Uy0k43hHDMWj/i4BRSY0+0PWO2iQEDqISAkWEu1QKoDWn7B9g8QyHLN4/LlVFcMtAX1tg11TSRvL3fb6tTWqEsBUIqrn6P7lg4+eN/RUL4Fo0ryxgNT/0=
