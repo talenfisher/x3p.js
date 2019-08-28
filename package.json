@@ -34,6 +34,7 @@
     "@types/jest": "^23.3.14",
     "@types/jszip": "^3.1.6",
     "@types/ndarray": "^1.0.7",
+    "@types/node": "^12.7.2",
     "@types/sax": "^1.2.0",
     "@types/typedarray-pool": "^1.1.2",
     "canvas": "^2.6.0",
