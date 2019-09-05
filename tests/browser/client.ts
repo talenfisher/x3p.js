@@ -10,11 +10,11 @@ declare var window: any;
     let response = await fetch("./test.x3p");
     let file = await response.arrayBuffer();
 
-    window.x3p = (await new X3P({ file, name: "test" })) as any;
+    window.x3p = await X3P.load({ file, name: "test" });
     
     let canvas = document.querySelector("canvas");
     document.body.appendChild(canvas);
     window.renderer = window.x3p.render(canvas, {
-        decimationFactor: 1,
+        decimationFactor: 0,
     });
 })();

@@ -9,6 +9,7 @@ import Axis from "../../axis";
 
 const EPSILON = 0.0001;
 const MULTIPLY = 5;
+const DISTANCE_THRESHOLD = 0.1;
 
 interface WorkerOptions {
     pointBuffer: ArrayBuffer;
@@ -90,6 +91,28 @@ class WorkerUtil {
     private hi = [ -Infinity, -Infinity, -Infinity ];
 
     /**
+     * Approximate amount of missing relevant data
+     */
+    private missingFactor: number = 0;
+
+    /**
+     * How much to increment/decrement the missingFactor
+     */
+    private missingFactorUnit: number;
+
+    /**
+     * Approximately where data padding stops on the axis [ x, y ]
+     * This will be towards the beginning of the axis (near 0)
+     */
+    private padStop: number[];
+
+    /**
+     * Approximately where data padding starts on the axis [ x, y ]
+     * This will be towards the end of the axis (near axis length)
+     */
+    private padStart: number[];
+
+    /**
      * Constructs a new Worker Util
      * 
      * @param options options to use for the workerutil
@@ -105,8 +128,11 @@ class WorkerUtil {
         ];
 
         this.shape = [ this.axes[0].size as number, this.axes[1].size as number, 3 ];
+        this.missingFactorUnit = 1 / (this.shape[0] * this.shape[1]);
         this.dataLength = this.shape[0] * this.shape[1] * this.shape[2];
         this.coords = ndarray(new Float32Array(this.dataLength), this.shape);
+        this.padStop = [ 0, 0 ];
+        this.padStart = [ this.shape[0], this.shape[1] ];
 
         let name = this.axes[2].dataType.name || "d";
         let type = dtype(name);
@@ -122,17 +148,32 @@ class WorkerUtil {
         const pox = this.origin[1].toLowerCase();
         const poy = this.origin[0].toLowerCase();
 
+        // handle custom origin points
         const ox = pox === "e" ? 0 : this.shape[0];
         const oy = poy === "n" ? 0 : this.shape[1];
 
         this.lo = [ 0, 0, Infinity ];
         this.hi = [ this.shape[0] * ix, this.shape[1] * iy, -Infinity ];
-        
+
         let cv = -1;
+        let foundPadStop = [ false, false ];
+        let foundPadStart = [ false, false ];
+        let lastDataPoint = Object.assign([], this.shape) as number[];
+
         for(let i = 0; i < data.length; i++) {
             const u = i % this.shape[0];
             const v = ((u === 0) ? ++cv : cv) % this.shape[1];
-            
+            const uv = [ u, v ];            
+
+            for(let j = 0; j < 2; j++) {
+                if(uv[j ^ 1] === 0) {
+                    foundPadStop[j ^ 1] = false;
+                    foundPadStart[j] = false;
+                    this.padStart[j] = (this.padStart[j] + lastDataPoint[j]) / 2;
+                    lastDataPoint[j] = this.shape[j];
+                }
+            }
+
             const x = Math.abs(ox - u) * ix;
             const y = Math.abs(oy - v) * iy;
             const z = (data[i] / EPSILON) * MULTIPLY;
@@ -145,8 +186,43 @@ class WorkerUtil {
                 this.lo[2] = Math.min(this.lo[2], data[i]);
                 this.hi[2] = Math.max(this.hi[2], data[i]);
             }
+
+            if(isNaN(data[i]) && this.getDistanceToEdge(u, v) > DISTANCE_THRESHOLD) {
+                this.missingFactor += this.missingFactorUnit;
+            }
+
+            // handle finding the average place where padding stops on the model's axes            
+            if(!isNaN(data[i])) {
+                for(let j = 0; j < 2; j++) {
+                    if(!foundPadStop[j]) {
+                        foundPadStop[j] = true;
+                        this.padStop[j] = (this.padStop[j] + uv[j]) / 2; // averaging up where padding stops on the axis
+                    }
+
+                    lastDataPoint[j] = uv[j];
+                }
+            }
         }
-        
+
+        // don't count padding past the distance threshold
+        for(let i = 0; i < 2; i++) {
+            this.padStop[i] = Math.min(this.padStop[i], this.shape[i] * DISTANCE_THRESHOLD);
+            this.padStart[i] = Math.max(this.padStart[i], this.shape[i] * (1 - DISTANCE_THRESHOLD));
+        }
+
+        // adjust missingFactor to account for padding
+        let padding = 0;
+
+        for(let i = 0; i < 2; i++) {
+            let opposite = i ^ 1; // opposite axis 1 -> 0, 0 -> 1
+            padding += this.missingFactorUnit * this.shape[opposite] * this.padStop[i]; // left
+            padding += this.missingFactorUnit * this.shape[opposite] * (this.shape[i] - this.padStart[i]); // right
+        }
+
+        console.log("padding: " + padding);
+        console.log("missing: " + this.missingFactor);
+        console.log("size: " + this.shape);
+        this.missingFactor = Math.max(this.missingFactor - padding, 0);
         this.buffer();
     }
 
@@ -161,6 +237,14 @@ class WorkerUtil {
         for(let i = 0; i < 3; i++) {
             gradient(this.gradient.pick(i), coords.pick(null, null, i));
         }
+    }
+
+    private getDistanceToEdge(x: number, y: number) {
+        let cx = Math.ceil(this.shape[0] / 2);
+        let cy = Math.ceil(this.shape[1] / 2);
+        let dx = Math.abs(x - cx) / this.shape[0];
+        let dy = Math.abs(y - cy) / this.shape[1];
+        return Math.min(dx, dy);
     }
 
     /**
@@ -277,6 +361,7 @@ class WorkerUtil {
             buffer: this.coordBuffer,
             shape: [ coords.shape[0], coords.shape[1] ],
             bounds: [ this.lo, this.hi ],
+            missingFactor: this.missingFactor,
         };
     }
 

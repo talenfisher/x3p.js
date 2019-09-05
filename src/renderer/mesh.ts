@@ -57,7 +57,35 @@ export interface PickResult {
     color?: string;
 }
 
+/**
+ * Represents an anomaly in the surface matrix
+ */
+export interface Anomaly {
+
+    /**
+     * An identifier for the anomaly
+     */
+    identifier: string;
+
+    /**
+     * A description of what the anomaly entails
+     */
+    description: string;
+
+    /**
+     * An expected value or threshold
+     */
+    expected: any;
+
+    /**
+     * The actual value received
+     */
+    actual: any;
+}
+
 const STRIDE = 4 * (3 + 3 + 2);
+
+const MISSING_FACTOR_THRESHOLD = 0.1;
 
 /**
  * This class was originally based off of gl-vis/gl-surface3d (https://github.com/gl-vis/gl-surface3d).  
@@ -148,6 +176,11 @@ export default class Mesh extends EventEmitter {
      * The pick shader to use for this mesh
      */
     private pickShader: any;
+
+    /**
+     * A list of anomalies found on the X3P's surface matrix.
+     */
+    private anomalies: Anomaly[] = [];
 
     /**
      * The shader uniforms to use during rendering
@@ -305,8 +338,18 @@ export default class Mesh extends EventEmitter {
                 this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
                 this.shape = e.data.shape;
                 this.bounds = e.data.bounds;
-
                 this.ready = true;
+                
+                if(e.data.missingFactor >= MISSING_FACTOR_THRESHOLD) {
+                    this.anomalies.push({
+                        identifier: "MISSING_DATA",
+                        description: "There is a large amount of missing data on this X3P file.",
+                        expected: MISSING_FACTOR_THRESHOLD,
+                        actual: e.data.missingFactor,
+                    });
+                }
+
+                console.log(this.anomalies);
 
                 if(this.onready) this.onready();
                 this.emit("ready");
