@@ -2,6 +2,7 @@ import X3P from "../index";
 import Identity from "./identity";
 import createShader from "./shaders/index";
 import Renderer from "./index";
+import Anomaly from "../anomaly";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
 import createVAO, { GLVao } from "gl-vao";
@@ -55,32 +56,6 @@ export interface PickResult {
      * Color on the texture at the pick result index
      */
     color?: string;
-}
-
-/**
- * Represents an anomaly in the surface matrix
- */
-export interface Anomaly {
-
-    /**
-     * An identifier for the anomaly
-     */
-    identifier: string;
-
-    /**
-     * A description of what the anomaly entails
-     */
-    description: string;
-
-    /**
-     * An expected value or threshold
-     */
-    expected: any;
-
-    /**
-     * The actual value received
-     */
-    actual: any;
 }
 
 const STRIDE = 4 * (3 + 3 + 2);
@@ -176,11 +151,6 @@ export default class Mesh extends EventEmitter {
      * The pick shader to use for this mesh
      */
     private pickShader: any;
-
-    /**
-     * A list of anomalies found on the X3P's surface matrix.
-     */
-    private anomalies: Anomaly[] = [];
 
     /**
      * The shader uniforms to use during rendering
@@ -341,15 +311,13 @@ export default class Mesh extends EventEmitter {
                 this.ready = true;
                 
                 if(e.data.missingFactor >= MISSING_FACTOR_THRESHOLD) {
-                    this.anomalies.push({
+                    this.x3p.anomalies.push({
                         identifier: "MISSING_DATA",
                         description: "There is a large amount of missing data on this X3P file.",
                         expected: MISSING_FACTOR_THRESHOLD,
                         actual: e.data.missingFactor,
                     });
                 }
-
-                console.log(this.anomalies);
 
                 if(this.onready) this.onready();
                 this.emit("ready");
