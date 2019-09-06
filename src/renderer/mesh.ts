@@ -2,7 +2,6 @@ import X3P from "../index";
 import Identity from "./identity";
 import createShader from "./shaders/index";
 import Renderer from "./index";
-import Anomaly from "../anomaly";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
 import createVAO, { GLVao } from "gl-vao";
@@ -60,7 +59,7 @@ export interface PickResult {
 
 const STRIDE = 4 * (3 + 3 + 2);
 
-const MISSING_FACTOR_THRESHOLD = 0.1;
+const MISSING_FACTOR_THRESHOLD = 0.05;
 
 /**
  * This class was originally based off of gl-vis/gl-surface3d (https://github.com/gl-vis/gl-surface3d).  
