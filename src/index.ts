@@ -4,6 +4,7 @@ import Mask from "./mask/index";
 import Renderer, { RendererOptions } from "./renderer/index";
 import Loader, { LoaderOptions } from "./loader";
 import { saveAs } from "file-saver";
+import Anomaly from "./anomaly";
 
 export interface X3POptions {
     name: string;
@@ -51,6 +52,11 @@ export default class X3P {
      * The loader used to load this X3P file
      */
     public readonly loader: Loader;
+
+    /**
+     * A list of anomalies found on the X3P's surface matrix.
+     */
+    public readonly anomalies: Anomaly[] = [];
 
     /**
      * Options that were used to construct this X3P object

@@ -2,6 +2,7 @@ import X3P from "../index";
 import Identity from "./identity";
 import createShader from "./shaders/index";
 import Renderer from "./index";
+import Anomaly from "../anomaly";
 
 import createBuffer, { GLBuffer } from "gl-buffer";
 import createVAO, { GLVao } from "gl-vao";
@@ -58,6 +59,8 @@ export interface PickResult {
 }
 
 const STRIDE = 4 * (3 + 3 + 2);
+
+const MISSING_FACTOR_THRESHOLD = 0.1;
 
 /**
  * This class was originally based off of gl-vis/gl-surface3d (https://github.com/gl-vis/gl-surface3d).  
@@ -305,8 +308,16 @@ export default class Mesh extends EventEmitter {
                 this.coordinateBuffer.update(e.data.buffer.subarray(0, e.data.elementCount));
                 this.shape = e.data.shape;
                 this.bounds = e.data.bounds;
-
                 this.ready = true;
+                
+                if(e.data.missingFactor >= MISSING_FACTOR_THRESHOLD) {
+                    this.x3p.anomalies.push({
+                        identifier: "MISSING_DATA",
+                        description: "There is a large amount of missing data on this X3P file.",
+                        expected: MISSING_FACTOR_THRESHOLD,
+                        actual: e.data.missingFactor,
+                    });
+                }
 
                 if(this.onready) this.onready();
                 this.emit("ready");
