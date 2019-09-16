@@ -2,6 +2,7 @@
 import Manifest from "./manifest";
 import Mask from "./mask/index";
 import X3P from "./index";
+import { DEFAULT_MISSING_FACTOR_THRESHOLD } from "./constants";
 
 import jszip from "jszip";
 import { EventEmitter } from "events";
@@ -9,6 +10,7 @@ import { EventEmitter } from "events";
 export interface LoaderOptions {
     file: any;
     name?: string;
+    missingFactorThreshold?: number;
 }
 
 export type Encoding = 
@@ -141,6 +143,7 @@ export default class Loader extends EventEmitter {
         this.manifest = new Manifest(await file.async("text"));
         let pointBuffer = await this.getPointBuffer();
         let mask = await this.getMask() as Mask;
+        let missingFactorThreshold = this.options.missingFactorThreshold || DEFAULT_MISSING_FACTOR_THRESHOLD;
 
         this.emit("load", new X3P({
             loader: this,
@@ -148,6 +151,7 @@ export default class Loader extends EventEmitter {
             mask,
             name: this.name as string,
             pointBuffer,
+            missingFactorThreshold,
         }));
     }
 

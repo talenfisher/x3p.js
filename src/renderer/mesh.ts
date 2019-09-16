@@ -59,8 +59,6 @@ export interface PickResult {
 
 const STRIDE = 4 * (3 + 3 + 2);
 
-const MISSING_FACTOR_THRESHOLD = 0.05;
-
 /**
  * This class was originally based off of gl-vis/gl-surface3d (https://github.com/gl-vis/gl-surface3d).  
  * It has been modified to use less memory and
@@ -309,11 +307,11 @@ export default class Mesh extends EventEmitter {
                 this.bounds = e.data.bounds;
                 this.ready = true;
                 
-                if(e.data.missingFactor >= MISSING_FACTOR_THRESHOLD) {
+                if(e.data.missingFactor >= this.x3p.missingFactorThreshold) {
                     this.x3p.anomalies.push({
                         identifier: "MISSING_DATA",
                         description: "There is a large amount of missing data on this X3P file.",
-                        expected: MISSING_FACTOR_THRESHOLD,
+                        expected: this.x3p.missingFactorThreshold,
                         actual: e.data.missingFactor,
                     });
                 }

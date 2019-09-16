@@ -5,6 +5,7 @@ import Renderer, { RendererOptions } from "./renderer/index";
 import Loader, { LoaderOptions } from "./loader";
 import { saveAs } from "file-saver";
 import Anomaly from "./anomaly";
+import { DEFAULT_MISSING_FACTOR_THRESHOLD } from "./constants";
 
 export interface X3POptions {
     name: string;
@@ -12,6 +13,7 @@ export interface X3POptions {
     manifest: Manifest;
     mask: Mask;
     pointBuffer?: ArrayBuffer;
+    missingFactorThreshold?: number;
 }
 
 /**
@@ -59,6 +61,11 @@ export default class X3P {
     public readonly anomalies: Anomaly[] = [];
 
     /**
+     * The allowable threshold of missing data for an X3P without reporting an anomaly.
+     */
+    public missingFactorThreshold: number;
+
+    /**
      * Options that were used to construct this X3P object
      */
     private options: X3POptions;
@@ -78,6 +85,7 @@ export default class X3P {
         this.loader = options.loader;
         this.manifest = options.manifest;
         this.pointBuffer = options.pointBuffer;
+        this.missingFactorThreshold = options.missingFactorThreshold || DEFAULT_MISSING_FACTOR_THRESHOLD;
         this.mask = options.mask;
         this.name = options.name;
         this.axes = {
