@@ -13,6 +13,7 @@
     "postbuild": "node postbuild.js",
     "types": "tsc -d --emitDeclarationOnly --allowJs false --outDir types",
     "docs": "typedoc --out docs --excludePrivate --excludeProtected --excludeNotExported",
+    "postdocs": "touch docs/.nojekyll",
     "postversion": "git push --follow-tags"
   },
   "keywords": [
