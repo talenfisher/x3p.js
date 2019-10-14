@@ -1,4 +1,3 @@
-
 import Manifest from "./manifest";
 import Mask from "./mask/index";
 import X3P from "./index";
@@ -10,6 +9,7 @@ import { EventEmitter } from "events";
 export interface LoaderOptions {
     file: any;
     name?: string;
+    defaultMask?: string;
     missingFactorThreshold?: number;
 }
 
@@ -56,6 +56,11 @@ export default class Loader extends EventEmitter {
     private root?: string = "";
 
     /**
+     * Default mask to use for the manifest
+     */
+    private defaultMask?: string;
+
+    /**
      * Constructs a new X3P Loader
      * 
      * @param options options to use for loading the X3P file
@@ -64,6 +69,7 @@ export default class Loader extends EventEmitter {
         super();
         this.options = options;
         this.name = options.file.name || options.name || "file.x3p";
+        this.defaultMask = options.defaultMask || this.defaultMask;
         this.load();
     }
 
@@ -140,7 +146,7 @@ export default class Loader extends EventEmitter {
             this.root = file.name.replace("main.xml", "");
         }
 
-        this.manifest = new Manifest(await file.async("text"));
+        this.manifest = new Manifest(await file.async("text"), this.defaultMask);
         let pointBuffer = await this.getPointBuffer();
         let mask = await this.getMask() as Mask;
         let missingFactorThreshold = this.options.missingFactorThreshold || DEFAULT_MISSING_FACTOR_THRESHOLD;
