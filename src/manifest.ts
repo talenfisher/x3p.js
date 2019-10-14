@@ -1,6 +1,7 @@
 import Tree from "./tree.xml";
 import DEFAULT_MASK from "./mask.xml";
 import md5 from "blueimp-md5";
+import Mask from "./mask";
 
 declare var window: any;
 
@@ -93,6 +94,10 @@ export default class Manifest {
      * @param defaultMask mask to use if the user doesn't supply one
      */
     constructor(source: string, userSpecifiedDefaultMask?: string) {
+        if(userSpecifiedDefaultMask && !Mask.isValidMask(userSpecifiedDefaultMask)) {
+            throw new Error("Invalid mask specified.");
+        }
+
         this.defaultMask = userSpecifiedDefaultMask || DEFAULT_MASK;
         this.tree = this.prepareTree();
         this.data = Parser.parseFromString(source, "text/xml");

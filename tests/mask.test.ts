@@ -125,4 +125,30 @@ describe("Mask", () => {
             expect(mask.annotations.red).toBe("Red Annotation");
         });
     });
+
+    describe("isValidMask", () => {
+        it("Should return false if the specified mask is not valid XML", () => {
+            expect(Mask.isValidMask("This ain't XML")).toBe(false);
+        });
+
+        it("Should return false if there is no background element", () => {
+            expect(Mask.isValidMask("<Mask><Annotations /></Mask>")).toBe(false);
+        });
+
+        it("Should return false if the background element is empty", () => {
+            expect(Mask.isValidMask("<Mask><Background /><Annotations /></Mask>")).toBe(false);
+        });
+
+        it("Should return false if there is no annotation element", () => {
+            expect(Mask.isValidMask("<Mask><Background>#000000</Background></Mask>")).toBe(false);
+        });
+
+        it("Should return false if the root element is not a Mask element", () => {
+            expect(Mask.isValidMask("<NotMask><Background>#0000000</Background><Annotations/></NotMask>")).toBe(false);
+        });
+
+        it("Should return true if the mask is valid", () => {
+            expect(Mask.isValidMask("<Mask><Background>#000000</Background><Annotations/></Mask>")).toBe(true);
+        });
+    });
 });

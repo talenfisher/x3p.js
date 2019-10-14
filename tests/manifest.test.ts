@@ -80,6 +80,13 @@ describe("Manifest", () => {
             let manifest = new Manifest(source);
             expect(manifest.get(`Record3 Mask Background`)).toBe("#cd7f32");
         });
+
+        it("Should throw an error if the userSpecifiedDefaultMask is not valid", () => {
+            let source = "";
+            let defaultMask = "This ain't XML";
+
+            expect(() => new Manifest(source, defaultMask)).toThrow();
+        });
     });
 
     describe("get", () => {
