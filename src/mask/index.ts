@@ -15,6 +15,9 @@ export interface MaskOptions {
     data?: ArrayBuffer;
 }
 
+declare var window: any;
+const Parser = new window.DOMParser();
+
 /**
  * Asynchronously load an array buffer onto an image
  * 
@@ -192,5 +195,34 @@ export default class Mask extends EventEmitter {
      */
     set version(version: number) {
         this.manifest.set("Record3 Mask Version", version);
+    }
+
+    /**
+     * Checks if the given mask is valid
+     * 
+     * @param mask the source mask in XML format
+     * @return true if the mask has the required elements (Background, Annotations)
+     */
+    public static isValidMask(mask: string) {
+        let xml = Parser.parseFromString(mask, "text/xml");
+        let numParserErrors = xml.querySelectorAll("parsererror").length;
+        let backgroundElement = xml.querySelector("Background");
+        let hexRegex = new RegExp(/^\#[0-9a-fA-F]{6}$/);
+        let backgroundValue = backgroundElement === null ? "" : (backgroundElement.innerHTML || "");
+        let numBackgroundElements = xml.querySelectorAll("Background").length;
+        let numAnnotationsElements = xml.querySelectorAll("Annotations").length;
+        let expectedParserErrors = 0;
+        let expectedBackgroundElements = 1;
+        let expectedAnnotationElements = 1;
+        
+        console.info("Validating default mask");
+        console.info(`Got ${numParserErrors} parser errors, expected ${expectedParserErrors}`);
+        console.info(`Got ${numBackgroundElements} background elements, expected ${expectedBackgroundElements}`);
+        console.info(`Got ${numAnnotationsElements} annotation elements, expected ${expectedAnnotationElements}`);
+
+        return numParserErrors === expectedParserErrors &&
+                numBackgroundElements === expectedBackgroundElements &&
+                numAnnotationsElements === expectedAnnotationElements &&
+                hexRegex.test(backgroundValue);
     }
 }
