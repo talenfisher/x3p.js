@@ -1,5 +1,5 @@
 import Tree from "./tree.xml";
-import DefaultMask from "./mask.xml";
+import DEFAULT_MASK from "./mask.xml";
 import md5 from "blueimp-md5";
 
 declare var window: any;
@@ -49,7 +49,7 @@ export default class Manifest {
     /**
      * The mask template to use
      */
-    private static [$defaultMask]: string = DefaultMask;
+    private defaultMask: string;
 
     /**
      * Dom tree created from the user-provided XML
@@ -90,8 +90,10 @@ export default class Manifest {
      * Constructs a new Manifest object
      * 
      * @param source the source XML to parse
+     * @param defaultMask mask to use if the user doesn't supply one
      */
-    constructor(source: string) {
+    constructor(source: string, userSpecifiedDefaultMask?: string) {
+        this.defaultMask = userSpecifiedDefaultMask || DEFAULT_MASK;
         this.tree = this.prepareTree();
         this.data = Parser.parseFromString(source, "text/xml");
         
@@ -100,20 +102,6 @@ export default class Manifest {
 
         // @ts-ignore - don't need to keep this tree in memory
         this.data = null;
-    }
-    
-    /**
-     * Gets the default mask template
-     */
-    public static get defaultMask() {
-        return this[$defaultMask];
-    }
-
-    /**
-     * Sets the default mask template
-     */
-    public static set defaultMask(mask) {
-        this[$defaultMask] = mask.trim() === "" ? DefaultMask : mask;
     }
 
     /**
@@ -231,7 +219,12 @@ export default class Manifest {
      * Prepares the source tree XML with the mask template
      */
     private prepareTree() {
-        let src = Tree.replace("<Mask/>", Manifest.defaultMask);
+        let src = Tree;
+
+        if(typeof this.defaultMask !== "undefined") {
+            src = src.replace("<Mask/>", this.defaultMask);
+        }
+
         return Parser.parseFromString(src, "text/xml");
     }
 
