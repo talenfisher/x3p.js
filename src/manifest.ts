@@ -1,7 +1,7 @@
 import Tree from "./tree.xml";
 import DEFAULT_MASK from "./mask.xml";
 import md5 from "blueimp-md5";
-import Mask from "./mask";
+import Mask from "./mask/index";
 
 declare var window: any;
 
