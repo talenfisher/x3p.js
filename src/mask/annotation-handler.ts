@@ -1,12 +1,11 @@
 // Proxy handlers for Mask Annotations
 
-function ownKeys(target: Element) {
-    const annotations = Array.from(target.querySelectorAll('Annotations Annotation'));
+function ownKeys(target: Element): string[] {
+    const annotations = Array.from(target.querySelectorAll("Annotations Annotation"));
     return annotations
-        .map(annotation => annotation.getAttribute("color"))
-        .filter(color => color != null) as string[];
+        .map((annotation: Element) => annotation.getAttribute("color"))
+        .filter((color) => color != null) as string[];
 }
-
 
 function getOwnPropertyDescriptor(target: Element, prop: string) {
     const value = get(target, prop);
