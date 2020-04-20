@@ -77,6 +77,24 @@ describe("Mask", () => {
             let mask = new Mask({ manifest });
             expect(mask.annotations.red).toBe("Example Label");
         });
+
+        it("Should allow use of Object.keys to get the annotation keys", () => {
+            let manifest = new Manifest(`
+                <root>
+                    <Record3>
+                        <Mask>
+                            <Annotations>
+                                <Annotation color="red">Example Label</Annotation>
+                                <Annotation color="blue">Example Label</Annotation>
+                            </Annotations>
+                        </Mask>
+                    </Record3>
+                </root>
+            `);
+
+            let mask = new Mask({ manifest });
+            expect(Object.keys(mask.annotations)).toEqual([ "red", "blue" ]);
+        });
     });
 
     describe("set annotations", () => {
