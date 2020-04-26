@@ -2,9 +2,19 @@
 
 function ownKeys(target: Element): string[] {
     const annotations = Array.from(target.querySelectorAll("Annotations Annotation"));
-    return annotations
-        .map((annotation: Element) => annotation.getAttribute("color"))
-        .filter((color) => color != null) as string[];
+    const colors: { [color: string]: boolean } = {};
+    
+    for(const annotation of annotations) {
+        const color = annotation.getAttribute("color");
+
+        if(color == null) {
+            continue;
+        }
+
+        colors[color] = true;
+    }
+
+    return Object.keys(colors);
 }
 
 function getOwnPropertyDescriptor(target: Element, prop: string) {
